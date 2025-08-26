@@ -16,8 +16,8 @@ const menuItems = [
 
 function Header() {
   return (
-    <div className="flex justify-between w-full px-10 items-center">
-      <img className="w-20" src={assets.logo} alt="Logo" />
+    <div className="flex justify-between w-full px-10 items-center fixed h-20 bg-white z-100 shadow-md">
+      <img className="md:w-20 w-15" src={assets.logo} alt="Logo" />
 
       <div className="hidden lg:flex gap-10 items-center font-thin text-sm">
         {menuItems.map((item) => (
