@@ -13,7 +13,7 @@ import hotels from "../constants/HotelItem.const";
 import HotelItem from "../components/HotelItem";
 import HomeDescriptionItem from "../components/HomeDescriptionItem";
 import { homeDescriptions } from "../constants/HomeDescription";
-import Footer from "../components/Footer";
+import { useEffect } from "react";
 
 function Home() {
   const [emblaRefLocal] = useEmblaCarousel({ axis: "x", dragFree: true });
@@ -22,12 +22,12 @@ function Home() {
   const [emblaRefTour] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefHotel] = useEmblaCarousel({ axis: "x", dragFree: true });
 
-  // useEffect(() => {
-  //   if ("scrollRestoration" in window.history) {
-  //     window.history.scrollRestoration = "manual";
-  //   }
-  //   window.scrollTo(0, 0);
-  // }, []);
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className=" bg-cover bg-center overflow-x-hidden">
