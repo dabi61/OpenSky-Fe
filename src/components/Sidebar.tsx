@@ -1,0 +1,43 @@
+import { MessageCircle, ReceiptText, Star, User } from "lucide-react";
+import { NavLink } from "react-router-dom";
+
+interface MenuItem {
+  icon: React.ReactElement;
+  label: string;
+  to: string;
+}
+
+function Sidebar() {
+  const menuItems: MenuItem[] = [
+    { icon: <User />, label: "Hồ sơ", to: "/profile" },
+    { icon: <ReceiptText />, label: "Đơn đặt chỗ", to: "/booking" },
+    { icon: <MessageCircle />, label: "Tin nhắn", to: "/message" },
+    { icon: <Star />, label: "Đánh giá của bạn", to: "/review" },
+  ];
+
+  const NavItem = ({ item }: { item: MenuItem }) => (
+    <NavLink
+      className={({ isActive }) =>
+        `w-full text-left px-4 py-5 text-sm rounded-md flex items-center gap-2 ${
+          isActive
+            ? "bg-blue-400 font-semibold text-white shadow-md"
+            : "text-gray-600 hover:text-blue-400"
+        }`
+      }
+      to={item.to}
+    >
+      {item.icon}
+      <div className="hidden md:block">{item.label}</div>
+    </NavLink>
+  );
+
+  return (
+    <div className="flex h-fit flex-col w-fit shadow-lg rounded-2xl p-4 gap-3">
+      {menuItems.map((item, index) => (
+        <NavItem key={index} item={item} />
+      ))}
+    </div>
+  );
+}
+
+export default Sidebar;

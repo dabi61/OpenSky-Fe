@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import assets from "../assets";
 import { RegisterSchema } from "../types/schemas/register.schema";
 
-function Register() {
+const Register: React.FC = () => {
   const {
     register,
     handleSubmit,
@@ -138,6 +138,6 @@ function Register() {
       </div>
     </div>
   );
-}
+};
 
 export default Register;

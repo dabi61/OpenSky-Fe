@@ -17,7 +17,7 @@ type VoucherItemProps = {
   item: VoucherType;
 };
 
-function VoucherItem({ item }: VoucherItemProps) {
+function VoucherHomeItem({ item }: VoucherItemProps) {
   return (
     <div
       className="flex flex-col cursor-pointer p-5 md:w-102 w-81
@@ -62,4 +62,4 @@ function VoucherItem({ item }: VoucherItemProps) {
   );
 }
 
-export default VoucherItem;
+export default VoucherHomeItem;

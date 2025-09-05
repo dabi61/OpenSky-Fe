@@ -7,6 +7,7 @@ import instagram from "./instagram.png";
 import facebook from "./facebook.png";
 import tiktok from "./tiktok.png";
 import youtube from "./youtube.png";
+import discount_background from "./discount-background.png";
 
 export default {
   logo,
@@ -18,4 +19,5 @@ export default {
   facebook,
   tiktok,
   youtube,
+  discount_background,
 };

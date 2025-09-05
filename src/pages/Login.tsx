@@ -1,7 +1,7 @@
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import assets from "../assets";
 
-function Login() {
+const Login: React.FC = () => {
   return (
     <div className="flex-1 w-full bg-gradient-to-r from-blue-100 via-blue-300 to-blue-500 flex items-center justify-center">
       <div className="rounded-3xl bg-white flex md:w-200">
@@ -77,6 +77,6 @@ function Login() {
       </div>
     </div>
   );
-}
+};
 
 export default Login;

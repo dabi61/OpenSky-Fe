@@ -6,16 +6,16 @@ import { vouchers } from "../constants/Voucher.const";
 import LocationHomeItem from "../components/LocationHomeItem";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
-import VoucherItem from "../components/Voucher";
-import TourItem from "../components/TourItem";
 import tours from "../constants/TourItem.const";
 import hotels from "../constants/HotelItem.const";
-import HotelItem from "../components/HotelItem";
 import HomeDescriptionItem from "../components/HomeDescriptionItem";
 import { homeDescriptions } from "../constants/HomeDescription";
 import { useEffect } from "react";
+import HotelHomeItem from "../components/HotelHomeItem";
+import TourHomeItem from "../components/TourHomeItem";
+import VoucherHomeItem from "../components/VoucherHomeItem";
 
-function Home() {
+const Home: React.FC = () => {
   const [emblaRefLocal] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefForeign] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefVoucher] = useEmblaCarousel({ axis: "x", dragFree: true });
@@ -168,7 +168,7 @@ function Home() {
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
                 {vouchers.map((item, index) => {
-                  return <VoucherItem key={index} item={item} />;
+                  return <VoucherHomeItem key={index} item={item} />;
                 })}
               </div>
             </div>
@@ -191,7 +191,7 @@ function Home() {
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
                 {tours.map((item, index) => {
-                  return <TourItem item={item} key={index} />;
+                  return <TourHomeItem item={item} key={index} />;
                 })}
               </div>
             </div>
@@ -216,7 +216,7 @@ function Home() {
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
                 {hotels.map((item, index) => {
-                  return <HotelItem item={item} key={index} />;
+                  return <HotelHomeItem item={item} key={index} />;
                 })}
               </div>
             </div>
@@ -235,6 +235,6 @@ function Home() {
       </div>
     </div>
   );
-}
+};
 
 export default Home;

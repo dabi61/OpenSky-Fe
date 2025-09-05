@@ -9,7 +9,7 @@ type Props = {
   item: Tour;
 };
 
-function TourItem({ item }: Props) {
+function TourHomeItem({ item }: Props) {
   return (
     <div className="flex flex-col border-1 border-gray-300 cursor-pointer transition-shadow duration-300 hover:shadow-lg rounded-xl flex-shrink-0">
       <div className="relative">
@@ -33,4 +33,4 @@ function TourItem({ item }: Props) {
   );
 }
 
-export default TourItem;
+export default TourHomeItem;
