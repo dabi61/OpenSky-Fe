@@ -3,8 +3,11 @@ import Sidebar from "../components/Sidebar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import { useUser } from "../contexts/UserContext";
+import type { UserType } from "../types/response/user";
+import assets from "../assets";
 
 const currentUser = {
   name: "Nguyễn Việt Tùng",
@@ -14,18 +17,19 @@ const currentUser = {
   birthDate: dayjs("1990-01-01"),
 };
 
-interface User {
-  name: string;
-  avatar: string;
-  phone: string;
-  birthDate: Dayjs | null;
-}
-
 const Profile: React.FC = () => {
-  const [userData, setUserData] = useState<User>(currentUser);
-
-  const handleDateChange = (newValue: Dayjs | null) => {
-    setUserData({ ...userData, birthDate: newValue });
+  const { user } = useUser();
+  const [userData, setUserData] = useState<UserType | null>(user || null);
+  useEffect(() => {
+    if (user) {
+      setUserData(user);
+    }
+  }, [user]);
+  if (!userData) {
+    return null;
+  }
+  const handleDateChange = (newValue: Dayjs) => {
+    setUserData({ ...userData, doB: newValue });
   };
 
   return (
@@ -34,11 +38,11 @@ const Profile: React.FC = () => {
       <div className="max-w-2xl bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col items-center mb-6">
           <img
-            src={userData.avatar}
+            src={userData.avatarURL || assets.logo}
             className="rounded-full w-40 h-40 object-cover mx-auto mb-4"
             alt="Avatar"
           />
-          <h2 className="text-xl font-semibold">{userData.name}</h2>
+          <h2 className="text-xl font-semibold">{userData.fullName}</h2>
         </div>
 
         <div className="space-y-4 w-full">
@@ -47,8 +51,10 @@ const Profile: React.FC = () => {
             fullWidth
             size="medium"
             margin="normal"
-            value={userData.name}
-            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+            value={userData.fullName}
+            onChange={(e) =>
+              setUserData({ ...userData, fullName: e.target.value })
+            }
           />
 
           <TextField
@@ -56,17 +62,17 @@ const Profile: React.FC = () => {
             fullWidth
             size="medium"
             margin="normal"
-            value={userData.phone}
+            value={userData.phoneNumber}
             onChange={(e) =>
-              setUserData({ ...userData, phone: e.target.value })
+              setUserData({ ...userData, phoneNumber: e.target.value })
             }
           />
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Ngày sinh"
-              value={userData.birthDate}
-              onChange={handleDateChange}
+              value={dayjs(userData.doB)}
+              // onChange={handleDateChange}
               slotProps={{
                 textField: {
                   fullWidth: true,

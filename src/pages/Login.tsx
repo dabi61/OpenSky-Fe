@@ -1,7 +1,39 @@
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import assets from "../assets";
+import { useState, type FormEvent } from "react";
+import type { LoginType } from "../types/schemas/login.schema";
+import { handleLogin } from "../api/auth";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const [loginData, setLoginData] = useState<LoginType>({
+    email: "",
+    password: "",
+    remember: false,
+  });
+  const { reloadUser } = useUser();
+
+  const onLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!loginData.email || !loginData.password) {
+      toast.error("Vui lòng nhập đầy đủ email và mật khẩu");
+      return;
+    }
+
+    const res = await handleLogin(loginData);
+
+    if (res.success) {
+      toast.success("Đăng nhập thành công!");
+      await reloadUser();
+      navigate("/home");
+    } else {
+      toast.error(res.message || "Đăng nhập thất bại");
+    }
+  };
+
   return (
     <div className="flex-1 w-full bg-gradient-to-r from-blue-100 via-blue-300 to-blue-500 flex items-center justify-center">
       <div className="rounded-3xl bg-white flex md:w-200">
@@ -9,7 +41,10 @@ const Login: React.FC = () => {
           <div className="text-2xl font-bold h-20 flex justify-center items-center">
             Đăng nhập
           </div>
-          <div className="flex flex-col gap-2 w-full h-full">
+          <form
+            onSubmit={onLogin}
+            className="flex flex-col gap-2 w-full h-full"
+          >
             <div className="h-18">
               <TextField
                 label="Email"
@@ -21,6 +56,10 @@ const Login: React.FC = () => {
                 InputLabelProps={{
                   shrink: true,
                 }}
+                value={loginData?.email}
+                onChange={(e) =>
+                  setLoginData((prev) => ({ ...prev, email: e.target.value }))
+                }
               />
             </div>
             <div className="h-18">
@@ -33,6 +72,13 @@ const Login: React.FC = () => {
                 InputLabelProps={{
                   shrink: true,
                 }}
+                value={loginData?.password}
+                onChange={(e) =>
+                  setLoginData((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="flex items-center justify-between text-[0.8rem] w-full">
@@ -44,6 +90,12 @@ const Login: React.FC = () => {
                     fontSize: "0.875rem",
                   },
                 }}
+                onChange={() =>
+                  setLoginData((prev) => ({
+                    ...prev,
+                    remember: !prev.remember,
+                  }))
+                }
               />
               <div>Quên mật khẩu ?</div>
             </div>
@@ -55,6 +107,7 @@ const Login: React.FC = () => {
                   backgroundColor: "#2563EB",
                 },
               }}
+              type="submit"
             >
               Đăng nhập
             </Button>
@@ -66,7 +119,7 @@ const Login: React.FC = () => {
                 <span className="text-blue-400">Đăng ký</span>
               </p>
             </div>
-          </div>
+          </form>
         </div>
         <div className="flex-1 w-full overflow-hidden rounded-r-3xl">
           <img

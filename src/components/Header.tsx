@@ -1,14 +1,11 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import assets from "../assets";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { AlignJustify } from "lucide-react";
-
-const currentUser = {
-  email: "Nguyễn Việt Tùng",
-  avatar:
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLjeSzoAS94hdtj3-nX6n95xRmtlSKhJEf8g&s",
-};
+import { handleLogout } from "../api/auth";
+import { useUser } from "../contexts/UserContext";
+import OverlayReload from "./Loading";
 
 const baseMenuItems = [
   { name: "Trang chủ", to: "/home" },
@@ -22,7 +19,6 @@ const settingMenuItems = [
   { name: "Cá nhân", to: "/profile" },
   { name: "Bài đăng của tôi", to: "/" },
   { name: "Đổi mật khẩu", to: "/" },
-  { name: "Đăng xuất", to: "/" },
 ];
 
 const authMenuItems = [
@@ -30,7 +26,21 @@ const authMenuItems = [
   { name: "Đăng ký", to: "/register" },
 ];
 function Header() {
-  const isLoggedIn = Boolean(currentUser);
+  const { user, loading } = useUser();
+  const navigate = useNavigate();
+
+  const isLoggedIn = !!user;
+
+  if (loading) {
+    return <OverlayReload />;
+  }
+
+  const onLogout = async () => {
+    const res = await handleLogout();
+    if (res?.success) {
+      navigate("/login");
+    }
+  };
 
   const menuItems = isLoggedIn
     ? baseMenuItems
@@ -62,12 +72,12 @@ function Header() {
           <Menu as="div">
             <Menu.Button className="flex items-center space-x-2 rounded-2xl border border-blue-500 px-3 py-2 cursor-pointer">
               <img
-                src={currentUser.avatar}
+                src={user.avatarURL || assets.logo}
                 alt="Avatar"
                 className="w-10 h-10 rounded-full"
               />
               <span className="text-md font-semibold text-blue-500">
-                {currentUser.email}
+                {user.fullName}
               </span>
             </Menu.Button>
             <Transition
@@ -96,6 +106,20 @@ function Header() {
                     )}
                   </Menu.Item>
                 ))}
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => onLogout()}
+                      className={`${
+                        active
+                          ? "bg-blue-400 font-semibold text-white shadow-md"
+                          : "hover:bg-blue-400 hover:text-white"
+                      } block w-full text-left px-4 py-2 text-sm rounded-md cursor-pointer`}
+                    >
+                      Đăng xuất
+                    </button>
+                  )}
+                </Menu.Item>
               </Menu.Items>
             </Transition>
           </Menu>
@@ -107,7 +131,7 @@ function Header() {
           <Menu as="div">
             <Menu.Button className="flex items-center justify-center mx-auto cursor-pointer">
               <img
-                src={currentUser.avatar}
+                src={user.avatarURL || assets.logo}
                 alt="Avatar"
                 className="w-10 h-10 rounded-full"
               />
@@ -138,6 +162,20 @@ function Header() {
                     )}
                   </Menu.Item>
                 ))}
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => onLogout()}
+                      className={`${
+                        active
+                          ? "bg-blue-400 font-semibold text-white shadow-md"
+                          : "hover:bg-blue-400 hover:text-white"
+                      } block w-full text-left px-4 py-2 text-sm rounded-md cursor-pointer`}
+                    >
+                      Đăng xuất
+                    </button>
+                  )}
+                </Menu.Item>
               </Menu.Items>
             </Transition>
           </Menu>

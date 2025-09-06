@@ -2,9 +2,18 @@ import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import assets from "../assets";
-import { RegisterSchema } from "../types/schemas/register.schema";
+import {
+  RegisterSchema,
+  type RegisterType,
+} from "../types/schemas/register.schema";
+import { handleRegister } from "../api/auth";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
+  const { reloadUser } = useUser();
   const {
     register,
     handleSubmit,
@@ -14,8 +23,15 @@ const Register: React.FC = () => {
     mode: "onBlur",
   });
 
-  const onSubmit = async () => {
-    console.log("Đăng ký thành công!");
+  const onSubmit = async (data: RegisterType) => {
+    const res = await handleRegister(data);
+    if (res.success) {
+      toast.success("Đăng ký thành công!");
+      await reloadUser();
+      navigate("/home");
+    } else {
+      toast.error(res.message);
+    }
   };
 
   return (
@@ -70,7 +86,7 @@ const Register: React.FC = () => {
             </div>
             <div className="h-18">
               <TextField
-                {...register("passowrd")}
+                {...register("password")}
                 label="Mật khẩu"
                 fullWidth
                 size="small"
@@ -80,9 +96,9 @@ const Register: React.FC = () => {
                   shrink: true,
                 }}
               />
-              {errors.passowrd && (
+              {errors.password && (
                 <p className="text-red-500 text-[11px] mt-[-5px]">
-                  {errors.passowrd.message}
+                  {errors.password.message}
                 </p>
               )}
             </div>
