@@ -2,10 +2,11 @@ import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import assets from "../assets";
 import { useState, type FormEvent } from "react";
 import type { LoginType } from "../types/schemas/login.schema";
-import { handleLogin } from "../api/auth";
+import { handleLogin } from "../api/auth.api";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import { Roles } from "../constants/role";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Login: React.FC = () => {
     password: "",
     remember: false,
   });
-  const { reloadUser } = useUser();
+  const { reloadUser, user } = useUser();
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,7 +29,11 @@ const Login: React.FC = () => {
     if (res.success) {
       toast.success("Đăng nhập thành công!");
       await reloadUser();
-      navigate("/home");
+      if (user?.role === Roles.ADMIN) {
+        navigate("/manager");
+      } else {
+        navigate("/home");
+      }
     } else {
       toast.error(res.message || "Đăng nhập thất bại");
     }
@@ -116,7 +121,9 @@ const Login: React.FC = () => {
               <img className="w-10 cursor-pointer" src={assets.google} />
               <p>
                 Bạn chưa có tài khoản ?{" "}
-                <span className="text-blue-400">Đăng ký</span>
+                <Link className="text-blue-400" to={"/register"}>
+                  Đăng ký
+                </Link>
               </p>
             </div>
           </form>

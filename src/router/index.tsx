@@ -7,6 +7,13 @@ import Hotel from "../pages/Hotel";
 import Discount from "../pages/Discount";
 import Tour from "../pages/Tour";
 import Profile from "../pages/Profile";
+import Unauthorized from "../pages/Unauthorized";
+import { AuthGuard, RoleGuard } from "../components/ProtectRoute";
+import { Roles } from "../constants/role";
+import Contact from "../pages/Contact";
+import Manager from "../pages/Manager";
+import Dashboard from "../pages/Dashboard";
+import CustomerManager from "../pages/CustomerManage";
 
 const router = createBrowserRouter([
   {
@@ -20,7 +27,38 @@ const router = createBrowserRouter([
       { path: "hotel", element: <Hotel /> },
       { path: "tour", element: <Tour /> },
       { path: "discount", element: <Discount /> },
-      { path: "profile", element: <Profile /> },
+      { path: "unauthorized", element: <Unauthorized /> },
+      {
+        element: <AuthGuard />,
+        children: [{ path: "profile", element: <Profile /> }],
+      },
+      {
+        element: <RoleGuard deniedRoles={[Roles.ADMIN]} />,
+        children: [{ path: "contact", element: <Contact /> }],
+      },
+      {
+        element: <RoleGuard allowedRoles={[Roles.ADMIN, Roles.SUPERVISOR]} />,
+        children: [
+          {
+            path: "/manager",
+            element: <Manager />,
+            children: [
+              {
+                path: "/manager",
+                element: <Navigate to="dashboard" replace />,
+              },
+              {
+                path: "dashboard",
+                element: <Dashboard />,
+              },
+              {
+                path: "customer",
+                element: <CustomerManager />,
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
 ]);

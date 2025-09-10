@@ -1,33 +1,91 @@
+// contexts/UserContext.tsx
 import {
   createContext,
   useContext,
   useEffect,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
-import { handleGetUser } from "../api/user";
-import type { UserType } from "../types/response/user";
+import {
+  handleCreateUser,
+  handleGetUser,
+  handleGetUserByRole,
+  handleSearchUserByRole,
+  handleUpdateCurrentUser,
+  handleUpdateUser,
+} from "../api/user.api";
+import type { UserPage, UserType } from "../types/response/user";
 import Cookies from "js-cookie";
+import type {
+  UserCreateType,
+  UserUpdateType,
+} from "../types/schemas/profile.schema";
+import { toast } from "sonner";
+import { Roles } from "../constants/role";
 
 type UserContextType = {
+  userList: UserType[];
   user: UserType | null;
   loading: boolean;
+  getUsersByRole: (
+    role: Roles,
+    page: number,
+    size: number
+  ) => Promise<UserPage>;
+  searchUsersByRole: (
+    keyword: string,
+    role: Roles,
+    page: number,
+    size: number
+  ) => Promise<UserPage>;
   reloadUser: () => Promise<void>;
+  updateUser: (id: string, data: Partial<UserUpdateType>) => Promise<void>;
+  updateCurrentUser: (data: Partial<UserUpdateType>) => Promise<void>;
+  createUser: (data: Partial<UserCreateType>) => Promise<void>;
+  addUserToList: (user: UserType) => void;
+  updateUserInList: (id: string, updatedUser: UserType) => void;
+  removeUserFromList: (id: string) => void;
+  refreshUsers: () => Promise<void>;
+  keyword: string;
+  setKeyword: Dispatch<SetStateAction<string>>;
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const initialUser = Cookies.get("refresh_token") ? undefined : null;
+  const [userList, setUserList] = useState<UserType[]>([]);
   const [user, setUser] = useState<UserType | null | undefined>(initialUser);
   const [loading, setLoading] = useState(!!Cookies.get("refresh_token"));
+  const [keyword, setKeyword] = useState<string>("");
+
+  const addUserToList = (newUser: UserType) => {
+    setUserList((prev) => [...prev, newUser]);
+  };
+
+  const updateUserInList = (id: string, updatedUser: UserType) => {
+    setUserList((prev) =>
+      prev.map((user) => (user.id === id ? { ...user, ...updatedUser } : user))
+    );
+  };
+
+  const removeUserFromList = (id: string) => {
+    setUserList((prev) => prev.filter((user) => user.id !== id));
+  };
+
+  const refreshUsers = async () => {
+    try {
+    } catch (error) {
+      console.error("Failed to refresh users:", error);
+    }
+  };
 
   const reloadUser = async () => {
     try {
       setLoading(true);
       const refresh_token = Cookies.get("refresh_token");
-      console.log(refresh_token);
-
       if (!refresh_token) {
         setUser(null);
         return;
@@ -42,6 +100,57 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateCurrentUser = async (data: Partial<UserUpdateType>) => {
+    const res = await handleUpdateCurrentUser(data);
+    if (Object.keys(res.profile).length > 0) {
+      toast.success(res.message);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const updateUser = async (id: string, data: Partial<UserUpdateType>) => {
+    const res = await handleUpdateUser(id, data);
+    if (Object.keys(res.profile).length > 0) {
+      toast.success(res.message);
+      updateUserInList(id, res.profile);
+      setKeyword("");
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const searchUsersByRole = async (
+    keyword: string,
+    role: Roles,
+    page: number,
+    size: number
+  ): Promise<UserPage> => {
+    const res = await handleSearchUserByRole(keyword, role, page, size);
+    return res;
+  };
+
+  const createUser = async (data: Partial<UserCreateType>) => {
+    const validData = data as UserCreateType;
+    const res = await handleCreateUser(validData);
+    if (Object.keys(res.profile).length > 0) {
+      toast.success(res.message);
+      addUserToList(res.profile);
+      setKeyword("");
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const getUsersByRole = async (
+    role: Roles,
+    page: number,
+    size: number
+  ): Promise<UserPage> => {
+    const res = await handleGetUserByRole(role, page, size);
+    return res;
+  };
+
   useEffect(() => {
     if (Cookies.get("refresh_token")) {
       reloadUser();
@@ -49,7 +158,25 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user: user || null, loading, reloadUser }}>
+    <UserContext.Provider
+      value={{
+        user: user || null,
+        userList,
+        loading,
+        reloadUser,
+        updateUser,
+        updateCurrentUser,
+        createUser,
+        getUsersByRole,
+        searchUsersByRole,
+        addUserToList,
+        updateUserInList,
+        removeUserFromList,
+        refreshUsers,
+        keyword,
+        setKeyword,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

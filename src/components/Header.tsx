@@ -3,9 +3,10 @@ import assets from "../assets";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { AlignJustify } from "lucide-react";
-import { handleLogout } from "../api/auth";
+import { handleLogout } from "../api/auth.api";
 import { useUser } from "../contexts/UserContext";
 import OverlayReload from "./Loading";
+import Cookies from "js-cookie";
 
 const baseMenuItems = [
   { name: "Trang chủ", to: "/home" },
@@ -13,6 +14,7 @@ const baseMenuItems = [
   { name: "Khách sạn", to: "/hotel" },
   { name: "Ưu đãi", to: "/discount" },
   { name: "Liên hệ", to: "/contact" },
+  { name: "Quản lý", to: "/manager" },
 ];
 
 const settingMenuItems = [
@@ -42,14 +44,26 @@ function Header() {
     }
   };
 
-  const menuItems = isLoggedIn
+  let menuItems = isLoggedIn
     ? baseMenuItems
     : [...baseMenuItems, ...authMenuItems];
+
+  if (user?.role === "Admin") {
+    menuItems = menuItems.filter((item) => item.to !== "/contact");
+  } else {
+    menuItems = menuItems.filter((item) => item.to !== "/manager");
+  }
+
+  console.log(Cookies.get("access_token"));
 
   return (
     <div className="flex justify-between w-full px-10 items-center fixed h-20 bg-white z-100 shadow-md">
       <Link to={"/"}>
-        <img className="md:w-20 w-15" src={assets.logo} alt="Logo" />
+        <img
+          className="md:w-20 w-15 object-cover"
+          src={assets.logo}
+          alt="Logo"
+        />
       </Link>
 
       <div className="hidden lg:flex gap-10 items-center font-thin text-sm">
@@ -74,7 +88,7 @@ function Header() {
               <img
                 src={user.avatarURL || assets.logo}
                 alt="Avatar"
-                className="w-10 h-10 rounded-full"
+                className="w-10 h-10 rounded-full object-cover"
               />
               <span className="text-md font-semibold text-blue-500">
                 {user.fullName}
@@ -133,7 +147,7 @@ function Header() {
               <img
                 src={user.avatarURL || assets.logo}
                 alt="Avatar"
-                className="w-10 h-10 rounded-full"
+                className="w-10 h-10 rounded-full object-cover"
               />
             </Menu.Button>
             <Transition

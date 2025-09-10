@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const RegisterSchema = z
   .object({
-    fullname: z.string().nonempty("Vui lòng nhập thông tin người dùng!"),
+    fullName: z.string().nonempty("Vui lòng nhập thông tin người dùng!"),
     email: z.email("Vui lòng nhập email!"),
     password: z.string().min(8, "Mật khẩu ít nhất 8 ký tự!"),
     repassword: z.string(),

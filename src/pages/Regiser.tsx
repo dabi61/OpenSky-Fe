@@ -6,7 +6,7 @@ import {
   RegisterSchema,
   type RegisterType,
 } from "../types/schemas/register.schema";
-import { handleRegister } from "../api/auth";
+import { handleRegister } from "../api/auth.api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
@@ -47,7 +47,7 @@ const Register: React.FC = () => {
           <div className="flex flex-col gap-2 w-full h-full">
             <div className="h-18">
               <TextField
-                {...register("fullname")}
+                {...register("fullName")}
                 label="Họ và tên"
                 variant="outlined"
                 fullWidth
@@ -58,9 +58,9 @@ const Register: React.FC = () => {
                   shrink: true,
                 }}
               />
-              {errors.fullname && (
+              {errors.fullName && (
                 <p className="text-red-500 text-[11px] mt-[-5px]">
-                  {errors.fullname.message}
+                  {errors.fullName.message}
                 </p>
               )}
             </div>

@@ -4,7 +4,7 @@ import HotelItem from "../components/HotelItem";
 import hotels from "../constants/HotelItem.const";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { getProvinces } from "../api/province";
+import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
 import {
   FormControl,

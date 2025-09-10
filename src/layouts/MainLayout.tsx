@@ -14,11 +14,13 @@ function MainLayout() {
           <Outlet />
         </div>
       </main>
-      {location.pathname !== "/login" && location.pathname !== "/register" && (
-        <footer>
-          <Footer />
-        </footer>
-      )}
+      {location.pathname !== "/login" &&
+        location.pathname !== "/register" &&
+        !location.pathname.includes("/manager") && (
+          <footer>
+            <Footer />
+          </footer>
+        )}
     </div>
   );
 }
