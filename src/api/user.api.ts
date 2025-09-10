@@ -101,8 +101,9 @@ export const handleSearchUserByRole = async (
   page: number,
   size: number
 ): Promise<UserPage> => {
+  const encodedKeyword = encodeURIComponent(keyword);
   const res = await axiosInstance.get(
-    `users/search?keyword=${keyword}&role=${role}&page=${page}&size=${size}`
+    `users/search?keyword=${encodedKeyword}&role=${role}&page=${page}&size=${size}`
   );
   return res.data;
 };
