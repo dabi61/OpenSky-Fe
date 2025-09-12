@@ -1,10 +1,11 @@
 import type { Dayjs } from "dayjs";
+import type { Roles } from "../../constants/role";
 
 export type UserType = {
   id: string;
   email: string;
   fullName: string;
-  role: string;
+  role: Roles;
   phoneNumber: string;
   citizenId: string;
   dob: Dayjs;

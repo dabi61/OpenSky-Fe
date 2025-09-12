@@ -14,6 +14,7 @@ import Contact from "../pages/Contact";
 import Manager from "../pages/Manager";
 import Dashboard from "../pages/Dashboard";
 import CustomerManager from "../pages/CustomerManage";
+import StaffManager from "../pages/StaffManage";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
               {
                 path: "customer",
                 element: <CustomerManager />,
+              },
+              {
+                path: "staff",
+                element: <StaffManager />,
               },
             ],
           },

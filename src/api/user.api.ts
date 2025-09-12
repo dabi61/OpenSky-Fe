@@ -10,6 +10,7 @@ import type {
   UserCreateType,
   UserUpdateType,
 } from "../types/schemas/profile.schema";
+import type { StaffCreateType } from "../types/schemas/staff.schema";
 
 export const handleGetUser = async (): Promise<UserType> => {
   const res = await axiosInstance.get("users/profile");
@@ -39,18 +40,26 @@ export const handleUpdateCurrentUser = async (
 };
 
 export const handleCreateUser = async (
-  data: UserCreateType
+  data: UserCreateType | StaffCreateType
 ): Promise<UserUpdateResponse> => {
   try {
     const formData = new FormData();
-    formData.append("email", data.new_email);
-    formData.append("password", data.new_password);
+    if ("new_email" in data) {
+      formData.append("email", data.new_email);
+      formData.append("password", data.new_password);
+    }
+
+    if ("staff_email" in data) {
+      formData.append("email", data.staff_email);
+      formData.append("password", data.staff_password);
+    }
     formData.append("fullName", data.fullname);
     if (data.phoneNumber)
       formData.append("phoneNumber", data.phoneNumber || "");
     if (data.citizenId) formData.append("citizenId", data.citizenId || "");
     if (data.dob) formData.append("dob", dayjs(data.dob).format("YYYY-MM-DD"));
     if (data.avatar) formData.append("avatar", data.avatar);
+    if (data.role) formData.append("role", data.role);
     const res = await axiosInstance.post("/users", formData);
     return res.data;
   } catch (error: any) {
@@ -85,25 +94,30 @@ export const handleUpdateUser = async (
 };
 
 export const handleGetUserByRole = async (
-  role: Roles,
+  roles: Roles[],
   page: number,
   size: number
 ): Promise<UserPage> => {
+  const roleParams = roles.map((r) => `roles=${r}`).join("&");
   const res = await axiosInstance(
-    `users?role=${role}&page=${page}&size=${size}`
+    `users?${roleParams}&page=${page}&size=${size}`
   );
   return res.data;
 };
 
 export const handleSearchUserByRole = async (
   keyword: string,
-  role: Roles,
+  roles: Roles[],
   page: number,
   size: number
 ): Promise<UserPage> => {
   const encodedKeyword = encodeURIComponent(keyword);
+
+  const roleParams = roles.map((r) => `roles=${r}`).join("&");
+
   const res = await axiosInstance.get(
-    `users/search?keyword=${encodedKeyword}&role=${role}&page=${page}&size=${size}`
+    `users/search?keyword=${encodedKeyword}&${roleParams}&page=${page}&size=${size}`
   );
+
   return res.data;
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import type { UserType } from "../types/response/user";
 import assets from "../assets";
-import { Edit, Mail, Phone, Trash2, MoreVertical } from "lucide-react";
+import { Edit, Mail, Phone, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 
 interface Props {

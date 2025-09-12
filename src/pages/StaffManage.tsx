@@ -1,16 +1,23 @@
-import React, { useEffect, useState, type ChangeEvent } from "react";
-import { Search, User, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { useUser } from "../contexts/UserContext";
-import { Roles } from "../constants/role";
 import type { UserType } from "../types/response/user";
-import CustomerManageItem from "../components/CustomerManagerItem";
 import { useSearchParams } from "react-router-dom";
-import CustomerModal from "../components/CustomerModal";
+import { Roles } from "../constants/role";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Plus,
+  Search,
+  User,
+} from "lucide-react";
+import StaffManageItem from "../components/StaffManageItem";
+import StaffModal from "../components/StaffModal";
 
-const CustomerManager: React.FC = () => {
+const StaffManager: React.FC = () => {
   const { getUsersByRole, userList, keyword, setKeyword, searchUsersByRole } =
     useUser();
-  const [customers, setCustomers] = useState<UserType[]>([]);
+  const [staffs, setStaffs] = useState<UserType[]>([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const pageParam = searchParams.get("page");
@@ -31,39 +38,38 @@ const CustomerManager: React.FC = () => {
     newSearchParams.set("page", currentPage.toString());
     setSearchParams(newSearchParams);
   }, [currentPage, searchParams, setSearchParams]);
-
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchStaffs = async () => {
       try {
         if (keyword) {
           const data = await searchUsersByRole(
             keyword,
-            [Roles.CUSTOMER],
+            [Roles.TOURGUIDE, Roles.SUPERVISOR],
             currentPage,
             pageSize
           );
-          setCustomers(data.content);
+          setStaffs(data.content);
           setTotalPages(data.totalPages);
         } else {
           const data = await getUsersByRole(
-            [Roles.CUSTOMER],
+            [Roles.TOURGUIDE, Roles.SUPERVISOR],
             currentPage,
             pageSize
           );
-          setCustomers(data.content);
-          setTotalPages(data.totalPages);
+          setStaffs(data.content);
+          setTotalPages(Math.max(data.totalPages));
         }
       } catch (error) {
-        console.error("Failed to fetch customers:", error);
+        console.error("Failed to fetch staffs:", error);
       }
     };
 
-    fetchCustomers();
+    fetchStaffs();
   }, [currentPage, getUsersByRole, keyword]);
 
   useEffect(() => {
     if (currentPage === 0 && userList.length > 0) {
-      setCustomers(userList);
+      setStaffs(userList);
     }
   }, [userList, currentPage]);
 
@@ -133,10 +139,10 @@ const CustomerManager: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-              Quản Lý Khách Hàng
+              Quản Lý Nhân viên
             </h1>
             <p className="text-gray-600 text-sm sm:text-base">
-              Danh sách khách hàng trong hệ thống
+              Danh sách nhân viên trong hệ thống
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -156,7 +162,10 @@ const CustomerManager: React.FC = () => {
                   }
                 />
               </div>
-
+              <button className="flex items-center justify-center border gap-2 text-gray-700 px-4 py-2 rounded-lg hover:text-gray-900 w-full md:w-auto cursor-pointer">
+                <Filter />
+                <span>Lọc</span>
+              </button>
               <div className="flex gap-2 w-full md:w-auto">
                 <button
                   className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full md:w-auto cursor-pointer"
@@ -172,17 +181,20 @@ const CustomerManager: React.FC = () => {
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            {customers.length > 0 ? (
+            {staffs.length > 0 ? (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700">
-                          Khách hàng
+                          Nhân viên
                         </th>
                         <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden md:table-cell">
                           Thông tin liên hệ
+                        </th>
+                        <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden lg:table-cell">
+                          Chức vụ
                         </th>
                         <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden lg:table-cell">
                           CCCD/CMND
@@ -194,9 +206,9 @@ const CustomerManager: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {customers.map((customer) => (
-                        <CustomerManageItem
-                          customer={customer}
+                      {staffs.map((customer) => (
+                        <StaffManageItem
+                          staff={customer}
                           key={customer.id}
                           onEdit={() => {
                             setSelectedCustomer(customer);
@@ -216,17 +228,17 @@ const CustomerManager: React.FC = () => {
               <div className="text-center py-12">
                 <User size={48} className="mx-auto text-gray-300 mb-4" />
                 <h3 className="text-lg font-medium text-gray-500">
-                  Không có khách hàng nào
+                  Không có nhân viên
                 </h3>
                 <p className="text-gray-400 mt-1">
-                  Hãy thêm khách hàng mới vào hệ thống
+                  Hãy thêm nhân viên mới vào hệ thống
                 </p>
               </div>
             )}
           </div>
         </div>
       </div>
-      <CustomerModal
+      <StaffModal
         isOpen={openAddCustomer}
         onClose={() => {
           setOpenAddCustomer(false);
@@ -237,5 +249,4 @@ const CustomerManager: React.FC = () => {
     </>
   );
 };
-
-export default CustomerManager;
+export default StaffManager;

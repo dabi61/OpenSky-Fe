@@ -1,4 +1,3 @@
-// contexts/UserContext.tsx
 import {
   createContext,
   useContext,
@@ -30,13 +29,13 @@ type UserContextType = {
   user: UserType | null;
   loading: boolean;
   getUsersByRole: (
-    role: Roles,
+    role: Roles[],
     page: number,
     size: number
   ) => Promise<UserPage>;
   searchUsersByRole: (
     keyword: string,
-    role: Roles,
+    roles: Roles[],
     page: number,
     size: number
   ) => Promise<UserPage>;
@@ -122,11 +121,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const searchUsersByRole = async (
     keyword: string,
-    role: Roles,
+    roles: Roles[],
     page: number,
     size: number
   ): Promise<UserPage> => {
-    const res = await handleSearchUserByRole(keyword, role, page, size);
+    const res = await handleSearchUserByRole(keyword, roles, page, size);
     return res;
   };
 
@@ -143,11 +142,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getUsersByRole = async (
-    role: Roles,
+    roles: Roles[],
     page: number,
     size: number
   ): Promise<UserPage> => {
-    const res = await handleGetUserByRole(role, page, size);
+    const res = await handleGetUserByRole(roles, page, size);
     return res;
   };
 

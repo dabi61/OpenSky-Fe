@@ -66,7 +66,7 @@ const BottomNavigation: React.FC = () => {
       id: "staff",
       icon: <UsersRound size={24} />,
       label: "Nhân viên",
-      to: "/unauthorized",
+      to: "staff",
     },
   ];
 

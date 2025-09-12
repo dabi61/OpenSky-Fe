@@ -1,26 +1,33 @@
 import type React from "react";
+import type { UserType } from "../types/response/user";
 import Modal from "./Modal";
-import { Button, TextField, CircularProgress } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { CalendarPlus, Camera, Mail, User } from "lucide-react";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { CalendarPlus, Camera, Mail, User } from "lucide-react";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
-  UserCreateSchema,
-  UserSchema,
-  type UserCreateType,
-  type UserCreateValidateType,
-  type UserUpdateType,
-  type UserValidateType,
-} from "../types/schemas/profile.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
-import { Roles } from "../constants/role";
+  StaffCreateSchema,
+  StaffUpdateSchema,
+  type StaffCreateType,
+  type StaffUpdateType,
+} from "../types/schemas/staff.schema";
 import { useUser } from "../contexts/UserContext";
-import type { UserType } from "../types/response/user";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Roles } from "../constants/role";
 
 interface ModalProps {
   isOpen: boolean;
@@ -28,7 +35,7 @@ interface ModalProps {
   data?: UserType | null;
 }
 
-const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
+const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
   const isUpdate = Boolean(data?.id);
 
   const {
@@ -37,15 +44,19 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     register,
     formState: { errors },
     reset,
-  } = useForm<UserCreateValidateType | UserValidateType>({
-    resolver: zodResolver(isUpdate ? UserSchema : UserCreateSchema),
+    setValue,
+  } = useForm<StaffUpdateType | StaffCreateType>({
+    resolver: zodResolver(isUpdate ? StaffUpdateSchema : StaffCreateSchema),
     mode: "onBlur",
     defaultValues: {
-      fullname: data?.fullName ?? "",
-      ...(isUpdate ? {} : { new_email: data?.email ?? "", new_password: "" }),
-      phoneNumber: data?.phoneNumber ?? "",
-      dob: data?.dob ? dayjs(data.dob).toDate() : null,
+      fullname: data?.fullName,
+      ...(isUpdate
+        ? {}
+        : { staff_email: data?.email ?? "", staff_password: "" }),
+      phoneNumber: data?.phoneNumber,
+      dob: data?.dob ? dayjs(data.dob).toDate() : undefined,
       citizenId: data?.citizenId ?? "",
+      role: data?.role,
     },
   });
 
@@ -60,10 +71,10 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     if (data) {
       reset({
         fullname: data.fullName ?? "",
-        new_email: data.email ?? "",
         phoneNumber: data.phoneNumber ?? "",
         dob: data.dob ? dayjs(data.dob).toDate() : null,
         citizenId: data.citizenId ?? "",
+        role: data.role ?? Roles.TOURGUIDE,
       });
 
       if (data.avatarURL) {
@@ -72,10 +83,12 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     } else {
       reset({
         fullname: "",
-        new_email: "",
+        staff_email: "",
+        staff_password: "",
         phoneNumber: "",
         dob: null,
         citizenId: "",
+        role: Roles.TOURGUIDE,
       });
       setAvatarPreview(null);
     }
@@ -94,6 +107,7 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     reader.onload = (e) => {
       setAvatarPreview(e.target?.result as string);
       setAvatarFile(file);
+      setValue("avatar", file, { shouldValidate: true });
     };
     reader.readAsDataURL(file);
     setIsUploading(true);
@@ -106,40 +120,42 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     fileInputRef.current?.click();
   };
 
-  const onCreateSubmit = async (formData: UserCreateValidateType) => {
+  const onCreateSubmit = async (formData: StaffCreateType) => {
     setIsSubmitting(true);
     try {
-      const submitData: UserCreateType = {
-        dob: formData.dob ?? null,
-        role: Roles.CUSTOMER,
-        citizenId: formData.citizenId ?? null,
-        phoneNumber: formData.phoneNumber ?? null,
+      const submitData: StaffCreateType = {
         ...formData,
+        dob: formData.dob,
+        role: formData.role,
+        citizenId: formData.citizenId,
+        phoneNumber: formData.phoneNumber,
       };
 
       if (avatarFile) {
         submitData.avatar = avatarFile;
       }
+
       await createUser(submitData);
     } catch (error) {
-      console.error("Failed to save customer:", error);
-      toast.error("Có lỗi xảy ra khi thêm khách hàng");
+      console.error("Failed to save staff:", error);
+      toast.error("Có lỗi xảy ra khi thêm nhân viên");
     } finally {
       setIsSubmitting(false);
       onClose();
     }
   };
 
-  const onUpdateSubmit = async (formData: UserValidateType) => {
+  const onUpdateSubmit = async (formData: StaffUpdateType) => {
     if (!data?.id) return;
 
     setIsSubmitting(true);
     try {
-      const submitData: Partial<UserUpdateType> = {
+      const submitData: Partial<StaffUpdateType> = {
         fullname: formData.fullname,
         phoneNumber: formData.phoneNumber,
         citizenId: formData.citizenId,
         dob: formData.dob ?? null,
+        role: formData.role,
       };
 
       if (avatarFile) {
@@ -148,19 +164,19 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
 
       await updateUser(data.id, submitData);
     } catch (error) {
-      console.error("Failed to save customer:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật khách hàng");
+      console.error("Failed to update staff:", error);
+      toast.error("Có lỗi xảy ra khi cập nhật nhân viên");
     } finally {
       setIsSubmitting(false);
       onClose();
     }
   };
 
-  const onSubmit = (formData: UserCreateValidateType | UserValidateType) => {
+  const onSubmit = (formData: StaffCreateType | StaffUpdateType) => {
     if (isUpdate) {
-      onUpdateSubmit(formData as UserValidateType);
+      onUpdateSubmit(formData as StaffUpdateType);
     } else {
-      onCreateSubmit(formData as UserCreateValidateType);
+      onCreateSubmit(formData as StaffCreateType);
     }
   };
 
@@ -168,8 +184,9 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isUpdate ? "Cập nhật khách hàng" : "Thêm khách hàng"}
+      title={isUpdate ? "Cập nhật nhân viên" : "Thêm nhân viên"}
       reset={() => {
+        reset();
         setAvatarPreview(null);
         setAvatarFile(null);
         setIsSubmitting(false);
@@ -210,81 +227,45 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
               />
             </label>
           </div>
+          {errors.avatar?.message && (
+            <div className="text-red-600 text-[12px]">
+              {errors.avatar.message}
+            </div>
+          )}
         </div>
 
         {data && data.email && (
-          <div className="flex gap-2 mx-auto justify-evenly text-gray-600 bg-gray-100 py-2 rounded-md w-full">
-            <div className="flex gap-2">
-              <Mail /> <div>{data.email}</div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-gray-600 bg-gray-100 p-3 rounded-md">
+            <div className="flex items-center gap-2 text-sm">
+              <Mail size={16} />
+              <span>{data.email}</span>
             </div>
-            <div className="flex gap-2">
-              <CalendarPlus />
-              <div>{dayjs(data.createdAt).format("DD-MM-YYYY")}</div>
+            <div className="flex items-center gap-2 text-sm">
+              <CalendarPlus size={16} />
+              <span>{dayjs(data.createdAt).format("DD/MM/YYYY")}</span>
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-          <div className="space-y-8 flex flex-col gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+          <div className="flex flex-col gap-2">
             <TextField
               fullWidth
               label="Họ và tên *"
-              placeholder="Nhập họ và tên"
               variant="outlined"
+              autoComplete="off"
               {...register("fullname")}
               error={!!errors.fullname}
               helperText={errors.fullname?.message ?? " "}
             />
 
-            {!isUpdate && (
-              <TextField
-                fullWidth
-                type="email"
-                label="Email *"
-                placeholder="Nhập email"
-                variant="outlined"
-                autoComplete="off"
-                {...register("new_email" as keyof UserCreateValidateType)}
-                error={!!(errors as any).new_email}
-                helperText={(errors as any).new_email?.message ?? " "}
-              />
-            )}
-
             <TextField
               fullWidth
-              label="CCCD/CMND"
-              placeholder="Nhập số CCCD/CMND"
+              label="CCCD/CMND *"
               variant="outlined"
               {...register("citizenId")}
               error={!!errors.citizenId}
               helperText={errors.citizenId?.message ?? " "}
-            />
-          </div>
-
-          <div className="space-y-4 flex flex-col gap-2">
-            {!isUpdate && (
-              <TextField
-                fullWidth
-                type="password"
-                label="Mật khẩu *"
-                autoComplete="off"
-                placeholder="Nhập mật khẩu"
-                variant="outlined"
-                {...register("new_password" as keyof UserCreateValidateType)}
-                error={!!(errors as any).new_password}
-                helperText={(errors as any).new_password?.message ?? " "}
-              />
-            )}
-
-            <TextField
-              fullWidth
-              type="tel"
-              label="Số điện thoại"
-              placeholder="Nhập số điện thoại"
-              variant="outlined"
-              {...register("phoneNumber")}
-              error={!!errors.phoneNumber}
-              helperText={errors.phoneNumber?.message ?? " "}
             />
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -293,15 +274,15 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    label="Ngày sinh"
+                    label="Ngày sinh *"
                     value={field.value ? dayjs(field.value) : null}
                     onChange={(date) =>
                       field.onChange(date ? date.toDate() : null)
                     }
+                    maxDate={dayjs()}
                     slotProps={{
                       textField: {
                         fullWidth: true,
-                        size: "medium",
                         error: !!errors.dob,
                         helperText: errors.dob?.message ?? " ",
                       },
@@ -310,6 +291,66 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 )}
               />
             </LocalizationProvider>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {!isUpdate && (
+              <>
+                <TextField
+                  fullWidth
+                  type="email"
+                  label="Email *"
+                  variant="outlined"
+                  autoComplete="new-email"
+                  {...register("staff_email")}
+                  error={!!errors.staff_email}
+                  helperText={errors.staff_email?.message ?? " "}
+                />
+
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Mật khẩu *"
+                  autoComplete="new-password"
+                  placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
+                  variant="outlined"
+                  {...register("staff_password")}
+                  error={!!errors.staff_password}
+                  helperText={errors.staff_password?.message ?? " "}
+                />
+              </>
+            )}
+
+            <TextField
+              fullWidth
+              type="tel"
+              label="Số điện thoại *"
+              placeholder="Nhập số điện thoại (10-11 số)"
+              variant="outlined"
+              {...register("phoneNumber")}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber?.message ?? " "}
+            />
+
+            <FormControl fullWidth error={!!errors.role}>
+              <InputLabel id="role-label">Vai trò *</InputLabel>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    labelId="role-label"
+                    label="Vai trò *"
+                    value={field.value || Roles.TOURGUIDE}
+                  >
+                    <MenuItem value={Roles.TOURGUIDE}>Hướng dẫn viên</MenuItem>
+                    <MenuItem value={Roles.SUPERVISOR}>Quản lý</MenuItem>
+                  </Select>
+                )}
+              />
+              <FormHelperText>{errors.role?.message ?? " "}</FormHelperText>
+            </FormControl>
           </div>
         </div>
 
@@ -327,10 +368,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 borderColor: "gray.400",
                 backgroundColor: "rgba(0, 0, 0, 0.04)",
               },
-              "&.Mui-disabled": {
-                borderColor: "rgba(0, 0, 0, 0.12)",
-                color: "rgba(0, 0, 0, 0.26)",
-              },
             }}
           >
             Hủy
@@ -343,6 +380,10 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
             disabled={isSubmitting || isUploading}
             sx={{
               py: 1.5,
+              backgroundColor: "primary.main",
+              "&:hover": {
+                backgroundColor: "primary.dark",
+              },
               "&.Mui-disabled": {
                 backgroundColor: "rgba(0, 0, 0, 0.12)",
                 color: "rgba(0, 0, 0, 0.26)",
@@ -355,9 +396,9 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 {isUpdate ? "Đang cập nhật..." : "Đang thêm..."}
               </>
             ) : isUpdate ? (
-              "Cập nhật khách hàng"
+              "Cập nhật nhân viên"
             ) : (
-              "Thêm khách hàng"
+              "Thêm nhân viên"
             )}
           </Button>
         </div>
@@ -366,4 +407,4 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
   );
 };
 
-export default CustomerModal;
+export default StaffModal;
