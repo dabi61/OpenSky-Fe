@@ -15,6 +15,7 @@ import Manager from "../pages/Manager";
 import Dashboard from "../pages/Dashboard";
 import CustomerManager from "../pages/CustomerManage";
 import StaffManager from "../pages/StaffManage";
+import HotelCreate from "../pages/HotelCreate";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "hotel", element: <Hotel /> },
+      { path: "hotel_create", element: <HotelCreate /> },
       { path: "tour", element: <Tour /> },
       { path: "discount", element: <Discount /> },
       { path: "unauthorized", element: <Unauthorized /> },

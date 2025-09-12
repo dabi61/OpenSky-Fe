@@ -7,12 +7,15 @@ import { useEffect, useState } from "react";
 import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
 import {
+  Button,
   FormControl,
   MenuItem,
   Select,
   type SelectChangeEvent,
 } from "@mui/material";
 import { Search } from "lucide-react";
+import assets from "../assets";
+import { useNavigate } from "react-router-dom";
 
 const Hotel: React.FC = () => {
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -21,6 +24,7 @@ const Hotel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isMobile, setIsMobile] = useState(false);
   const [filteredHotels, setFilteredHotels] = useState(hotels);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchProvinces() {
@@ -233,6 +237,51 @@ const Hotel: React.FC = () => {
           )}
         </motion.div>
       </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        viewport={{ once: true, amount: 0.3 }}
+        className="flex flex-col gap-5 main-content w-full"
+      >
+        <div className="w-full relative mt-20 mb-[-1.8rem]">
+          <div>
+            <img
+              className="w-full h-70 object-cover absolute z-10"
+              src={assets.hotel_background}
+              alt="hotel background"
+            />
+            <div className="absolute inset-0 bg-black/50 h-70 z-20"></div>
+
+            <div className="relative z-30 flex flex-col justify-center w-2/5 mx-auto h-72 text-center">
+              <h1 className="font-bold text-4xl text-white">
+                Đăng ký khách sạn của bạn
+              </h1>
+              <p className="font-light mt-4 text-lg text-white">
+                Thêm khách sạn vào hệ thống và bắt đầu hợp tác cùng chúng tôi.
+              </p>
+              <Button
+                variant="contained"
+                onClick={() => navigate("/hotel_create")}
+                size="medium"
+                sx={{
+                  backgroundColor: "#3B82F6",
+                  borderRadius: "10px",
+                  "&:hover": {
+                    backgroundColor: "#2563EB",
+                  },
+                  marginTop: 3,
+                  width: "300px",
+                  paddingY: 2,
+                  marginX: "auto",
+                }}
+              >
+                Tạo khách sạn ngay
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </>
   );
 };

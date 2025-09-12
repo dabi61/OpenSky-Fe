@@ -24,3 +24,11 @@ export type UserPage = {
   pageNumber: number;
   pageSize: number;
 };
+
+export type UserSummaryType = {
+  id: string;
+  email: string;
+  fullName: string;
+  phoneNumber: string;
+  avatarURL: string;
+};

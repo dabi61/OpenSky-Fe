@@ -229,7 +229,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
             <TextField
               fullWidth
               label="Họ và tên *"
-              placeholder="Nhập họ và tên"
               variant="outlined"
               {...register("fullname")}
               error={!!errors.fullname}
@@ -241,7 +240,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 fullWidth
                 type="email"
                 label="Email *"
-                placeholder="Nhập email"
                 variant="outlined"
                 autoComplete="off"
                 {...register("new_email" as keyof UserCreateValidateType)}
@@ -253,7 +251,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
             <TextField
               fullWidth
               label="CCCD/CMND"
-              placeholder="Nhập số CCCD/CMND"
               variant="outlined"
               {...register("citizenId")}
               error={!!errors.citizenId}
@@ -268,7 +265,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 type="password"
                 label="Mật khẩu *"
                 autoComplete="off"
-                placeholder="Nhập mật khẩu"
                 variant="outlined"
                 {...register("new_password" as keyof UserCreateValidateType)}
                 error={!!(errors as any).new_password}
@@ -280,7 +276,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
               fullWidth
               type="tel"
               label="Số điện thoại"
-              placeholder="Nhập số điện thoại"
               variant="outlined"
               {...register("phoneNumber")}
               error={!!errors.phoneNumber}

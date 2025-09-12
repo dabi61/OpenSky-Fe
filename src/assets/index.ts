@@ -8,6 +8,7 @@ import facebook from "./facebook.png";
 import tiktok from "./tiktok.png";
 import youtube from "./youtube.png";
 import discount_background from "./discount-background.png";
+import hotel_background from "./hotel_background.jpg";
 
 export default {
   logo,
@@ -20,4 +21,5 @@ export default {
   tiktok,
   youtube,
   discount_background,
+  hotel_background,
 };

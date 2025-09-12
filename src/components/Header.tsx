@@ -19,7 +19,7 @@ const baseMenuItems = [
 
 const settingMenuItems = [
   { name: "Cá nhân", to: "/profile" },
-  { name: "Bài đăng của tôi", to: "/" },
+  { name: "Khách sạn của tôi", to: "/" },
   { name: "Đổi mật khẩu", to: "/" },
 ];
 
