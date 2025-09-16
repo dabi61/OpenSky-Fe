@@ -1,4 +1,4 @@
 export type ImageSummaryType = {
-  id: string;
+  imageID: string;
   url: string;
 };

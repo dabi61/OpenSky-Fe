@@ -82,7 +82,7 @@ export const handleUpdateUser = async (
     if (data.citizenId) formData.append("citizenId", data.citizenId || "");
     if (data.dob) formData.append("dob", dayjs(data.dob).format("YYYY-MM-DD"));
     if (data.avatar) formData.append("avatar", data.avatar);
-    const res = await axiosInstance.put(`/users/${id}`, formData);
+    const res = await axiosInstance.put(`users/${id}`, formData);
     return res.data;
   } catch (error: any) {
     console.log(error);
@@ -100,7 +100,7 @@ export const handleGetUserByRole = async (
 ): Promise<UserPage> => {
   const roleParams = roles.map((r) => `roles=${r}`).join("&");
   const res = await axiosInstance(
-    `users?${roleParams}&page=${page}&size=${size}`
+    `users?page=${page}&limit=${size}&${roleParams}`
   );
   return res.data;
 };

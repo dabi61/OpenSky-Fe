@@ -39,7 +39,7 @@ type UserContextType = {
     page: number,
     size: number
   ) => Promise<UserPage>;
-  reloadUser: () => Promise<void>;
+  reloadUser: () => Promise<UserType | null>;
   updateUser: (id: string, data: Partial<UserUpdateType>) => Promise<void>;
   updateCurrentUser: (data: Partial<UserUpdateType>) => Promise<void>;
   createUser: (data: Partial<UserCreateType>) => Promise<void>;
@@ -66,12 +66,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUserInList = (id: string, updatedUser: UserType) => {
     setUserList((prev) =>
-      prev.map((user) => (user.id === id ? { ...user, ...updatedUser } : user))
+      prev.map((user) =>
+        user.userID === id ? { ...user, ...updatedUser } : user
+      )
     );
   };
 
   const removeUserFromList = (id: string) => {
-    setUserList((prev) => prev.filter((user) => user.id !== id));
+    setUserList((prev) => prev.filter((user) => user.userID !== id));
   };
 
   const refreshUsers = async () => {
@@ -81,19 +83,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const reloadUser = async () => {
+  const reloadUser = async (): Promise<UserType | null> => {
     try {
       setLoading(true);
       const refresh_token = Cookies.get("refresh_token");
       if (!refresh_token) {
         setUser(null);
-        return;
+        return null;
       }
       const data = await handleGetUser();
       setUser(data);
+      return data;
     } catch (error) {
       console.error("Lỗi lấy user:", error);
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }

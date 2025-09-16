@@ -16,6 +16,7 @@ const Login: React.FC = () => {
     remember: false,
   });
   const { reloadUser, user } = useUser();
+  console.log(user);
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,8 +29,9 @@ const Login: React.FC = () => {
 
     if (res.success) {
       toast.success("Đăng nhập thành công!");
-      await reloadUser();
-      if (user?.role === Roles.ADMIN) {
+      const currentUser = await reloadUser();
+
+      if (currentUser?.role === Roles.ADMIN) {
         navigate("/manager");
       } else {
         navigate("/home");

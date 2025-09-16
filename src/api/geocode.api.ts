@@ -2,9 +2,9 @@ import axios from "axios";
 
 export const getCoordinates = async (address: string) => {
   const res = await axios.get(
-    `https://geocode.maps.co/search?q=${encodeURIComponent(
-      address
-    )}&api_key=68c3d40a45103634934146rvk8629f7`
+    `https://geocode.maps.co/search?q=${encodeURIComponent(address)}&api_key=${
+      import.meta.env.VITE_SECRET_GEOCODE_API
+    }`
   );
 
   if (res.data.length === 0) {
@@ -12,7 +12,7 @@ export const getCoordinates = async (address: string) => {
   }
 
   return {
-    lat: parseFloat(res.data[0].lat),
-    lon: parseFloat(res.data[0].lon),
+    latitude: parseFloat(res.data[0].lat),
+    lontitude: parseFloat(res.data[0].lon),
   };
 };

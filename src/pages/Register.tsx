@@ -24,6 +24,7 @@ const Register: React.FC = () => {
   });
 
   const onSubmit = async (data: RegisterType) => {
+    console.log(data);
     const res = await handleRegister(data);
     if (res.success) {
       toast.success("Đăng ký thành công!");

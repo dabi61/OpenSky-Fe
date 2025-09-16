@@ -3,7 +3,6 @@ import type { LoginType } from "../types/schemas/login.schema";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
 import type { RegisterType } from "../types/schemas/register.schema";
-import { success } from "zod";
 
 export const handleLogin = async (req: LoginType) => {
   try {

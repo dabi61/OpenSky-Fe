@@ -42,7 +42,7 @@ const CustomerManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setCustomers(data.content);
+          setCustomers(data.users);
           setTotalPages(data.totalPages);
         } else {
           const data = await getUsersByRole(
@@ -50,7 +50,7 @@ const CustomerManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setCustomers(data.content);
+          setCustomers(data.users);
           setTotalPages(data.totalPages);
         }
       } catch (error) {
@@ -197,7 +197,7 @@ const CustomerManager: React.FC = () => {
                       {customers.map((customer) => (
                         <CustomerManageItem
                           customer={customer}
-                          key={customer.id}
+                          key={customer.userID}
                           onEdit={() => {
                             setSelectedCustomer(customer);
                             setOpenAddCustomer(true);

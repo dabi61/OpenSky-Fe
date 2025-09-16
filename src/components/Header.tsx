@@ -7,6 +7,7 @@ import { handleLogout } from "../api/auth.api";
 import { useUser } from "../contexts/UserContext";
 import OverlayReload from "./Loading";
 import Cookies from "js-cookie";
+import { Roles } from "../constants/role";
 
 const baseMenuItems = [
   { name: "Trang chủ", to: "/home" },
@@ -17,9 +18,9 @@ const baseMenuItems = [
   { name: "Quản lý", to: "/manager" },
 ];
 
-const settingMenuItems = [
+let settingMenuItems = [
   { name: "Cá nhân", to: "/profile" },
-  { name: "Khách sạn của tôi", to: "/" },
+  { name: "Khách sạn của tôi", to: "/my_hotel" },
   { name: "Đổi mật khẩu", to: "/" },
 ];
 
@@ -28,7 +29,7 @@ const authMenuItems = [
   { name: "Đăng ký", to: "/register" },
 ];
 function Header() {
-  const { user, loading } = useUser();
+  const { user, loading, reloadUser } = useUser();
   const navigate = useNavigate();
 
   const isLoggedIn = !!user;
@@ -40,6 +41,7 @@ function Header() {
   const onLogout = async () => {
     const res = await handleLogout();
     if (res?.success) {
+      await reloadUser();
       navigate("/login");
     }
   };
@@ -52,6 +54,12 @@ function Header() {
     menuItems = menuItems.filter((item) => item.to !== "/contact");
   } else {
     menuItems = menuItems.filter((item) => item.to !== "/manager");
+  }
+
+  if (user?.role !== Roles.HOTELMANAGER) {
+    settingMenuItems = settingMenuItems.filter(
+      (item) => item.to !== "/my_hotel"
+    );
   }
 
   console.log(Cookies.get("access_token"));

@@ -3,7 +3,7 @@ import type { ImageSummaryType } from "./image";
 import type { UserSummaryType } from "./user";
 
 export type HotelType = {
-  id: string;
+  hotelID: string;
   email: string;
   user: UserSummaryType;
   address: string;
@@ -18,9 +18,9 @@ export type HotelType = {
   images: ImageSummaryType[];
 };
 
-export type UserUpdateResponse = {
+export type HotelResponse = {
   message: string;
-  hotel: HotelType;
+  hotelID: string | null;
 };
 
 export type HotelPage = {

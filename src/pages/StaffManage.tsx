@@ -48,7 +48,7 @@ const StaffManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setStaffs(data.content);
+          setStaffs(data.users);
           setTotalPages(data.totalPages);
         } else {
           const data = await getUsersByRole(
@@ -56,7 +56,7 @@ const StaffManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setStaffs(data.content);
+          setStaffs(data.users);
           setTotalPages(Math.max(data.totalPages));
         }
       } catch (error) {
@@ -209,7 +209,7 @@ const StaffManager: React.FC = () => {
                       {staffs.map((customer) => (
                         <StaffManageItem
                           staff={customer}
-                          key={customer.id}
+                          key={customer.userID}
                           onEdit={() => {
                             setSelectedCustomer(customer);
                             setOpenAddCustomer(true);

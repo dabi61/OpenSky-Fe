@@ -29,6 +29,7 @@ const Hotel: React.FC = () => {
   useEffect(() => {
     async function fetchProvinces() {
       const data = await getProvinces();
+      console.log(data);
       setProvinces(data);
     }
     fetchProvinces();

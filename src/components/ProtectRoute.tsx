@@ -12,6 +12,8 @@ export function RoleGuard({ allowedRoles, deniedRoles }: ProtectedRouteProps) {
 
   if (loading) return <OverlayReload />;
 
+  if (!user) return <Navigate to="/login" replace />;
+
   if (allowedRoles && !allowedRoles.includes(user?.role ?? "")) {
     return <Navigate to={"/unauthorized"} replace />;
   }

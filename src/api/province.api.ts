@@ -1,6 +1,7 @@
 import axios from "axios";
+import type { Province } from "../types/api/province";
 
-export const getProvinces = async () => {
+export const getProvinces = async (): Promise<Province[]> => {
   try {
     const res = await axios.get("https://vapi.vnappmob.com/api/v2/province/");
     return res.data.results.map((p: any) => {

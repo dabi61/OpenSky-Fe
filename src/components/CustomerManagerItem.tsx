@@ -11,7 +11,7 @@ interface Props {
 
 const CustomerManageItem: React.FC<Props> = ({ customer, onEdit }) => {
   return (
-    <tr key={customer.id} className="hover:bg-gray-50">
+    <tr key={customer.userID} className="hover:bg-gray-50">
       <td className="py-4 px-4 sm:px-6">
         <div className="flex items-center">
           <img
@@ -23,7 +23,10 @@ const CustomerManageItem: React.FC<Props> = ({ customer, onEdit }) => {
             }}
           />
           <div>
-            <div className="font-medium text-gray-900">
+            <div
+              className="font-medium text-gray-900 truncate max-w-40"
+              title={customer.fullName || "Chưa cập nhật"}
+            >
               {customer.fullName || "Chưa cập nhật"}
             </div>
             <div className="md:hidden text-sm text-gray-500 mt-1">

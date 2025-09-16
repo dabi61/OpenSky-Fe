@@ -2,7 +2,7 @@ import type { Dayjs } from "dayjs";
 import type { Roles } from "../../constants/role";
 
 export type UserType = {
-  id: string;
+  userID: string;
   email: string;
   fullName: string;
   role: Roles;
@@ -19,7 +19,7 @@ export type UserUpdateResponse = {
 };
 
 export type UserPage = {
-  content: UserType[];
+  users: UserType[];
   totalPages: number;
   pageNumber: number;
   pageSize: number;
