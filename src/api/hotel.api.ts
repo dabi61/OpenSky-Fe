@@ -1,7 +1,42 @@
-import type { HotelResponse } from "../types/response/hotel";
+import axios from "axios";
+import { HotelStatus } from "../constants/HotelStatus";
+import type {
+  HotelPage,
+  HotelResponse,
+  HotelTypeWithImgs,
+} from "../types/response/hotel.type";
 import type { HotelCreateValidateType } from "../types/schemas/hotel.schema";
 import axiosInstance from "../utils/AxisosInstance";
 import { handleGetUser } from "./user.api";
+
+export const handleGetHotelByStatus = async (
+  status: HotelStatus,
+  page: number,
+  limit: number
+): Promise<HotelPage> => {
+  const res = await axiosInstance.get(
+    `hotels/status/${status}?page=${page}&size=${limit}`
+  );
+  console.log(res.data);
+  return res.data;
+};
+
+export const handleGetActiveHotel = async (
+  page: number,
+  limit: number
+): Promise<HotelPage> => {
+  const res = await axiosInstance.get(
+    `${import.meta.env.VITE_API_URL}hotels/active?page=${page}&size=${limit}`
+  );
+  return res.data;
+};
+
+export const handleGetHotelById = async (
+  id: string
+): Promise<HotelTypeWithImgs> => {
+  const res = await axios.get(`hotels/${id}`);
+  return res.data;
+};
 
 export const handleCreateHotel = async (
   data: HotelCreateValidateType
@@ -31,7 +66,7 @@ export const handleCreateHotel = async (
   } catch (error: any) {
     return {
       message: error?.response?.data.message,
-      hotelId: null,
+      hotelID: null,
     };
   }
 };

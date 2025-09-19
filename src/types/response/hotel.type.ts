@@ -1,6 +1,5 @@
 import type { HotelStatus } from "../../constants/HotelStatus";
-import type { ImageSummaryType } from "./image";
-import type { UserSummaryType } from "./user";
+import type { UserSummaryType } from "./user.type";
 
 export type HotelType = {
   hotelID: string;
@@ -10,12 +9,28 @@ export type HotelType = {
   province: string;
   lon: number;
   lat: number;
-  name: string;
+  hotelName: string;
+  description: string;
+  star: number;
+  createdAt: Date;
+  status: HotelStatus;
+  firstImage: string;
+};
+
+export type HotelTypeWithImgs = {
+  hotelID: string;
+  email: string;
+  user: UserSummaryType;
+  address: string;
+  province: string;
+  lon: number;
+  lat: number;
+  hotelName: string;
   description: string;
   star: number;
   createdAt: Date;
   hotelStatus: HotelStatus;
-  images: ImageSummaryType[];
+  images: string[];
 };
 
 export type HotelResponse = {
@@ -24,7 +39,7 @@ export type HotelResponse = {
 };
 
 export type HotelPage = {
-  content: HotelType[];
+  hotels: HotelType[];
   totalPages: number;
   pageNumber: number;
   pageSize: number;

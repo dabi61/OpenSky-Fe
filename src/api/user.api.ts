@@ -2,7 +2,7 @@ import type {
   UserPage,
   UserType,
   UserUpdateResponse,
-} from "../types/response/user";
+} from "../types/response/user.type";
 import axiosInstance from "../utils/AxisosInstance";
 import dayjs from "dayjs";
 import type { Roles } from "../constants/role";

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useUser } from "../contexts/UserContext";
-import type { UserType } from "../types/response/user";
+import type { UserType } from "../types/response/user.type";
 import { useSearchParams } from "react-router-dom";
 import { Roles } from "../constants/role";
 import {
@@ -26,7 +26,7 @@ const StaffManager: React.FC = () => {
   );
 
   const [currentPage, setCurrentPage] = useState(() => {
-    return pageParam ? parseInt(pageParam) : 0;
+    return pageParam ? parseInt(pageParam) : 1;
   });
 
   const [totalPages, setTotalPages] = useState(0);
@@ -187,19 +187,19 @@ const StaffManager: React.FC = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                           Nhân viên
                         </th>
-                        <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden md:table-cell">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden md:table-cell">
                           Thông tin liên hệ
                         </th>
-                        <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden lg:table-cell">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden lg:table-cell">
                           Chức vụ
                         </th>
-                        <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden lg:table-cell">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden lg:table-cell">
                           CCCD/CMND
                         </th>
-                        <th className="text-left py-4 px-4 sm:px-6 font-semibold text-gray-700 hidden xl:table-cell">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden xl:table-cell">
                           Ngày sinh
                         </th>
                         <th className="text-right py-4 px-4 sm:px-6 font-semibold text-gray-700"></th>

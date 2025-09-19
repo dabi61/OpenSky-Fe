@@ -1,21 +1,20 @@
 import { Button, TextField, CircularProgress } from "@mui/material";
 import { ChevronLeft, CloudUpload, Trash } from "lucide-react";
-import { useForm } from "react-hook-form";
-import {
-  HotelSchema,
-  type HotelCreateValidateType,
-} from "../types/schemas/hotel.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { getCoordinates } from "../api/geocode.api";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { useImage } from "../contexts/ImageContext";
 import useEmblaCarousel from "embla-carousel-react";
-import { handleCreateHotel } from "../api/hotel.api";
-import { getProvinces } from "../api/province.api";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import {
+  TourSchema,
+  type TourCreateValidateType,
+} from "../types/schemas/tour.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getProvinces } from "../api/province.api";
+import { toast } from "sonner";
+import { handleCreateTour } from "../api/tour.api";
 
-const HotelCreate = () => {
+const TourCreate = () => {
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
@@ -23,51 +22,26 @@ const HotelCreate = () => {
     window.scrollTo(0, 0);
   }, []);
   const navigate = useNavigate();
-  const [coordinates, setCoordinates] = useState({ lon: 0, lat: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const [emblaRefImages] = useEmblaCarousel({ axis: "x", dragFree: true });
   const { imageList, addImageList, deleteImage, previewImageList } = useImage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
+    register,
     watch,
     handleSubmit,
-    register,
     setValue,
     formState: { errors },
-  } = useForm<HotelCreateValidateType>({
-    resolver: zodResolver(HotelSchema),
+  } = useForm<TourCreateValidateType>({
+    resolver: zodResolver(TourSchema),
     mode: "onBlur",
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLoadLocation = async (address: string) => {
-    const res = await getCoordinates(address);
-    if (res) {
-      setCoordinates({
-        lat: res?.latitude,
-        lon: res?.lontitude,
-      });
-    } else {
-      toast.error("Tọa độ này không khả dụng!");
-    }
-  };
-
-  const onSubmit = async (data: HotelCreateValidateType) => {
-    const allProvinces = await getProvinces();
-    const parts = data.address.split(",").map((p) => p.trim());
-    const lastPart = parts[parts.length - 1];
-    const matchedProvince = allProvinces.find(
-      (province) =>
-        province.province_name.toLowerCase() === lastPart.toLowerCase()
-    );
-    if (!matchedProvince) {
-      toast.error("Can't find this province!");
-      return;
-    }
-    setValue("province", matchedProvince.province_name);
-
-    const res = await handleCreateHotel(data);
-    if (res.hotelID) {
+  const onSubmit = async (data: TourCreateValidateType) => {
+    const res = await handleCreateTour(data);
+    if (res.tourID) {
       toast.success(res.message);
+      navigate("/manager/tour");
     } else {
       toast.error(res.message);
     }
@@ -75,16 +49,10 @@ const HotelCreate = () => {
 
   const submitForm = async () => {
     setIsLoading(true);
-
+    if (imageList.length > 0) {
+      setValue("files", imageList);
+    }
     try {
-      if (coordinates.lat !== 0 && coordinates.lon !== 0) {
-        setValue("latitude", coordinates.lat);
-        setValue("longitude", coordinates.lon);
-      }
-      if (imageList.length > 0) {
-        setValue("files", imageList);
-      }
-
       const address = watch("address");
       const allProvinces = await getProvinces();
       const parts = address.split(",").map((p) => p.trim());
@@ -94,11 +62,10 @@ const HotelCreate = () => {
           province.province_name.toLowerCase() === lastPart.toLowerCase()
       );
       if (!matchedProvince) {
-        toast.error("Can't find this province!");
+        toast.error("Can't find this province");
         return;
       }
       setValue("province", matchedProvince.province_name);
-
       await handleSubmit(onSubmit)();
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -127,16 +94,16 @@ const HotelCreate = () => {
       </div>
       <div className="border rounded-2xl p-10 mt-5 border-blue-500">
         <div className="font-semibold flex justify-center text-2xl mb-10">
-          Thông tin khách sạn
+          Thông tin tour
         </div>
         <div className="px-20 flex flex-col gap-10">
           <TextField
             fullWidth
             variant="outlined"
-            {...register("hotelName")}
-            label="Tên khách sạn"
-            error={!!errors.hotelName}
-            helperText={errors.hotelName?.message}
+            label="Tên tour"
+            {...register("tourName")}
+            error={!!errors.tourName}
+            helperText={errors.tourName?.message || " "}
             InputLabelProps={{
               shrink: true,
               sx: {
@@ -149,34 +116,83 @@ const HotelCreate = () => {
               },
             }}
           />
-          <TextField
-            fullWidth
-            variant="outlined"
-            {...register("email")}
-            label="Nhập email liên hệ"
-            error={!!errors.email}
-            helperText={errors.email?.message}
-            InputLabelProps={{
-              shrink: true,
-              sx: {
-                fontWeight: "bold",
-                fontSize: "1.25rem",
-                backgroundColor: "white",
-                transform: "translate(14px, -9px) scale(0.8)",
-                padding: "0 8px",
-                marginLeft: "-8px",
-              },
-            }}
-          />
+          <div className="flex gap-20">
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Nhập giá"
+              type="number"
+              {...register("price", { valueAsNumber: true })}
+              error={!!errors.price}
+              helperText={errors.price?.message || " "}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontWeight: "bold",
+                  fontSize: "1.25rem",
+                  backgroundColor: "white",
+                  transform: "translate(14px, -9px) scale(0.8)",
+                  padding: "0 8px",
+                  marginLeft: "-8px",
+                },
+              }}
+              InputProps={{
+                inputProps: { min: 0 },
+                sx: {
+                  "input::-webkit-outer-spin-button, input::-webkit-inner-spin-button":
+                    {
+                      WebkitAppearance: "none",
+                      margin: 0,
+                    },
+                  "input[type=number]": {
+                    MozAppearance: "textfield",
+                  },
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Nhập số lượng người giam gia"
+              {...register("maxPeople", { valueAsNumber: true })}
+              type="number"
+              error={!!errors.maxPeople}
+              helperText={errors.maxPeople?.message || " "}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontWeight: "bold",
+                  fontSize: "1.25rem",
+                  backgroundColor: "white",
+                  transform: "translate(14px, -9px) scale(0.8)",
+                  padding: "0 8px",
+                  marginLeft: "-8px",
+                },
+              }}
+              InputProps={{
+                inputProps: { min: 0 },
+                sx: {
+                  "input::-webkit-outer-spin-button, input::-webkit-inner-spin-button":
+                    {
+                      WebkitAppearance: "none",
+                      margin: 0,
+                    },
+                  "input[type=number]": {
+                    MozAppearance: "textfield",
+                  },
+                },
+              }}
+            />
+          </div>
 
           <TextField
             fullWidth
             variant="outlined"
             label="Địa chỉ"
-            placeholder="Địa chỉ (VD: Cầu Giấy, Dịch Vọng, Hà Nội)"
-            error={!!errors.address}
-            helperText={errors.address?.message}
             {...register("address")}
+            error={!!errors.address}
+            helperText={errors.address?.message || " "}
+            placeholder="Địa chỉ (VD: Cầu Giấy, Dịch Vọng, Hà Nội)"
             InputLabelProps={{
               shrink: true,
               sx: {
@@ -190,31 +206,14 @@ const HotelCreate = () => {
             }}
           />
 
-          <Button
-            variant="outlined"
-            onClick={() => handleLoadLocation(watch("address"))}
-            disabled={isLoading}
-          >
-            Xem bản đồ
-          </Button>
-          {coordinates.lat !== 0 && coordinates.lon !== 0 && (
-            <iframe
-              width="100%"
-              height="400"
-              loading="lazy"
-              allowFullScreen
-              src={`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lon}&hl=vi&z=15&output=embed`}
-            ></iframe>
-          )}
-
           <TextField
             fullWidth
             variant="outlined"
             label="Mô tả"
-            error={!!errors.description}
-            helperText={errors.description?.message}
             multiline
             {...register("description")}
+            error={!!errors.description}
+            helperText={errors.description?.message || " "}
             minRows={4}
             InputLabelProps={{
               shrink: true,
@@ -235,7 +234,7 @@ const HotelCreate = () => {
 
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors mb-6 border-gray-300 hover:border-blue-400 ${
-                  isLoading ? "opacity-50 pointer-events-none" : ""
+                  isLoading ? "opacity-50 pointer-events-none" : " "
                 }`}
                 onClick={() => {
                   if (!isLoading && fileInputRef.current) {
@@ -335,4 +334,4 @@ const HotelCreate = () => {
   );
 };
 
-export default HotelCreate;
+export default TourCreate;

@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { Roles } from "../constants/role";
 import { useUser } from "../contexts/UserContext";
-import type { UserType } from "../types/response/user";
+import type { UserType } from "../types/response/user.type";
 import { toast } from "sonner";
 
 interface ModalProps {
@@ -29,7 +29,7 @@ interface ModalProps {
 }
 
 const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
-  const isUpdate = Boolean(data?.id);
+  const isUpdate = Boolean(data?.userID);
 
   const {
     control,
@@ -131,7 +131,7 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
   };
 
   const onUpdateSubmit = async (formData: UserValidateType) => {
-    if (!data?.id) return;
+    if (!data?.userID) return;
 
     setIsSubmitting(true);
     try {
@@ -146,7 +146,7 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
         submitData.avatar = avatarFile;
       }
 
-      await updateUser(data.id, submitData);
+      await updateUser(data.userID, submitData);
     } catch (error) {
       console.error("Failed to save customer:", error);
       toast.error("Có lỗi xảy ra khi cập nhật khách hàng");

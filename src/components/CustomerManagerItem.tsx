@@ -1,5 +1,5 @@
 import React from "react";
-import type { UserType } from "../types/response/user";
+import type { UserType } from "../types/response/user.type";
 import assets from "../assets";
 import { Edit, Mail, Phone, Trash2 } from "lucide-react";
 import dayjs from "dayjs";

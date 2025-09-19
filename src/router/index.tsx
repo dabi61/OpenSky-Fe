@@ -18,6 +18,13 @@ import StaffManager from "../pages/StaffManage";
 import HotelCreate from "../pages/HotelCreate";
 import { ImageProvider } from "../contexts/ImageContext";
 import MyHotel from "../pages/MyHotel";
+import HotelManage from "../pages/HotelManage";
+import TourManage from "../pages/TourManage";
+import { TourProvider } from "../contexts/TourContext";
+import TourCreate from "../pages/TourCreate";
+import TourInfo from "../pages/TourInfo";
+import { HotelProvider } from "../contexts/HotelContext";
+import HotelInfo from "../pages/HotelInfo";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +35,31 @@ const router = createBrowserRouter([
       { path: "home", element: <Home /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
-      { path: "hotel", element: <Hotel /> },
+      {
+        path: "hotel",
+        element: (
+          <HotelProvider>
+            <Hotel />
+          </HotelProvider>
+        ),
+      },
+      { path: "tour", element: <Tour /> },
+      {
+        path: "/tour_info/:id",
+        element: (
+          <TourProvider>
+            <TourInfo />
+          </TourProvider>
+        ),
+      },
+      {
+        path: "/hotel_info/:id",
+        element: (
+          <HotelProvider>
+            <HotelInfo />
+          </HotelProvider>
+        ),
+      },
       {
         path: "hotel_create",
         element: (
@@ -46,7 +77,6 @@ const router = createBrowserRouter([
           },
         ],
       },
-      { path: "tour", element: <Tour /> },
       { path: "discount", element: <Discount /> },
       { path: "unauthorized", element: <Unauthorized /> },
       {
@@ -71,6 +101,32 @@ const router = createBrowserRouter([
               { path: "dashboard", element: <Dashboard /> },
               { path: "customer", element: <CustomerManager /> },
               { path: "staff", element: <StaffManager /> },
+              {
+                path: "hotel",
+                element: (
+                  <HotelProvider>
+                    <HotelManage />
+                  </HotelProvider>
+                ),
+              },
+              {
+                path: "tour",
+                element: (
+                  <TourProvider>
+                    <TourManage />
+                  </TourProvider>
+                ),
+              },
+              {
+                path: "tour_create",
+                element: (
+                  <ImageProvider>
+                    <TourProvider>
+                      <TourCreate />
+                    </TourProvider>
+                  </ImageProvider>
+                ),
+              },
             ],
           },
         ],

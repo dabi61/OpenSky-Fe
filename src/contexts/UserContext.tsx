@@ -15,7 +15,7 @@ import {
   handleUpdateCurrentUser,
   handleUpdateUser,
 } from "../api/user.api";
-import type { UserPage, UserType } from "../types/response/user";
+import type { UserPage, UserType } from "../types/response/user.type";
 import Cookies from "js-cookie";
 import type {
   UserCreateType,

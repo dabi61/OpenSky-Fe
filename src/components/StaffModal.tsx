@@ -1,5 +1,5 @@
 import type React from "react";
-import type { UserType } from "../types/response/user";
+import type { UserType } from "../types/response/user.type";
 import Modal from "./Modal";
 import {
   Button,
@@ -36,7 +36,7 @@ interface ModalProps {
 }
 
 const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
-  const isUpdate = Boolean(data?.id);
+  const isUpdate = Boolean(data?.userID);
 
   const {
     control,
@@ -146,7 +146,7 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
   };
 
   const onUpdateSubmit = async (formData: StaffUpdateType) => {
-    if (!data?.id) return;
+    if (!data?.userID) return;
 
     setIsSubmitting(true);
     try {
@@ -162,7 +162,7 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
         submitData.avatar = avatarFile;
       }
 
-      await updateUser(data.id, submitData);
+      await updateUser(data.userID, submitData);
     } catch (error) {
       console.error("Failed to update staff:", error);
       toast.error("Có lỗi xảy ra khi cập nhật nhân viên");
