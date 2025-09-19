@@ -48,8 +48,13 @@ const BottomNavigation: React.FC = () => {
       label: "Hoàn tiền",
       to: "/unauthorized",
     },
-    { id: "tour", icon: <TentTree size={24} />, label: "Tour", to: "/bill" },
-    { id: "hotel", icon: <Hotel size={24} />, label: "Khách sạn", to: "/bill" },
+    { id: "tour", icon: <TentTree size={24} />, label: "Tour", to: "tour" },
+    {
+      id: "hotel",
+      icon: <Hotel size={24} />,
+      label: "Khách sạn",
+      to: "hotel",
+    },
     {
       id: "sale",
       icon: <TicketPercent size={24} />,
