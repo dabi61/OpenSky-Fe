@@ -1,4 +1,4 @@
-import { Calendar, Edit, Eye, Mail, MapPin, Star, Trash2 } from "lucide-react";
+import { Calendar, Edit, MapPin, Star, Trash2 } from "lucide-react";
 import type { FC } from "react";
 import type { HotelType } from "../types/response/hotel.type";
 import dayjs from "dayjs";
@@ -7,9 +7,16 @@ import assets from "../assets";
 type Props = {
   hotel: HotelType;
   onClick: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
 };
 
-const HotelManageItem: FC<Props> = ({ hotel, onClick }: Props) => {
+const HotelManageItem: FC<Props> = ({
+  hotel,
+  onClick,
+  onDelete,
+  onEdit,
+}: Props) => {
   return (
     <div
       className="bg-white rounded-lg shadow overflow-hidden"
@@ -20,19 +27,6 @@ const HotelManageItem: FC<Props> = ({ hotel, onClick }: Props) => {
           src={hotel.firstImage || assets.logo}
           className="w-full h-full object-cover"
         />
-        <div className="absolute top-4 right-4">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              hotel.status === "Active"
-                ? "bg-green-100 text-green-800"
-                : hotel.status === "Inactive"
-                ? "bg-gray-100 text-gray-800"
-                : "bg-blue-100 text-blue-800"
-            }`}
-          >
-            {hotel.status}
-          </span>
-        </div>
       </div>
 
       <div className="p-6">
@@ -64,9 +58,16 @@ const HotelManageItem: FC<Props> = ({ hotel, onClick }: Props) => {
         </p>
 
         <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-          <div className="flex items-center">
-            <Mail className="h-4 w-4 mr-1" />
-            <span>{hotel.email}</span>
+          <div className="flex justify-center items-center gap-2">
+            <img
+              className="w-7 rounded-full"
+              src={
+                hotel.user.avatarURL ||
+                `${import.meta.env.VITE_AVATAR_API}${hotel.user.fullName}`
+              }
+              alt={hotel.user.fullName}
+            />
+            <div>{hotel.user.email}</div>
           </div>
           <div className="flex items-center">
             <Calendar className="h-4 w-4 mr-1" />
@@ -74,25 +75,26 @@ const HotelManageItem: FC<Props> = ({ hotel, onClick }: Props) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            {/* <img
-              src={`https://ui-avatars.com/api/?name=${hotel.user.firstName}+${hotel.user.lastName}&background=random`}
-              alt={`${hotel.user.firstName} ${hotel.user.lastName}`}
-              className="h-8 w-8 rounded-full mr-2"
-            /> */}
-            {/* <span className="text-sm text-gray-600">
-              {hotel.user.firstName} {hotel.user.lastName}
-            </span> */}
-          </div>
-
+        <div className="flex items-center justify-end">
           <div className="flex space-x-2">
             {hotel.status !== "Inactive" && (
-              <button className="p-2 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="p-2 cursor-pointer text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
+              >
                 <Edit className="h-4 w-4" />
               </button>
             )}
-            <button className="p-2 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50">
+            <button
+              className="p-2 text-gray-400 cursor-pointer hover:text-red-600 rounded-full hover:bg-red-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
               <Trash2 className="h-4 w-4" />
             </button>
           </div>

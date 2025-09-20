@@ -1,4 +1,4 @@
-export type HotelType = {
+export type RoomType = {
   roomID: string;
   roomName: string;
   roomType: string;
@@ -7,10 +7,22 @@ export type HotelType = {
   firstImage: string;
 };
 
-export type HotelTypeWithImgs = {
+export type RoomTypeWithImgs = {
   roomID: string;
   roomName: string;
   roomType: string;
   price: number;
   maxPeople: number;
+};
+
+export type RoomResponse = {
+  message: string;
+  hotelID: string | null;
+};
+
+export type RoomPage = {
+  rooms: RoomType[];
+  totalPages: number;
+  pageNumber: number;
+  pageSize: number;
 };

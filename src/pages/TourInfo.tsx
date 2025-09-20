@@ -6,10 +6,12 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, MapPin, Star, Users } from "lucide-react";
 import OverlayReload from "../components/Loading";
 import { Button } from "@mui/material";
+import { useUser } from "../contexts/UserContext";
 
 const TourInfo: FC = () => {
   const { id } = useParams();
   const { getTourById, loading, selectedTour } = useTour();
+  const { user } = useUser();
 
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
@@ -116,21 +118,23 @@ const TourInfo: FC = () => {
           <div className="font-bold text-blue-500 text-xl md:text-3xl">
             {new Intl.NumberFormat("vi-VN").format(tour.price)} VNĐ
           </div>
-          <Button
-            variant="contained"
-            type="submit"
-            sx={{
-              backgroundColor: "#3B82F6",
-              "&:hover": {
-                backgroundColor: "#2563EB",
-              },
-              padding: "12px 30px",
-              borderRadius: "1rem",
-              width: { xs: "100%", md: "auto" },
-            }}
-          >
-            <div className="font-semibold text-base md:text-lg">Đặt vé</div>
-          </Button>
+          {user?.role === "Customer" && (
+            <Button
+              variant="contained"
+              type="submit"
+              sx={{
+                backgroundColor: "#3B82F6",
+                "&:hover": {
+                  backgroundColor: "#2563EB",
+                },
+                padding: "12px 30px",
+                borderRadius: "1rem",
+                width: { xs: "100%", md: "auto" },
+              }}
+            >
+              <div className="font-semibold text-base md:text-lg">Đặt vé</div>
+            </Button>
+          )}
         </div>
 
         {tour.description && (

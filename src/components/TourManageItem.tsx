@@ -4,12 +4,12 @@ import type { TourType } from "../types/response/tour.type";
 
 interface Props {
   tour: TourType;
-  // onEdit: () => void;
-  // onDelete: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
   onClick: () => void;
 }
 
-const TourManageItem: FC<Props> = ({ tour, onClick }) => {
+const TourManageItem: FC<Props> = ({ tour, onClick, onDelete, onEdit }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -39,20 +39,6 @@ const TourManageItem: FC<Props> = ({ tour, onClick }) => {
           )}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-60"></div>
-
-          <div className="absolute top-3 right-3">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${
-                tour.status === "Active"
-                  ? "bg-green-100 text-green-800"
-                  : tour.status === "Inactive"
-                  ? "bg-gray-100 text-gray-800"
-                  : "bg-blue-100 text-blue-800"
-              }`}
-            >
-              {tour.status}
-            </span>
-          </div>
 
           <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2">
             <span className="font-bold text-blue-600">
@@ -103,9 +89,9 @@ const TourManageItem: FC<Props> = ({ tour, onClick }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              // onEdit();
+              onEdit();
             }}
-            className="flex-1 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm"
+            className="flex-1 cursor-pointer flex items-center justify-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm"
           >
             <Edit size={16} />
             <span>Sửa</span>
@@ -113,9 +99,9 @@ const TourManageItem: FC<Props> = ({ tour, onClick }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              // onDelete();
+              onDelete();
             }}
-            className="flex-1 flex items-center justify-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm"
+            className="flex-1 cursor-pointer flex items-center justify-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm"
           >
             <Trash2 size={16} />
             <span>Xóa</span>

@@ -25,6 +25,9 @@ import TourCreate from "../pages/TourCreate";
 import TourInfo from "../pages/TourInfo";
 import { HotelProvider } from "../contexts/HotelContext";
 import HotelInfo from "../pages/HotelInfo";
+import { RoomProvider } from "../contexts/RoomContext";
+import TourEdit from "../pages/TourEdit";
+import HotelEdit from "../pages/HotelEdit";
 
 const router = createBrowserRouter([
   {
@@ -56,7 +59,9 @@ const router = createBrowserRouter([
         path: "/hotel_info/:id",
         element: (
           <HotelProvider>
-            <HotelInfo />
+            <RoomProvider>
+              <HotelInfo />
+            </RoomProvider>
           </HotelProvider>
         ),
       },
@@ -87,6 +92,22 @@ const router = createBrowserRouter([
         element: <RoleGuard deniedRoles={[Roles.ADMIN]} />,
         children: [{ path: "contact", element: <Contact /> }],
       },
+      {
+        element: <RoleGuard deniedRoles={[Roles.CUSTOMER]} />,
+        children: [
+          {
+            path: "hotel_edit/:id",
+            element: (
+              <HotelProvider>
+                <ImageProvider>
+                  <HotelEdit />
+                </ImageProvider>
+              </HotelProvider>
+            ),
+          },
+        ],
+      },
+
       {
         element: <RoleGuard allowedRoles={[Roles.ADMIN, Roles.SUPERVISOR]} />,
         children: [
@@ -123,6 +144,18 @@ const router = createBrowserRouter([
                   <ImageProvider>
                     <TourProvider>
                       <TourCreate />
+                    </TourProvider>
+                  </ImageProvider>
+                ),
+              },
+              {
+                path: "tour_edit/:id",
+                element: (
+                  <ImageProvider>
+                    <TourProvider>
+                      <ImageProvider>
+                        <TourEdit />
+                      </ImageProvider>
                     </TourProvider>
                   </ImageProvider>
                 ),

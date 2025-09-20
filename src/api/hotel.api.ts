@@ -3,6 +3,7 @@ import { HotelStatus } from "../constants/HotelStatus";
 import type {
   HotelPage,
   HotelResponse,
+  HotelStatusResponse,
   HotelTypeWithImgs,
 } from "../types/response/hotel.type";
 import type { HotelCreateValidateType } from "../types/schemas/hotel.schema";
@@ -17,7 +18,6 @@ export const handleGetHotelByStatus = async (
   const res = await axiosInstance.get(
     `hotels/status/${status}?page=${page}&size=${limit}`
   );
-  console.log(res.data);
   return res.data;
 };
 
@@ -31,10 +31,44 @@ export const handleGetActiveHotel = async (
   return res.data;
 };
 
+export const handleAllHotelExceptRemove = async (
+  page: number,
+  limit: number
+): Promise<HotelPage> => {
+  const res = await axiosInstance.get(
+    `${import.meta.env.VITE_API_URL}hotels/all?page=${page}&size=${limit}`
+  );
+  return res.data;
+};
+
+export const handleUpdateHotelStatus = async (
+  id: string,
+  status: HotelStatus
+): Promise<HotelStatusResponse> => {
+  try {
+    const res = await axiosInstance.put(
+      `hotels/${id}/status`,
+      { status },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(res);
+    return res.data;
+  } catch (error: any) {
+    return {
+      message: error?.response?.data.message,
+      status: null,
+    };
+  }
+};
+
 export const handleGetHotelById = async (
   id: string
 ): Promise<HotelTypeWithImgs> => {
-  const res = await axios.get(`hotels/${id}`);
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}hotels/${id}`);
   return res.data;
 };
 

@@ -7,8 +7,8 @@ export type HotelType = {
   user: UserSummaryType;
   address: string;
   province: string;
-  lon: number;
-  lat: number;
+  longitude: number;
+  latitude: number;
   hotelName: string;
   description: string;
   star: number;
@@ -23,19 +23,24 @@ export type HotelTypeWithImgs = {
   user: UserSummaryType;
   address: string;
   province: string;
-  lon: number;
-  lat: number;
+  longitude: number;
+  latitude: number;
   hotelName: string;
   description: string;
   star: number;
   createdAt: Date;
-  hotelStatus: HotelStatus;
+  status: HotelStatus;
   images: string[];
 };
 
 export type HotelResponse = {
   message: string;
   hotelID: string | null;
+};
+
+export type HotelStatusResponse = {
+  message: string;
+  status: HotelStatus | null;
 };
 
 export type HotelPage = {

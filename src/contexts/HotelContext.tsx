@@ -5,12 +5,12 @@ import type {
   HotelTypeWithImgs,
 } from "../types/response/hotel.type";
 import {
+  handleAllHotelExceptRemove,
   handleGetActiveHotel,
   handleGetHotelById,
   handleGetHotelByStatus,
 } from "../api/hotel.api";
 import { HotelStatus } from "../constants/HotelStatus";
-import { Hotel } from "lucide-react";
 
 type HotelContextType = {
   hotelList: HotelType[];
@@ -18,6 +18,7 @@ type HotelContextType = {
   selectedHotel: HotelTypeWithImgs | null;
   setSelectedHotel: (hotel: HotelTypeWithImgs | null) => void;
   getActiveHotel: (page: number, limit: number) => Promise<HotelPage>;
+  getAllHotelExceptRemoved: (page: number, limit: number) => Promise<HotelPage>;
   getHotelById: (id: string) => Promise<HotelTypeWithImgs>;
   getHotelBySatus: (
     status: HotelStatus,
@@ -33,6 +34,21 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
   const [selectedHotel, setSelectedHotel] = useState<HotelTypeWithImgs | null>(
     null
   );
+  const [loading, setLoading] = useState(false);
+
+  const getAllHotelExceptRemoved = async (
+    page: number,
+    limit: number
+  ): Promise<HotelPage> => {
+    try {
+      setLoading(true);
+      const res = await handleAllHotelExceptRemove(page, limit);
+      setHotelList(res.hotels);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getActiveHotel = async (
     page: number,
@@ -74,13 +90,13 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const [loading, setLoading] = useState(false);
   return (
     <HotelContext.Provider
       value={{
         hotelList,
         selectedHotel,
         setSelectedHotel,
+        getAllHotelExceptRemoved,
         loading,
         getActiveHotel,
         getHotelBySatus,

@@ -10,6 +10,7 @@ interface CustomDialogProps {
   children?: ReactNode;
   widthClass?: string;
   reset?: () => void;
+  onAgree?: () => void;
 }
 
 export default function Modal({
@@ -19,6 +20,7 @@ export default function Modal({
   description,
   children,
   reset,
+  onAgree,
   widthClass = "md:w-150 w-full",
 }: CustomDialogProps) {
   return (
@@ -59,6 +61,23 @@ export default function Modal({
             )}
 
             {children}
+
+            {onAgree && (
+              <div className="flex justify-end mt-6 gap-3">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 cursor-pointer rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={onAgree}
+                  className="px-4 py-2 cursor-pointer rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Xác nhận
+                </button>
+              </div>
+            )}
           </Dialog.Panel>
         </div>
       </Dialog>

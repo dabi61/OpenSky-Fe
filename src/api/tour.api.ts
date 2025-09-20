@@ -17,6 +17,24 @@ export const getTours = async (
   return res.data;
 };
 
+export const handleSoftDeleteTour = async (
+  id: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const res = await axiosInstance.put(`tours/delete/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return { success: true, message: res.data.message };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message ?? "Có lỗi xảy ra",
+    };
+  }
+};
+
 export const handleCreateTour = async (
   tour: TourCreateValidateType
 ): Promise<TourResponse> => {
@@ -44,6 +62,8 @@ export const handleCreateTour = async (
     };
   }
 };
+
+export const handleUpdateTour = async () => {};
 
 export const handleGetTourById = async (
   id: string
