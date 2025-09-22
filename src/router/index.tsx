@@ -28,6 +28,8 @@ import HotelInfo from "../pages/HotelInfo";
 import { RoomProvider } from "../contexts/RoomContext";
 import TourEdit from "../pages/TourEdit";
 import HotelEdit from "../pages/HotelEdit";
+import HotelEditAll from "../pages/HotelEditAll";
+import HotelRoomManage from "../pages/HotelRoomManage";
 
 const router = createBrowserRouter([
   {
@@ -46,7 +48,14 @@ const router = createBrowserRouter([
           </HotelProvider>
         ),
       },
-      { path: "tour", element: <Tour /> },
+      {
+        path: "tour",
+        element: (
+          <TourProvider>
+            <Tour />
+          </TourProvider>
+        ),
+      },
       {
         path: "/tour_info/:id",
         element: (
@@ -78,7 +87,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: "my_hotel",
-            element: <MyHotel />,
+            element: (
+              <HotelProvider>
+                <MyHotel />
+              </HotelProvider>
+            ),
           },
         ],
       },
@@ -96,14 +109,29 @@ const router = createBrowserRouter([
         element: <RoleGuard deniedRoles={[Roles.CUSTOMER]} />,
         children: [
           {
-            path: "hotel_edit/:id",
-            element: (
-              <HotelProvider>
-                <ImageProvider>
-                  <HotelEdit />
-                </ImageProvider>
-              </HotelProvider>
-            ),
+            element: <HotelEditAll />,
+            children: [
+              {
+                path: "hotel_edit/:id",
+                element: (
+                  <HotelProvider>
+                    <ImageProvider>
+                      <HotelEdit />
+                    </ImageProvider>
+                  </HotelProvider>
+                ),
+              },
+              {
+                path: "room_manage/:id",
+                element: (
+                  <HotelProvider>
+                    <RoomProvider>
+                      <HotelRoomManage />
+                    </RoomProvider>
+                  </HotelProvider>
+                ),
+              },
+            ],
           },
         ],
       },

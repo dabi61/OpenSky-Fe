@@ -7,10 +7,17 @@ import { ChevronLeft, ChevronRight, MapPin, Star, Users } from "lucide-react";
 import OverlayReload from "../components/Loading";
 import { Button } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
+import TourItineraryItem from "../components/TourItineraryItem";
 
 const TourInfo: FC = () => {
   const { id } = useParams();
-  const { getTourById, loading, selectedTour } = useTour();
+  const {
+    getTourById,
+    loading,
+    selectedTour,
+    tourItineraryList,
+    getTourItineraryByTour,
+  } = useTour();
   const { user } = useUser();
 
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
@@ -20,12 +27,21 @@ const TourInfo: FC = () => {
     loop: true,
   });
 
-  useEffect(() => {
-    if (id) {
-      getTourById(id).catch((err) =>
-        console.error("Error fetching tour:", err)
-      );
+  const fetchTour = async () => {
+    try {
+      if (id) {
+        const tour = await getTourById(id);
+        if (tour) {
+          await getTourItineraryByTour(id);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch tour:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchTour();
   }, []);
 
   useEffect(() => {
@@ -81,7 +97,6 @@ const TourInfo: FC = () => {
         </button>
       </div>
 
-      {/* Thông tin tour */}
       <div className="w-full md:w-[90%] rounded-xl md:rounded-2xl border px-4 md:px-10 border-blue-500 mx-auto mb-10">
         <div className="font-bold text-2xl md:text-4xl pt-5 md:pt-20">
           {tour.tourName}
@@ -150,7 +165,15 @@ const TourInfo: FC = () => {
           <div className="font-semibold text-base md:text-lg mb-2 md:mb-3">
             Lịch trình
           </div>
-          <div className="space-y-3"></div>
+          <div className="space-y-3 relative border-l-3 border-blue-400 pl-6">
+            {tourItineraryList.map((itinerary) => (
+              <TourItineraryItem
+                key={itinerary.itineraryID}
+                itinerary={itinerary}
+                size="compact"
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

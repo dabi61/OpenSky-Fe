@@ -7,6 +7,7 @@ import type {
 import {
   handleAllHotelExceptRemove,
   handleGetActiveHotel,
+  handleGetCurrentHotel,
   handleGetHotelById,
   handleGetHotelByStatus,
 } from "../api/hotel.api";
@@ -20,6 +21,7 @@ type HotelContextType = {
   getActiveHotel: (page: number, limit: number) => Promise<HotelPage>;
   getAllHotelExceptRemoved: (page: number, limit: number) => Promise<HotelPage>;
   getHotelById: (id: string) => Promise<HotelTypeWithImgs>;
+  getMyHotel: () => Promise<HotelTypeWithImgs>;
   getHotelBySatus: (
     status: HotelStatus,
     page: number,
@@ -44,6 +46,17 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       const res = await handleAllHotelExceptRemove(page, limit);
       setHotelList(res.hotels);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getMyHotel = async (): Promise<HotelTypeWithImgs> => {
+    try {
+      setLoading(true);
+      const res = await handleGetCurrentHotel();
+      setSelectedHotel(res);
       return res;
     } finally {
       setLoading(false);
@@ -101,6 +114,7 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
         getActiveHotel,
         getHotelBySatus,
         getHotelById,
+        getMyHotel,
       }}
     >
       {children}

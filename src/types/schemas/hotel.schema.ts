@@ -1,4 +1,5 @@
 import z from "zod";
+import { HotelStatus } from "../../constants/HotelStatus";
 
 export const HotelSchema = z.object({
   hotelName: z.string().nonempty("Vui lòng nhập tên khách sạn"),
@@ -15,3 +16,7 @@ export const HotelSchema = z.object({
 });
 
 export type HotelCreateValidateType = z.infer<typeof HotelSchema>;
+export const HotelUpdateSchema = HotelSchema.extend({
+  status: z.enum(HotelStatus),
+}).partial();
+export type HotelupdateValidateType = z.infer<typeof HotelUpdateSchema>;

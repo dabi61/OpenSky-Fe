@@ -157,7 +157,7 @@ const HotelManage: React.FC = () => {
                     setSelectedHotelId(hotel.hotelID);
                     setOpenModal(true);
                   }}
-                  onEdit={() => navigate(`/hotel_edit/${hotel.hotelID}`)}
+                  onEdit={() => navigate(`/room_manage/${hotel.hotelID}`)}
                 />
               ))
             )}

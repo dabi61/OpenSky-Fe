@@ -21,3 +21,5 @@ export const TourSchema = z.object({
 });
 
 export type TourCreateValidateType = z.infer<typeof TourSchema>;
+export const TourUpdateSchema = TourSchema.partial();
+export type TourUpdateValidateType = z.infer<typeof TourUpdateSchema>;

@@ -1,7 +1,6 @@
 import Sticky from "react-stickynode";
 import StarSort from "../components/StarSort";
 import HotelItem from "../components/HotelItem";
-import hotels from "../constants/HotelItem.const";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getProvinces } from "../api/province.api";
@@ -16,20 +15,43 @@ import {
 import { Search } from "lucide-react";
 import assets from "../assets";
 import { useNavigate } from "react-router-dom";
+import { useHotel } from "../contexts/HotelContext";
+import useQueryState from "../hooks/useQueryState";
+import OverlayReload from "../components/Loading";
 
 const Hotel: React.FC = () => {
+  const { getAllHotelExceptRemoved, hotelList } = useHotel();
   const [provinces, setProvinces] = useState<Province[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [selectedProvince, setSelectedProvince] = useState<number | "">("");
   const [priceFilter, setPriceFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isMobile, setIsMobile] = useState(false);
-  const [filteredHotels, setFilteredHotels] = useState(hotels);
   const navigate = useNavigate();
+  const [page, setPage] = useQueryState("page", "1" as string);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const fetchHotels = async () => {
+    try {
+      const currentPage = parseInt(page);
+      const data = await getAllHotelExceptRemoved(currentPage, 20);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch tourList:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHotels();
+  }, [page]);
+
+  if (!hotelList) {
+    return <OverlayReload />;
+  }
 
   useEffect(() => {
     async function fetchProvinces() {
       const data = await getProvinces();
-      console.log(data);
       setProvinces(data);
     }
     fetchProvinces();
@@ -46,30 +68,6 @@ const Hotel: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    let results = hotels;
-
-    if (priceFilter === "low") {
-      results = results.filter((hotel) => hotel.price < 1000000);
-    } else if (priceFilter === "medium") {
-      results = results.filter(
-        (hotel) => hotel.price >= 1000000 && hotel.price < 3000000
-      );
-    } else if (priceFilter === "high") {
-      results = results.filter((hotel) => hotel.price >= 3000000);
-    }
-
-    if (searchTerm) {
-      results = results.filter(
-        (hotel) =>
-          hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          hotel.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredHotels(results);
-  }, [selectedProvince, priceFilter, searchTerm]);
-
   const MenuProps = {
     PaperProps: {
       style: {
@@ -80,6 +78,12 @@ const Hotel: React.FC = () => {
 
   const handlePriceFilterChange = (event: SelectChangeEvent<string>) => {
     setPriceFilter(event.target.value);
+  };
+
+  const handlePageChange = (value: number) => {
+    setCurrentPage(value);
+    setPage(value.toString());
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -227,9 +231,9 @@ const Hotel: React.FC = () => {
           viewport={{ once: true, amount: 0.3 }}
           className="flex flex-col gap-5 main-content w-full"
         >
-          {filteredHotels.length > 0 ? (
-            filteredHotels.map((hotel, index) => (
-              <HotelItem item={hotel} key={index} />
+          {hotelList.length > 0 ? (
+            hotelList.map((hotel) => (
+              <HotelItem item={hotel} key={hotel.hotelID} />
             ))
           ) : (
             <div className="text-center py-10 text-gray-500">
@@ -238,6 +242,27 @@ const Hotel: React.FC = () => {
           )}
         </motion.div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8">
+          <div className="flex space-x-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`w-10 h-10 flex items-center justify-center rounded-lg ${
+                  currentPage === page
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

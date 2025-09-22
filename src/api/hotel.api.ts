@@ -6,7 +6,10 @@ import type {
   HotelStatusResponse,
   HotelTypeWithImgs,
 } from "../types/response/hotel.type";
-import type { HotelCreateValidateType } from "../types/schemas/hotel.schema";
+import type {
+  HotelCreateValidateType,
+  HotelupdateValidateType,
+} from "../types/schemas/hotel.schema";
 import axiosInstance from "../utils/AxisosInstance";
 import { handleGetUser } from "./user.api";
 
@@ -19,6 +22,11 @@ export const handleGetHotelByStatus = async (
     `hotels/status/${status}?page=${page}&size=${limit}`
   );
   return res.data;
+};
+
+export const handleGetCurrentHotel = async (): Promise<HotelTypeWithImgs> => {
+  const res = await axiosInstance.get(`hotels/my-hotels`);
+  return res.data[0];
 };
 
 export const handleGetActiveHotel = async (
@@ -36,7 +44,7 @@ export const handleAllHotelExceptRemove = async (
   limit: number
 ): Promise<HotelPage> => {
   const res = await axiosInstance.get(
-    `${import.meta.env.VITE_API_URL}hotels/all?page=${page}&size=${limit}`
+    `${import.meta.env.VITE_API_URL}hotels/all?page=${page}&limit=${limit}`
   );
   return res.data;
 };
@@ -55,7 +63,6 @@ export const handleUpdateHotelStatus = async (
         },
       }
     );
-    console.log(res);
     return res.data;
   } catch (error: any) {
     return {
@@ -96,6 +103,39 @@ export const handleCreateHotel = async (
       formData.append("latitude", data.latitude.toString());
     }
     const res = await axiosInstance.post("hotels/apply", formData);
+    return res.data;
+  } catch (error: any) {
+    return {
+      message: error?.response?.data.message,
+      hotelID: null,
+    };
+  }
+};
+
+export const handleUpdateHotel = async (
+  hotelID: string,
+  hotel: HotelupdateValidateType
+): Promise<HotelResponse> => {
+  try {
+    const formData = new FormData();
+    if (hotel.hotelName) formData.append("hotelName", hotel.hotelName);
+    if (hotel.email) formData.append("email", hotel.email);
+    if (hotel.address) {
+      formData.append("address", hotel.address.toString());
+    }
+    if (hotel.latitude && hotel.longitude) {
+      formData.append("longitude", hotel.longitude.toString());
+      formData.append("latitude", hotel.latitude.toString());
+    }
+    if (hotel.description) formData.append("description", hotel.description);
+    if (hotel.files && hotel.files.length > 0) {
+      hotel.files.forEach((file) => {
+        formData.append("files", file);
+      });
+      formData.append("imageAction", "replace");
+    }
+    if (hotel.province) formData.append("province", hotel.province);
+    const res = await axiosInstance.put(`hotels/${hotelID}`);
     return res.data;
   } catch (error: any) {
     return {

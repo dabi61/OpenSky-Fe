@@ -1,78 +1,79 @@
-import React, { useState } from "react";
-import { Calendar, Search, MapPin, Star } from "lucide-react";
-import tours from "../constants/TourItem.const";
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Calendar, Search, MapPin, Star, Filter, User } from "lucide-react";
+import { Button, FormControl, MenuItem, Select } from "@mui/material";
 import { motion } from "framer-motion";
-
-interface Tour {
-  img: string;
-  name: string;
-  description: string;
-  price: number;
-  rating: number;
-}
+import { useTour } from "../contexts/TourContext";
+import useQueryState from "../hooks/useQueryState";
+import OverlayReload from "../components/Loading";
+import Sticky from "react-stickynode";
+import { getProvinces } from "../api/province.api";
+import type { Province } from "../types/api/province";
+import StarSort from "../components/StarSort";
 
 const Tour: React.FC = () => {
+  const { tourList, getAllTours } = useTour();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [priceFilter, setPriceFilter] = useState<string>("all");
+  const [totalPages, setTotalPages] = useState(0);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [isMobile, setIsMobile] = useState(false);
+
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 6;
+  const [page, setPage] = useQueryState("page", "1" as string);
 
-  const filteredTours = tours.filter((tour: Tour) => {
-    const matchesSearch =
-      tour.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tour.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-    let matchesPrice = true;
-    if (priceFilter === "low") {
-      matchesPrice = tour.price < 2000000;
-    } else if (priceFilter === "medium") {
-      matchesPrice = tour.price >= 2000000 && tour.price < 4000000;
-    } else if (priceFilter === "high") {
-      matchesPrice = tour.price >= 4000000;
+  useEffect(() => {
+    async function fetchProvinces() {
+      const data = await getProvinces();
+      setProvinces(data);
     }
+    fetchProvinces();
 
-    return matchesSearch && matchesPrice;
-  });
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
 
-  const totalPages = Math.ceil(filteredTours.length / itemsPerPage);
-  const paginatedTours = filteredTours.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
+  }, []);
+
+  const fetchTours = async () => {
+    try {
+      const currentPage = parseInt(page);
+      const data = await getAllTours(currentPage, 20);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch tourList:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTours();
+  }, [page]);
+
+  if (!tourList) {
+    return <OverlayReload />;
+  }
 
   const handlePageChange = (value: number) => {
     setCurrentPage(value);
+    setPage(value.toString());
     window.scrollTo(0, 0);
   };
 
-  const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  };
-
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }).map((_, index) => (
-      <Star
-        key={index}
-        size={16}
-        className={
-          index < rating ? "text-yellow-400 fill-current" : "text-gray-300"
-        }
-      />
-    ));
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: 200,
+      },
+    },
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 md:px-22">
       <div className="text-center mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-blue-600 mb-4">
           Khám phá Tour Du lịch
@@ -82,8 +83,8 @@ const Tour: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
+      <div className="flex justify-center mb-8">
+        <div className="relative w-275 ">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={20} className="text-gray-400" />
           </div>
@@ -95,87 +96,201 @@ const Tour: React.FC = () => {
             className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
           />
         </div>
-
-        <FormControl>
-          <InputLabel>Mức giá</InputLabel>
-          <Select
-            value={priceFilter}
-            label="Mức giá"
-            onChange={(e) => {
-              setPriceFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <MenuItem value="all">Tất cả mức giá</MenuItem>
-            <MenuItem value="low">Dưới 2 triệu</MenuItem>
-            <MenuItem value="medium">2 - 4 triệu</MenuItem>
-            <MenuItem value="high">Trên 4 triệu</MenuItem>
-          </Select>
-        </FormControl>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-      >
-        {paginatedTours.map((tour: Tour, index: number) => (
-          <div
-            key={index}
-            className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 flex flex-col h-full"
-          >
-            <img
-              src={tour.img}
-              alt={tour.name}
-              className="w-full h-48 object-cover"
-            />
+      <div className="flex flex-col lg:flex-row justify-center items-start gap-4 lg:gap-6">
+        <div className="w-full lg:w-[280px] shrink-0 relative">
+          {isMobile ? (
+            <details className="bg-white rounded-lg shadow-lg mb-4">
+              <summary className="p-4 font-bold cursor-pointer flex justify-between items-center">
+                Bộ lọc
+                <Filter size={20} />
+              </summary>
+              <div className="p-4 border-t space-y-4">
+                <div>
+                  <div className="font-bold mb-2">Chọn tỉnh thành</div>
+                  <FormControl fullWidth variant="outlined" size="small">
+                    <Select
+                      labelId="province-label"
+                      value={selectedProvince}
+                      onChange={(e) =>
+                        setSelectedProvince(e.target.value as string)
+                      }
+                      MenuProps={MenuProps}
+                    >
+                      <MenuItem value="">
+                        <em>-- Chọn tỉnh --</em>
+                      </MenuItem>
+                      {provinces.map((p) => (
+                        <MenuItem key={p.province_id} value={p.province_name}>
+                          {p.province_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
 
-            <div className="p-5 flex flex-col flex-grow">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 h-15">
-                  {tour.description}
-                </h3>
-                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ml-2">
-                  {new Intl.NumberFormat("vi-VN").format(tour.price)} VND
-                </span>
+                <div className="mt-4 ">
+                  <StarSort />
+                </div>
               </div>
+            </details>
+          ) : (
+            <Sticky top={80} innerZ={40} bottomBoundary=".main-content">
+              <div className="bg-white rounded-lg p-4 shadow-lg space-y-4">
+                <div>
+                  <div className="font-bold mb-2">Chọn tỉnh thành</div>
+                  <FormControl fullWidth variant="outlined" size="small">
+                    <Select
+                      labelId="province-label"
+                      value={selectedProvince}
+                      onChange={(e) =>
+                        setSelectedProvince(e.target.value as string)
+                      }
+                      MenuProps={MenuProps}
+                    >
+                      <MenuItem value="">
+                        <em>-- Chọn tỉnh --</em>
+                      </MenuItem>
+                      {provinces.map((p) => (
+                        <MenuItem key={p.province_id} value={p.province_name}>
+                          {p.province_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
 
-              <div className="flex items-center mb-4">
-                <div className="flex mr-2">{renderStars(tour.rating)}</div>
-                <span className="text-sm text-gray-600">{tour.rating}/5</span>
+                <div className="mt-4">
+                  <StarSort />
+                </div>
               </div>
+            </Sticky>
+          )}
+        </div>
 
-              <div className="flex items-center mt-auto">
-                <MapPin size={16} className="text-gray-500 mr-1" />
-                <span className="text-sm text-gray-600">{tour.name}</span>
-              </div>
-            </div>
-
-            <div className="px-5 pb-5">
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Calendar size={18} />}
-                sx={{
-                  backgroundColor: "#3B82F6",
-                  padding: "12px 16px",
-                  borderRadius: "8px",
-                  fontWeight: 500,
-                  fontSize: "16px",
-                  textTransform: "none",
-                  "&:hover": {
-                    backgroundColor: "#2563EB",
-                  },
-                }}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.3 }}
+          className="flex flex-col gap-6 main-content w-full"
+        >
+          {tourList.length > 0 ? (
+            tourList.map((tour) => (
+              <motion.div
+                key={tour.tourID}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col lg:flex-row h-full group border border-gray-100"
               >
-                Đặt tour ngay
-              </Button>
+                <div className="lg:w-80 lg:shrink-0 relative overflow-hidden">
+                  <img
+                    src={tour.firstImage}
+                    alt={tour.tourName}
+                    className="w-full h-48 lg:h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+
+                  {tour.star > 0 && (
+                    <div className="absolute bottom-4 left-4 bg-black/80 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
+                      <Star /> {tour.star}/5
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 p-6 flex flex-col">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 line-clamp-2 pr-4">
+                      {tour.tourName}
+                    </h3>
+                    <span className="text-2xl font-bold text-blue-600 whitespace-nowrap">
+                      {new Intl.NumberFormat("vi-VN").format(tour.price)} ₫
+                    </span>
+                  </div>
+
+                  <div className="flex items-center mb-4">
+                    <MapPin size={18} className="text-blue-600 mr-2" />
+                    <span className="text-gray-700 font-medium">
+                      {tour.province}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-600 line-clamp-3 mb-6 flex-1">
+                    {tour.description ||
+                      "Tour du lịch đặc sắc với nhiều trải nghiệm thú vị và đáng nhớ..."}
+                  </p>
+
+                  <div className="flex items-center gap-4 mb-6">
+                    {/* <div className="flex items-center text-sm text-gray-500">
+                      <Calendar size={16} className="mr-1 text-green-600" />
+                      <span>3 ngày 2 đêm</span>
+                    </div> */}
+                    <div className="flex items-center text-sm text-gray-500">
+                      <User size={16} className="mr-1 text-purple-600" />
+                      <span>{tour.maxPeople || 20} người</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                    <Button
+                      variant="contained"
+                      startIcon={<Calendar size={18} />}
+                      sx={{
+                        backgroundColor: "#3B82F6",
+                        padding: "12px 24px",
+                        borderRadius: "12px",
+                        fontWeight: 600,
+                        fontSize: "16px",
+                        textTransform: "none",
+                        flex: 1,
+                        "&:hover": {
+                          backgroundColor: "#2563EB",
+                          transform: "translateY(-1px)",
+                          boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                        },
+                        transition: "all 0.2s ease-in-out",
+                      }}
+                    >
+                      Đặt tour ngay
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        borderColor: "#3B82F6",
+                        color: "#3B82F6",
+                        padding: "12px 16px",
+                        borderRadius: "12px",
+                        fontWeight: 500,
+                        textTransform: "none",
+                        "&:hover": {
+                          borderColor: "#2563EB",
+                          backgroundColor: "rgba(37, 99, 235, 0.04)",
+                          transform: "translateY(-1px)",
+                        },
+                        transition: "all 0.2s ease-in-out",
+                      }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                Không tìm thấy tour nào phù hợp
+              </h3>
+              <p className="text-gray-500 max-w-md mx-auto">
+                Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác để khám
+                phá thêm nhiều tour hấp dẫn
+              </p>
             </div>
-          </div>
-        ))}
-      </motion.div>
+          )}
+        </motion.div>
+      </div>
+
       {totalPages > 1 && (
         <div className="flex justify-center mt-8">
           <div className="flex space-x-2">
@@ -193,17 +308,6 @@ const Tour: React.FC = () => {
               </button>
             ))}
           </div>
-        </div>
-      )}
-
-      {filteredTours.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600 text-lg mb-2">
-            Không tìm thấy tour nào phù hợp
-          </p>
-          <p className="text-gray-500">
-            Hãy thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc
-          </p>
         </div>
       )}
     </div>

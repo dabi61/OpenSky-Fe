@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+
+import { handleGetRoomByHotel, handlegetRoomById } from "../api/hotelRoom.api";
 import type {
   RoomPage,
   RoomType,
   RoomTypeWithImgs,
-} from "../types/response/hotel_room.type";
-import { handleGetRoomByHotel, handlegetRoomById } from "../api/hotelRoom.api";
-import hotels from "../constants/HotelItem.const";
+} from "../types/response/room.type";
 
 type RoomContextType = {
   roomList: RoomType[];

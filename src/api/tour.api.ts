@@ -4,7 +4,10 @@ import type {
   TourResponse,
   TourTypeWithImgs,
 } from "../types/response/tour.type";
-import type { TourCreateValidateType } from "../types/schemas/tour.schema";
+import type {
+  TourCreateValidateType,
+  TourUpdateValidateType,
+} from "../types/schemas/tour.schema";
 import axiosInstance from "../utils/AxisosInstance";
 
 export const getTours = async (
@@ -63,7 +66,33 @@ export const handleCreateTour = async (
   }
 };
 
-export const handleUpdateTour = async () => {};
+export const handleUpdateTour = async (
+  tourID: string,
+  tour: TourUpdateValidateType
+): Promise<TourResponse> => {
+  try {
+    const formData = new FormData();
+    if (tour.tourName) formData.append("tourName", tour.tourName);
+    if (tour.price) formData.append("price", tour.price.toString());
+    if (tour.maxPeople) formData.append("maxPeople", tour.maxPeople.toString());
+    if (tour.address) formData.append("address", tour.address.toString());
+    if (tour.description) formData.append("description", tour.description);
+    if (tour.files && tour.files.length > 0) {
+      tour.files.forEach((file) => {
+        formData.append("files", file);
+      });
+      formData.append("imageAction", "replace");
+    }
+    if (tour.province) formData.append("province", tour.province);
+    const res = await axiosInstance.put(`tours/${tourID}`);
+    return res.data;
+  } catch (error: any) {
+    return {
+      message: error?.response?.data.message,
+      tourID: null,
+    };
+  }
+};
 
 export const handleGetTourById = async (
   id: string

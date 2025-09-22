@@ -1,9 +1,7 @@
 import axios from "axios";
-import type {
-  RoomPage,
-  RoomTypeWithImgs,
-} from "../types/response/hotel_room.type";
+
 import axiosInstance from "../utils/AxisosInstance";
+import type { RoomPage, RoomTypeWithImgs } from "../types/response/room.type";
 
 export const handleGetRoomByHotel = async (
   id: string,
@@ -13,7 +11,6 @@ export const handleGetRoomByHotel = async (
   const res = await axiosInstance(
     `rooms/hotel/${id}?page=${page}&limit=${limit}`
   );
-  console.log(res.data);
   return res.data;
 };
 

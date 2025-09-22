@@ -3,6 +3,7 @@ import type { FC } from "react";
 import type { HotelType } from "../types/response/hotel.type";
 import dayjs from "dayjs";
 import assets from "../assets";
+import { hotelStatusColors } from "../constants/HotelStatus";
 
 type Props = {
   hotel: HotelType;
@@ -19,10 +20,17 @@ const HotelManageItem: FC<Props> = ({
 }: Props) => {
   return (
     <div
-      className="bg-white rounded-lg shadow overflow-hidden"
+      className="bg-white rounded-lg cursor-pointer shadow overflow-hidden"
       onClick={onClick}
     >
       <div className="relative h-48">
+        <div
+          className={`absolute right-0 m-2 px-2 py-1 text-sm rounded-2xl text-white ${
+            hotelStatusColors[hotel.status] || "bg-gray-300"
+          }`}
+        >
+          {hotel.status}
+        </div>
         <img
           src={hotel.firstImage || assets.logo}
           className="w-full h-full object-cover"

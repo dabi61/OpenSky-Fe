@@ -1,6 +1,11 @@
 import type { FC } from "react";
+import HotelEdit from "./HotelEdit";
 
 const MyHotel: FC = () => {
-  return <div>Hotel</div>;
+  return (
+    <div>
+      <HotelEdit />
+    </div>
+  );
 };
 export default MyHotel;
