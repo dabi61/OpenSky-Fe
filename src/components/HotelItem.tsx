@@ -1,8 +1,10 @@
 import { Button } from "@mui/material";
 import { Star } from "lucide-react";
 import type { HotelType } from "../types/response/hotel.type";
+import { useNavigate } from "react-router-dom";
 
 function HotelItem({ item }: { item: HotelType }) {
+  const navigate = useNavigate();
   return (
     <div className="rounded-2xl shadow-lg flex flex-col sm:flex-row w-full md:w-200">
       <div className="sm:w-40 md:w-48 lg:w-56 h-48 sm:h-auto">
@@ -32,16 +34,11 @@ function HotelItem({ item }: { item: HotelType }) {
         </div>
 
         <div className="flex flex-col justify-between border-t pt-4 sm:pt-0 sm:border-t-0 sm:pl-4 ">
-          {/* <div className="flex flex-col items-end mb-4 sm:mb-0">
-            <div className="text-sm text-gray-600">Giá mỗi đêm:</div>
-            <div className="font-semibold text-blue-500 text-lg md:text-xl">
-              {new Intl.NumberFormat("vi-VN").format(item.)} VND
-            </div>
-          </div> */}
           <div className="flex justify-end">
             <Button
               variant="contained"
               size="medium"
+              onClick={() => navigate(`/hotel_info/${item.hotelID}`)}
               sx={{
                 backgroundColor: "#3B82F6",
                 borderRadius: "10px",

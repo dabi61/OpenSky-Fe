@@ -35,5 +35,5 @@ export type RoomPage = {
 
 export type RoomResponse = {
   message: string;
-  hotelID: string | null;
+  roomID: string | null;
 };

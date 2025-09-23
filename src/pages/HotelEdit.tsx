@@ -49,7 +49,7 @@ const HotelEdit: React.FC = () => {
       if (id) {
         await getHotelById(id);
       }
-      if (location === `/my_hotel`) {
+      if (location === `/my_hotel/hotel_edit`) {
         await getMyHotel();
       }
     } catch (error) {
@@ -87,6 +87,8 @@ const HotelEdit: React.FC = () => {
     resolver: zodResolver(HotelUpdateSchema),
     mode: "onBlur",
   });
+
+  console.log(location);
 
   useEffect(() => {
     if (selectedHotel) {
@@ -198,6 +200,9 @@ const HotelEdit: React.FC = () => {
                 error={!!errors.hotelName}
                 helperText={errors.hotelName?.message || " "}
                 variant="outlined"
+                InputLabelProps={{
+                  shrink: true,
+                }}
               />
               <TextField
                 fullWidth
@@ -375,7 +380,7 @@ const HotelEdit: React.FC = () => {
             )}
           </Paper>
 
-          {location !== `/my_hotel` && (
+          {!location.includes(`/my_hotel`) && (
             <Paper elevation={2} className="p-6">
               <Typography
                 variant="h6"

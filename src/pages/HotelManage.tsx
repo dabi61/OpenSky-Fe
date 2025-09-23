@@ -104,8 +104,8 @@ const HotelManage: React.FC = () => {
                       <div
                         key="all"
                         onClick={() => {
-                          setSelectedStatus(undefined); // hoặc "ALL"
-                          close(); // đóng popover
+                          setSelectedStatus(undefined);
+                          close();
                         }}
                         className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"
                       >
@@ -157,7 +157,9 @@ const HotelManage: React.FC = () => {
                     setSelectedHotelId(hotel.hotelID);
                     setOpenModal(true);
                   }}
-                  onEdit={() => navigate(`/room_manage/${hotel.hotelID}`)}
+                  onEdit={() =>
+                    navigate(`/manager/room_manage/${hotel.hotelID}`)
+                  }
                 />
               ))
             )}

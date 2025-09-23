@@ -16,6 +16,8 @@ function MainLayout() {
       </main>
       {location.pathname !== "/login" &&
         location.pathname !== "/register" &&
+        !location.pathname.includes("/my_hotel") &&
+        !location.pathname.includes("/room_info") &&
         !location.pathname.includes("/manager") && (
           <footer>
             <Footer />

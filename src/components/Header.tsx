@@ -18,12 +18,6 @@ const baseMenuItems = [
   { name: "Quản lý", to: "/manager" },
 ];
 
-let settingMenuItems = [
-  { name: "Cá nhân", to: "/profile" },
-  { name: "Khách sạn của tôi", to: "/my_hotel" },
-  { name: "Đổi mật khẩu", to: "/" },
-];
-
 const authMenuItems = [
   { name: "Đăng nhập", to: "/login" },
   { name: "Đăng ký", to: "/register" },
@@ -31,6 +25,14 @@ const authMenuItems = [
 function Header() {
   const { user, loading, reloadUser } = useUser();
   const navigate = useNavigate();
+
+  const settingMenuItems = [
+    { name: "Cá nhân", to: "/profile" },
+    ...(user?.role === Roles.HOTELMANAGER
+      ? [{ name: "Khách sạn của tôi", to: "/my_hotel" }]
+      : []),
+    { name: "Đổi mật khẩu", to: "/" },
+  ];
 
   const isLoggedIn = !!user;
 
@@ -54,12 +56,6 @@ function Header() {
     menuItems = menuItems.filter((item) => item.to !== "/contact");
   } else {
     menuItems = menuItems.filter((item) => item.to !== "/manager");
-  }
-
-  if (user?.role !== Roles.HOTELMANAGER) {
-    settingMenuItems = settingMenuItems.filter(
-      (item) => item.to !== "/my_hotel"
-    );
   }
 
   console.log(Cookies.get("access_token"));

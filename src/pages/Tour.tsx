@@ -9,6 +9,7 @@ import Sticky from "react-stickynode";
 import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
 import StarSort from "../components/StarSort";
+import { useNavigate } from "react-router-dom";
 
 const Tour: React.FC = () => {
   const { tourList, getAllTours } = useTour();
@@ -20,6 +21,7 @@ const Tour: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [page, setPage] = useQueryState("page", "1" as string);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchProvinces() {
@@ -256,6 +258,7 @@ const Tour: React.FC = () => {
 
                     <Button
                       variant="outlined"
+                      onClick={() => navigate(`/tour_info/${tour.tourID}`)}
                       sx={{
                         borderColor: "#3B82F6",
                         color: "#3B82F6",

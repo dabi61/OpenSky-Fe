@@ -12,4 +12,11 @@ export const hotelStatusColors: Record<string, string> = {
   [HotelStatus.REMOVED]: "bg-red-500",
 };
 
+export const hotelStatusVi: Record<HotelStatus, string> = {
+  [HotelStatus.ACTIVE]: "Hoạt động",
+  [HotelStatus.INACTIVE]: "Không hoạt động",
+  [HotelStatus.SUSPEND]: "Tạm dừng",
+  [HotelStatus.REMOVED]: "Đã gỡ bỏ",
+};
+
 export type HotelStatus = (typeof HotelStatus)[keyof typeof HotelStatus];

@@ -1,9 +1,9 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useHotel } from "../contexts/HotelContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import OverlayReload from "../components/Loading";
-import { ChevronLeft, ChevronRight, MapPin, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Map, MapPin, Star, X } from "lucide-react";
 import { useRoom } from "../contexts/RoomContext";
 import useQueryState from "../hooks/useQueryState";
 import { useUser } from "../contexts/UserContext";
@@ -11,11 +11,12 @@ import { Button } from "@mui/material";
 import { handleUpdateHotelStatus } from "../api/hotel.api";
 import type { HotelStatus } from "../constants/HotelStatus";
 import { toast } from "sonner";
+import RoomItem from "../components/RoomItem";
 
 const HotelInfo = () => {
   const { id } = useParams();
-
   const { getHotelById, loading, selectedHotel } = useHotel();
+  const [totalPages, setTotalPages] = useState(0);
   const { getRoomByHotel, roomList } = useRoom();
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
@@ -23,18 +24,28 @@ const HotelInfo = () => {
     dragFree: true,
     loop: true,
   });
+  const [openMap, setOpenMap] = useState(false);
   const navigate = useNavigate();
   const [page, setPage] = useQueryState("page", "1" as string);
   const { user } = useUser();
 
-  useEffect(() => {
-    if (id) {
-      getHotelById(id).catch((err) =>
-        console.error("Error fetching selectedHotel:", err)
-      );
-      getRoomByHotel(id, parseInt(page), 10);
+  const fetchRooms = async () => {
+    try {
+      if (id) {
+        await getHotelById(id).catch((err) =>
+          console.error("Error fetching selectedHotel:", err)
+        );
+        const data = await getRoomByHotel(id, parseInt(page), 10);
+        setTotalPages(data.totalPages);
+      }
+    } catch (error) {
+      console.error("Failed to fetch tour:", error);
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchRooms();
+  }, [id, page]);
 
   useEffect(() => {
     if (selectedHotel?.images?.length && emblaApi) {
@@ -97,9 +108,21 @@ const HotelInfo = () => {
         </div>
       )}
 
-      <div className="w-full md:w-[90%] rounded-xl mt-3 md:rounded-2xl border px-4 md:px-10 border-blue-500 mx-auto mb-10">
+      <div className="w-full md:w-[90%] rounded-xl mt-3 md:rounded-2xl border px-4 md:px-10 border-blue-500 mx-auto mb-10 pb-5">
         <div className="font-bold text-2xl md:text-4xl pt-5 md:pt-20">
           {selectedHotel.hotelName}
+        </div>
+        <div className="flex items-end">
+          <div className="flex items-center gap-2 ">
+            <div className="text-sm mt-3 flex flex-col gap-1">
+              {selectedHotel.user.phoneNumber && (
+                <div>Liên hệ: {selectedHotel.user.phoneNumber}</div>
+              )}
+              {selectedHotel.user.email && (
+                <div>Email: {selectedHotel.user.email}</div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-1 mt-3 md:mt-5 w-full">
@@ -119,24 +142,33 @@ const HotelInfo = () => {
             <div className="text-sm md:text-base">
               Địa chỉ: {selectedHotel.address}
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <img
-              className="w-7 rounded-full"
-              src={
-                selectedHotel.user.avatarURL ||
-                `${import.meta.env.VITE_AVATAR_API}${
-                  selectedHotel.user.fullName
-                }`
-              }
-              alt={selectedHotel.user.fullName}
-            />
-            <div>
-              <div>{selectedHotel.user.email}</div>
-              <div>{selectedHotel.user.phoneNumber}</div>
-            </div>
+            {!openMap ? (
+              <div
+                className="rounded-full border cursor-pointer border-blue-500 bg-blue-50 p-2 mx-2 text-blue-500 hover:bg-blue-100 transition"
+                onClick={() => setOpenMap(!openMap)}
+              >
+                <Map className="w-5 h-5" />
+              </div>
+            ) : (
+              <div
+                className="rounded-full border cursor-pointer border-red-500 bg-red-50 p-2 mx-2 text-red-500 hover:bg-red-100 transition"
+                onClick={() => setOpenMap(!openMap)}
+              >
+                <X className="w-5 h-5" />
+              </div>
+            )}
           </div>
+          {openMap && selectedHotel.latitude && (
+            <iframe
+              className="rounded-2xl"
+              width="100%"
+              height="400"
+              loading="lazy"
+              allowFullScreen
+              src={`https://www.google.com/maps?q=${selectedHotel.latitude},${selectedHotel.longitude}&hl=vi&z=15&output=embed`}
+            ></iframe>
+          )}
         </div>
 
         {selectedHotel.description && (
@@ -148,15 +180,66 @@ const HotelInfo = () => {
           </div>
         )}
 
-        <div className="mt-4 md:mt-5 pb-5 md:pb-10">
-          <div className="font-semibold text-base md:text-lg mb-2 md:mb-3">
-            Phòng
+        {roomList.length > 0 && (
+          <div className="mt-4 md:mt-5 pb-5 md:pb-10">
+            <div className="font-semibold text-base md:text-lg mb-2 md:mb-3">
+              Phòng
+            </div>
+
+            <div>
+              {roomList.map((room) => (
+                <RoomItem key={room.roomID} room={room} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex flex-wrap gap-1 py-5 justify-center">
+                <button
+                  onClick={() => setPage((parseInt(page) - 1).toString())}
+                  disabled={parseInt(page) === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (parseInt(page) <= 2) {
+                    pageNum = i + 1;
+                  } else if (parseInt(page) >= totalPages - 3) {
+                    pageNum = totalPages - 5 + i;
+                  } else {
+                    pageNum = parseInt(page) - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum.toString())}
+                      className={`px-3 py-1 border rounded-md text-sm ${
+                        parseInt(page) === pageNum
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => setPage((parseInt(page) + 1).toString())}
+                  disabled={parseInt(page) === totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </div>
-          <div>
-            {roomList && roomList.map((room) => <div>{room.roomName}</div>)}
-          </div>
-          <div className="space-y-3"></div>
-        </div>
+        )}
         {(user?.role === "Admin" || user?.role === "Supervisor") && (
           <div className="flex w-110 gap-10 mx-auto mb-7">
             {selectedHotel.status === "Active" && (

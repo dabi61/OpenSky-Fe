@@ -17,7 +17,6 @@ import CustomerManager from "../pages/CustomerManage";
 import StaffManager from "../pages/StaffManage";
 import HotelCreate from "../pages/HotelCreate";
 import { ImageProvider } from "../contexts/ImageContext";
-import MyHotel from "../pages/MyHotel";
 import HotelManage from "../pages/HotelManage";
 import TourManage from "../pages/TourManage";
 import { TourProvider } from "../contexts/TourContext";
@@ -30,6 +29,8 @@ import TourEdit from "../pages/TourEdit";
 import HotelEdit from "../pages/HotelEdit";
 import HotelEditAll from "../pages/HotelEditAll";
 import HotelRoomManage from "../pages/HotelRoomManage";
+import RoomManageInfo from "../pages/RoomManageInfo";
+import RoomInfo from "../pages/RoomInfo";
 
 const router = createBrowserRouter([
   {
@@ -65,11 +66,21 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "/room_info/:id",
+        element: (
+          <RoomProvider>
+            <RoomInfo />
+          </RoomProvider>
+        ),
+      },
+      {
         path: "/hotel_info/:id",
         element: (
           <HotelProvider>
             <RoomProvider>
-              <HotelInfo />
+              <RoomProvider>
+                <HotelInfo />
+              </RoomProvider>
             </RoomProvider>
           </HotelProvider>
         ),
@@ -82,19 +93,7 @@ const router = createBrowserRouter([
           </ImageProvider>
         ),
       },
-      {
-        element: <RoleGuard allowedRoles={[Roles.HOTELMANAGER]} />,
-        children: [
-          {
-            path: "my_hotel",
-            element: (
-              <HotelProvider>
-                <MyHotel />
-              </HotelProvider>
-            ),
-          },
-        ],
-      },
+
       { path: "discount", element: <Discount /> },
       { path: "unauthorized", element: <Unauthorized /> },
       {
@@ -105,14 +104,48 @@ const router = createBrowserRouter([
         element: <RoleGuard deniedRoles={[Roles.ADMIN]} />,
         children: [{ path: "contact", element: <Contact /> }],
       },
+
       {
-        element: <RoleGuard deniedRoles={[Roles.CUSTOMER]} />,
+        element: <RoleGuard allowedRoles={[Roles.HOTELMANAGER]} />,
+        path: "my_hotel",
         children: [
           {
-            element: <HotelEditAll />,
+            path: "/my_hotel",
+            element: <Navigate to="room_manage" replace />,
+          },
+          {
+            path: "room_create",
+            element: (
+              <ImageProvider>
+                <HotelProvider>
+                  <RoomProvider>
+                    <RoomManageInfo />
+                  </RoomProvider>
+                </HotelProvider>
+              </ImageProvider>
+            ),
+          },
+          {
+            path: "room_edit/:id",
+            element: (
+              <ImageProvider>
+                <HotelProvider>
+                  <RoomProvider>
+                    <RoomManageInfo />
+                  </RoomProvider>
+                </HotelProvider>
+              </ImageProvider>
+            ),
+          },
+          {
+            element: (
+              <HotelProvider>
+                <HotelEditAll />
+              </HotelProvider>
+            ),
             children: [
               {
-                path: "hotel_edit/:id",
+                path: "hotel_edit",
                 element: (
                   <HotelProvider>
                     <ImageProvider>
@@ -122,13 +155,13 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "room_manage/:id",
+                path: "room_manage",
                 element: (
-                  <HotelProvider>
-                    <RoomProvider>
+                  <RoomProvider>
+                    <HotelProvider>
                       <HotelRoomManage />
-                    </RoomProvider>
-                  </HotelProvider>
+                    </HotelProvider>
+                  </RoomProvider>
                 ),
               },
             ],
@@ -187,6 +220,35 @@ const router = createBrowserRouter([
                     </TourProvider>
                   </ImageProvider>
                 ),
+              },
+              {
+                element: (
+                  <HotelProvider>
+                    <HotelEditAll />
+                  </HotelProvider>
+                ),
+                children: [
+                  {
+                    path: "hotel_edit/:id",
+                    element: (
+                      <HotelProvider>
+                        <ImageProvider>
+                          <HotelEdit />
+                        </ImageProvider>
+                      </HotelProvider>
+                    ),
+                  },
+                  {
+                    path: "room_manage/:id",
+                    element: (
+                      <HotelProvider>
+                        <RoomProvider>
+                          <HotelRoomManage />
+                        </RoomProvider>
+                      </HotelProvider>
+                    ),
+                  },
+                ],
               },
             ],
           },

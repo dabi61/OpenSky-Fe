@@ -37,7 +37,6 @@ export const RoomProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       const res = await handleGetRoomByHotel(id, page, limit);
       setRoomList(res.rooms);
-      console.log(res.rooms);
       return res;
     } finally {
       setLoading(false);
