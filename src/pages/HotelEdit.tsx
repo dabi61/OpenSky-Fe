@@ -1,7 +1,6 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useHotel } from "../contexts/HotelContext";
 import { useEffect, useState } from "react";
-import OverlayReload from "../components/Loading";
 import {
   Paper,
   TextField,

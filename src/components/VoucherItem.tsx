@@ -1,23 +1,13 @@
 import { Button } from "@mui/material";
 import { Hotel, TentTree } from "lucide-react";
-
-export const VoucherEnum = {
-  TOUR: "tour",
-  HOTEL: "hotel",
-} as const;
-
-type VoucherType = {
-  description: string;
-  type: (typeof VoucherEnum)[keyof typeof VoucherEnum];
-  percent: string;
-  code: string;
-};
+import type { FC } from "react";
+import type { VoucherType } from "../types/response/voucher.type";
 
 type VoucherItemProps = {
   item: VoucherType;
 };
 
-function VoucherItem({ item }: VoucherItemProps) {
+const VoucherItem: FC<VoucherItemProps> = ({ item }) => {
   return (
     <div
       className="flex flex-col cursor-pointer p-5 md:w-60 w-50
@@ -25,7 +15,7 @@ function VoucherItem({ item }: VoucherItemProps) {
     >
       <div className="flex flex-col gap-5 justify-center items-center">
         <div>
-          {item.type === VoucherEnum.HOTEL ? (
+          {item.tableType === "Hotel" ? (
             <Hotel size={65} className="text-blue-500" />
           ) : (
             <TentTree size={65} className="text-green-500" />
@@ -34,7 +24,7 @@ function VoucherItem({ item }: VoucherItemProps) {
         <div>
           <div className="md:text-lg font-semibold flex w-full">
             Giảm tới {item.percent} cho bill{" "}
-            {item.type === VoucherEnum.HOTEL ? "Khách sạn" : "Tour"}
+            {item.tableType === "Hotel" ? "Khách sạn" : "Tour"}
           </div>
           <div className="md:text-sm text-[15px] flex w-full">
             {item.description}
@@ -58,6 +48,6 @@ function VoucherItem({ item }: VoucherItemProps) {
       </div>
     </div>
   );
-}
+};
 
 export default VoucherItem;

@@ -1,9 +1,33 @@
 import assets from "../assets";
 import VoucherItem from "../components/VoucherItem";
-import { vouchers } from "../constants/Voucher.const";
 import { motion } from "framer-motion";
+import { useVoucher } from "../contexts/VoucherContext";
+import { useEffect, useState } from "react";
+import useQueryState from "../hooks/useQueryState";
+import OverlayReload from "../components/Loading";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Discount: React.FC = () => {
+  const { getAvailableVoucher, voucherList, loading } = useVoucher();
+  const [page, setPage] = useQueryState("page", "1" as string);
+  const [totalPages, setTotalPages] = useState(0);
+
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        const data = await getAvailableVoucher(Number(page), 20);
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error("Failed to fetch tourList:", error);
+      }
+    };
+    fetchVouchers();
+  }, []);
+
+  if (loading) {
+    return <OverlayReload />;
+  }
+
   return (
     <div>
       <div className="w-full relative">
@@ -30,11 +54,57 @@ const Discount: React.FC = () => {
         className="flex justify-center mx-auto"
       >
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-5 mt-10 w-full max-w-screen-xl px-4">
-          {vouchers.map((item, index) => (
+          {voucherList.map((item, index) => (
             <VoucherItem key={index} item={item} />
           ))}
         </div>
       </motion.div>
+      {totalPages > 1 && (
+        <div className="flex flex-wrap gap-1 py-5 justify-center">
+          <button
+            onClick={() => setPage((parseInt(page) - 1).toString())}
+            disabled={parseInt(page) === 1}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (parseInt(page) <= 2) {
+              pageNum = i + 1;
+            } else if (parseInt(page) >= totalPages - 3) {
+              pageNum = totalPages - 5 + i;
+            } else {
+              pageNum = parseInt(page) - 2 + i;
+            }
+
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum.toString())}
+                className={`px-3 py-1 border rounded-md text-sm ${
+                  parseInt(page) === pageNum
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => setPage((parseInt(page) + 1).toString())}
+            disabled={parseInt(page) === totalPages}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

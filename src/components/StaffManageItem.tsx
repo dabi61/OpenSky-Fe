@@ -1,7 +1,7 @@
 import React from "react";
 import type { UserType } from "../types/response/user.type";
 import assets from "../assets";
-import { Edit, Mail, Phone, Trash2, User } from "lucide-react";
+import { Edit, Mail, Phone, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import { Roles } from "../constants/role";
 
@@ -22,7 +22,7 @@ const StaffManageItem: React.FC<Props> = ({ staff, onEdit }) => {
   };
 
   return (
-    <tr key={staff.id} className="hover:bg-gray-50">
+    <tr key={staff.userID} className="hover:bg-gray-50">
       <td className="py-4 px-4 sm:px-6">
         <div className="flex items-center">
           <div className="relative">

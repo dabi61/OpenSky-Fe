@@ -1,4 +1,4 @@
-import { VoucherEnum } from "../components/VoucherHomeItem";
+import { VoucherEnum } from "./VoucherEnum";
 
 export const vouchers = [
   {

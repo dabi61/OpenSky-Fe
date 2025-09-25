@@ -59,7 +59,7 @@ const BottomNavigation: React.FC = () => {
       id: "sale",
       icon: <TicketPercent size={24} />,
       label: "Ưu đãi",
-      to: "/unauthorized",
+      to: "voucher",
     },
     {
       id: "customer",

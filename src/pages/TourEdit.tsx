@@ -114,7 +114,7 @@ const TourEdit: FC = () => {
   return (
     <>
       <form
-        className="p-6 bg-gray-50 min-h-screen w-6/7 mx-auto"
+        className="p-6 min-h-screen w-6/7 mx-auto"
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex items-center justify-between mb-6">
@@ -170,7 +170,7 @@ const TourEdit: FC = () => {
 
               <Divider className="my-4" />
 
-              <Typography variant="h6" className="font-semibold mb-4">
+              <Typography variant="h6" className="font-semibold mb-9">
                 Thông tin giá và sức chứa
               </Typography>
 
@@ -204,8 +204,6 @@ const TourEdit: FC = () => {
                   }}
                 />
               </div>
-
-              <Divider className="my-4" />
 
               <TextField
                 fullWidth

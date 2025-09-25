@@ -31,6 +31,8 @@ import HotelEditAll from "../pages/HotelEditAll";
 import HotelRoomManage from "../pages/HotelRoomManage";
 import RoomManageInfo from "../pages/RoomManageInfo";
 import RoomInfo from "../pages/RoomInfo";
+import VoucherManage from "../pages/VoucherManage";
+import { VoucherProvider } from "../contexts/VoucherContext";
 
 const router = createBrowserRouter([
   {
@@ -94,7 +96,14 @@ const router = createBrowserRouter([
         ),
       },
 
-      { path: "discount", element: <Discount /> },
+      {
+        path: "discount",
+        element: (
+          <VoucherProvider>
+            <Discount />
+          </VoucherProvider>
+        ),
+      },
       { path: "unauthorized", element: <Unauthorized /> },
       {
         element: <AuthGuard />,
@@ -183,6 +192,14 @@ const router = createBrowserRouter([
               { path: "dashboard", element: <Dashboard /> },
               { path: "customer", element: <CustomerManager /> },
               { path: "staff", element: <StaffManager /> },
+              {
+                path: "voucher",
+                element: (
+                  <VoucherProvider>
+                    <VoucherManage />
+                  </VoucherProvider>
+                ),
+              },
               {
                 path: "hotel",
                 element: (

@@ -136,40 +136,42 @@ const HotelInfo = () => {
           ))}
         </div>
 
-        <div className="flex flex-col gap-5 mt-5">
-          <div className="flex items-center">
-            <MapPin className="text-blue-500 mr-2 w-4 h-4 md:w-5 md:h-5" />
-            <div className="text-sm md:text-base">
-              Địa chỉ: {selectedHotel.address}
-            </div>
+        {selectedHotel.latitude != null && selectedHotel.longitude != null && (
+          <div className="flex flex-col gap-5 mt-5">
+            <div className="flex items-center">
+              <MapPin className="text-blue-500 mr-2 w-4 h-4 md:w-5 md:h-5" />
+              <div className="text-sm md:text-base">
+                Địa chỉ: {selectedHotel.address}
+              </div>
 
-            {!openMap ? (
-              <div
-                className="rounded-full border cursor-pointer border-blue-500 bg-blue-50 p-2 mx-2 text-blue-500 hover:bg-blue-100 transition"
-                onClick={() => setOpenMap(!openMap)}
-              >
-                <Map className="w-5 h-5" />
-              </div>
-            ) : (
-              <div
-                className="rounded-full border cursor-pointer border-red-500 bg-red-50 p-2 mx-2 text-red-500 hover:bg-red-100 transition"
-                onClick={() => setOpenMap(!openMap)}
-              >
-                <X className="w-5 h-5" />
-              </div>
+              {!openMap ? (
+                <div
+                  className="rounded-full border cursor-pointer border-blue-500 bg-blue-50 p-2 mx-2 text-blue-500 hover:bg-blue-100 transition"
+                  onClick={() => setOpenMap(!openMap)}
+                >
+                  <Map className="w-5 h-5" />
+                </div>
+              ) : (
+                <div
+                  className="rounded-full border cursor-pointer border-red-500 bg-red-50 p-2 mx-2 text-red-500 hover:bg-red-100 transition"
+                  onClick={() => setOpenMap(!openMap)}
+                >
+                  <X className="w-5 h-5" />
+                </div>
+              )}
+            </div>
+            {openMap && selectedHotel.latitude != null && (
+              <iframe
+                className="rounded-2xl"
+                width="100%"
+                height="400"
+                loading="lazy"
+                allowFullScreen
+                src={`https://www.google.com/maps?q=${selectedHotel.latitude},${selectedHotel.longitude}&hl=vi&z=15&output=embed`}
+              ></iframe>
             )}
           </div>
-          {openMap && selectedHotel.latitude && (
-            <iframe
-              className="rounded-2xl"
-              width="100%"
-              height="400"
-              loading="lazy"
-              allowFullScreen
-              src={`https://www.google.com/maps?q=${selectedHotel.latitude},${selectedHotel.longitude}&hl=vi&z=15&output=embed`}
-            ></iframe>
-          )}
-        </div>
+        )}
 
         {selectedHotel.description && (
           <div className="mt-4 md:mt-5">
@@ -241,7 +243,7 @@ const HotelInfo = () => {
           </div>
         )}
         {(user?.role === "Admin" || user?.role === "Supervisor") && (
-          <div className="flex w-110 gap-10 mx-auto mb-7">
+          <div className="flex w-110 gap-10 mx-auto mb-7 mt-10">
             {selectedHotel.status === "Active" && (
               <Button
                 variant="contained"

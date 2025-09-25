@@ -1,10 +1,6 @@
 import { Button } from "@mui/material";
 import { Hotel, TentTree } from "lucide-react";
-
-export const VoucherEnum = {
-  TOUR: "tour",
-  HOTEL: "hotel",
-} as const;
+import { VoucherEnum } from "../constants/VoucherEnum";
 
 type VoucherType = {
   description: string;

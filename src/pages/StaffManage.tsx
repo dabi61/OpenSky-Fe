@@ -242,7 +242,9 @@ const StaffManager: React.FC = () => {
         isOpen={openAddCustomer}
         onClose={() => {
           setOpenAddCustomer(false);
-          setSelectedCustomer(null);
+          setTimeout(() => {
+            setSelectedCustomer(null);
+          }, 500);
         }}
         data={selectedCustomer}
       />
