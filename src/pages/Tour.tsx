@@ -223,10 +223,6 @@ const Tour: React.FC = () => {
                   </p>
 
                   <div className="flex items-center gap-4 mb-6">
-                    {/* <div className="flex items-center text-sm text-gray-500">
-                      <Calendar size={16} className="mr-1 text-green-600" />
-                      <span>3 ngày 2 đêm</span>
-                    </div> */}
                     <div className="flex items-center text-sm text-gray-500">
                       <User size={16} className="mr-1 text-purple-600" />
                       <span>{tour.maxPeople || 20} người</span>

@@ -1,4 +1,5 @@
 import type { RoomStatus } from "../../constants/RoomStatus";
+import type { ImageType } from "./image.type";
 
 export type RoomType = {
   roomID: string;
@@ -23,7 +24,7 @@ export type RoomTypeWithImgs = {
   maxPeople: number;
   status: RoomStatus;
   createdAt: Date;
-  images: string[];
+  images: ImageType[];
 };
 
 export type RoomPage = {

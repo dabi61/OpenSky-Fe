@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import assets from "../assets";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
@@ -25,6 +25,11 @@ const authMenuItems = [
 function Header() {
   const { user, loading, reloadUser } = useUser();
   const navigate = useNavigate();
+  const location = useLocation().pathname;
+
+  if (!location.includes("/hotel_info") && !location.includes("/room_info")) {
+    localStorage.clear();
+  }
 
   const settingMenuItems = [
     { name: "Cá nhân", to: "/profile" },

@@ -357,7 +357,7 @@ const HotelEdit: React.FC = () => {
               {selectedHotel?.images?.map((img, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={img}
+                    src={img.imageUrl}
                     alt={`Hotel image ${index + 1}`}
                     className="w-full h-32 object-cover rounded-md"
                   />

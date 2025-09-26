@@ -73,7 +73,7 @@ const TourInfo: FC = () => {
                   className="embla__slide basis-full shrink-0 mx-auto flex justify-center items-center w-auto h-100"
                 >
                   <img
-                    src={img}
+                    src={img.imageUrl}
                     alt={`tour-img-${index}`}
                     className="w-fit h-100 object-contain rounded-2xl"
                   />
@@ -175,6 +175,30 @@ const TourInfo: FC = () => {
             ))}
           </div>
         </div>
+        {user?.role === "Customer" && (
+          <div className="flex justify-center md:w-100 items-center mx-auto mb-7">
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#3B82F6",
+                padding: "12px 24px",
+                borderRadius: "12px",
+                fontWeight: 600,
+                fontSize: "16px",
+                textTransform: "none",
+                flex: 1,
+                "&:hover": {
+                  backgroundColor: "#2563EB",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                },
+                transition: "all 0.2s ease-in-out",
+              }}
+            >
+              Đặt tour ngay
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

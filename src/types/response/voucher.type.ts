@@ -10,7 +10,7 @@ export type VoucherType = {
   endDate: Dayjs;
   description: string;
   usedCount: number;
-  isExpired: boolean;
+  isDeleted: boolean;
   isAvailable: boolean;
 };
 

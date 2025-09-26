@@ -1,4 +1,5 @@
 import type { TourStatus } from "../../constants/TourStatus";
+import type { ImageType } from "./image.type";
 
 export type TourType = {
   tourID: string;
@@ -23,7 +24,7 @@ export type TourTypeWithImgs = {
   maxPeople: number;
   status: TourStatus;
   description?: string;
-  images: string[];
+  images: ImageType[];
 };
 
 export type TourResponse = {

@@ -114,7 +114,7 @@ export const handleSoftDeleteVoucher = async (
   id: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const res = await axiosInstance.delete(`vouchers/${id}`);
+    const res = await axiosInstance.put(`vouchers/${id}/delete`);
     return { success: true, message: res.data.message };
   } catch (error: any) {
     return {

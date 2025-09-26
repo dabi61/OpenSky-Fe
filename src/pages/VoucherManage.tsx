@@ -16,6 +16,8 @@ import Modal from "../components/Modal";
 import { VoucherEnum } from "../constants/VoucherEnum";
 import VoucherMangeItem from "../components/VoucherManageItem";
 import VoucherModal from "../components/VoucherModal";
+import { toast } from "sonner";
+import { handleSoftDeleteVoucher } from "../api/voucher.api";
 
 const VoucherManage: React.FC = () => {
   const {
@@ -46,6 +48,18 @@ const VoucherManage: React.FC = () => {
     } catch (error) {
       console.error("Failed to fetch voucherList:", error);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedVoucher?.voucherID) return;
+    const res = await handleSoftDeleteVoucher(selectedVoucher.voucherID);
+    if (res.success) {
+      toast.success(res.message);
+      getAvailableVoucher(parseInt(page), 20);
+    } else {
+      toast.error(res.message);
+    }
+    setSelectedVoucher(null);
   };
 
   useEffect(() => {
@@ -150,7 +164,10 @@ const VoucherManage: React.FC = () => {
                     setSelectedVoucher(voucher);
                     setOpenCreateModal(true);
                   }}
-                  onDelete={() => setOpenModal(true)}
+                  onDelete={() => {
+                    setSelectedVoucher(voucher);
+                    setOpenModal(true);
+                  }}
                 />
               ))
             )}
@@ -234,7 +251,10 @@ const VoucherManage: React.FC = () => {
         onClose={() => setOpenModal(false)}
         description="Bạn có muốn xóa voucher này khỏi hệ thống?"
         title="Thông báo"
-        // onAgree={() => handleDelete(selectedVoucherId)}
+        onAgree={() => {
+          handleDelete();
+          setOpenModal(false);
+        }}
       />
 
       <VoucherModal

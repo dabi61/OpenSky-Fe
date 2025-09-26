@@ -1,4 +1,5 @@
 import type { HotelStatus } from "../../constants/HotelStatus";
+import type { ImageType } from "./image.type";
 import type { UserSummaryType } from "./user.type";
 
 export type HotelType = {
@@ -30,7 +31,7 @@ export type HotelTypeWithImgs = {
   star: number;
   createdAt: Date;
   status: HotelStatus;
-  images: string[];
+  images: ImageType[];
 };
 
 export type HotelResponse = {

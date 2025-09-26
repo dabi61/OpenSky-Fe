@@ -23,18 +23,12 @@ const VoucherMangeItem: FC<Props> = ({ voucher, onEdit, onDelete }) => {
         </span>
         <span
           className={`text-xs font-medium px-2.5 py-0.5 rounded ${
-            voucher.isExpired
-              ? "bg-red-100 text-red-800"
-              : voucher.isAvailable
+            voucher.isAvailable
               ? "bg-green-100 text-green-800"
               : "bg-gray-100 text-gray-800"
           }`}
         >
-          {voucher.isExpired
-            ? "Hết hạn"
-            : voucher.isAvailable
-            ? "Khả dụng"
-            : "Không khả dụng"}
+          {!voucher.isAvailable ? "Hết hạn" : "Khả dụng"}
         </span>
       </div>
 

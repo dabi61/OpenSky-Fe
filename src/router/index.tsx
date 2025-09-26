@@ -33,6 +33,9 @@ import RoomManageInfo from "../pages/RoomManageInfo";
 import RoomInfo from "../pages/RoomInfo";
 import VoucherManage from "../pages/VoucherManage";
 import { VoucherProvider } from "../contexts/VoucherContext";
+import ProfileLayout from "../layouts/ProfileLayout";
+import UserVoucher from "../pages/UserVoucher";
+import { BookingRoomProvider } from "../contexts/BookingRoomContext";
 
 const router = createBrowserRouter([
   {
@@ -80,9 +83,7 @@ const router = createBrowserRouter([
         element: (
           <HotelProvider>
             <RoomProvider>
-              <RoomProvider>
-                <HotelInfo />
-              </RoomProvider>
+              <HotelInfo />
             </RoomProvider>
           </HotelProvider>
         ),
@@ -105,9 +106,24 @@ const router = createBrowserRouter([
         ),
       },
       { path: "unauthorized", element: <Unauthorized /> },
+
       {
         element: <AuthGuard />,
-        children: [{ path: "profile", element: <Profile /> }],
+        children: [
+          {
+            element: <ProfileLayout />,
+            children: [
+              {
+                path: "profile",
+                element: <Profile />,
+              },
+              {
+                path: "user_voucher",
+                element: <UserVoucher />,
+              },
+            ],
+          },
+        ],
       },
       {
         element: <RoleGuard deniedRoles={[Roles.ADMIN]} />,

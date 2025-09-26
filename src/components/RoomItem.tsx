@@ -2,8 +2,14 @@ import { Button } from "@mui/material";
 import type { RoomType } from "../types/response/room.type";
 import { MapPin, Users, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import type { FC } from "react";
 
-const RoomItem = ({ room }: { room: RoomType }) => {
+type Props = {
+  room: RoomType;
+  onClick: () => void;
+};
+
+const RoomItem: FC<Props> = ({ room, onClick }) => {
   const navigate = useNavigate();
   return (
     <div className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 mb-4 overflow-hidden">
@@ -81,6 +87,7 @@ const RoomItem = ({ room }: { room: RoomType }) => {
                   },
                 }}
                 type="submit"
+                onClick={onClick}
               >
                 Đặt phòng
               </Button>
