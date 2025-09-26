@@ -100,3 +100,16 @@ export const handleGetTourById = async (
   const res = await axiosInstance.get(`tours/${id}`);
   return res.data;
 };
+
+export const handleGetTourByStar = async (
+  star: number,
+  page: number,
+  size: number
+): Promise<TourPage> => {
+  const res = await axios.get(
+    `${
+      import.meta.env.VITE_API_URL
+    }/tours/star/${star}?page=${page}&size=${size}`
+  );
+  return res.data;
+};
