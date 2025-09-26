@@ -7,7 +7,6 @@ import useQueryState from "../hooks/useQueryState";
 import { ChevronLeft, ChevronRight, Funnel, Plus, Search } from "lucide-react";
 import HotelRoomManageItem from "../components/RoomManageItem";
 import { useHotel } from "../contexts/HotelContext";
-import useOptionalQueryState from "../hooks/useOptionalQueryState";
 import { RoomStatus } from "../constants/RoomStatus";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 
@@ -18,8 +17,8 @@ const HotelRoomManage: FC = () => {
   const [page, setPage] = useQueryState("page", "1" as string);
   const [totalPages, setTotalPages] = useState(0);
   const location = useLocation().pathname;
-  const [selectedStatus, setSelectedStatus] =
-    useOptionalQueryState<RoomStatus>("status");
+  // const [selectedStatus, setSelectedStatus] =
+  //   useOptionalQueryState<RoomStatus>("status");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const navigate = useNavigate();
 
@@ -80,7 +79,7 @@ const HotelRoomManage: FC = () => {
                     <div
                       key="all"
                       onClick={() => {
-                        setSelectedStatus(undefined);
+                        // setSelectedStatus(undefined);
                         close();
                       }}
                       className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"
@@ -97,7 +96,7 @@ const HotelRoomManage: FC = () => {
                         <div
                           key={status}
                           onClick={() => {
-                            setSelectedStatus(status);
+                            // setSelectedStatus(status);
                             close();
                           }}
                           className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"

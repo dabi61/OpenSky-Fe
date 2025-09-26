@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useHotel } from "../contexts/HotelContext";
 import { useEffect, useState } from "react";
 import {
@@ -22,7 +22,6 @@ import {
   User,
   Calendar,
   MapPinned,
-  Box,
 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -40,7 +39,7 @@ const HotelEdit: React.FC = () => {
   const { getHotelById, selectedHotel, loading, getMyHotel } = useHotel();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [imageList, setImageList] = useState<File[]>([]);
+  // const [imageList, setImageList] = useState<File[]>([]);
   const location = useLocation().pathname;
 
   const fetchHotel = async () => {
@@ -141,9 +140,9 @@ const HotelEdit: React.FC = () => {
         setValue("latitude", coordinates.lat);
         setValue("longitude", coordinates.lon);
       }
-      if (imageList.length > 0) {
-        setValue("files", imageList);
-      }
+      // if (imageList.length > 0) {
+      //   setValue("files", imageList);
+      // }
       const address = watch("address");
       const allProvinces = await getProvinces();
       if (address) {

@@ -20,17 +20,17 @@ export const handleGetRoomByHotel = async (
   return res.data;
 };
 
-export const handleGetRoomByStatus = async (
-  id: string,
-  status: RoomStatus,
-  page: number,
-  limit: number
-): Promise<RoomPage> => {
-  const res = await axiosInstance(
-    `rooms/hotel/${id}?page=${page}&limit=${limit}`
-  );
-  return res.data;
-};
+// export const handleGetRoomByStatus = async (
+//   id: string,
+//   status: RoomStatus,
+//   page: number,
+//   limit: number
+// ): Promise<RoomPage> => {
+//   const res = await axiosInstance(
+//     `rooms/hotel/${id}?page=${page}&limit=${limit}`
+//   );
+//   return res.data;
+// };
 
 export const handlegetRoomById = async (
   id: string
