@@ -41,7 +41,7 @@ export const handleUpdateCurrentUser = async (
 
 export const handleCreateUser = async (
   data: UserCreateType | StaffCreateType
-): Promise<UserUpdateResponse> => {
+): Promise<UserType | { message: string }> => {
   try {
     const formData = new FormData();
     if ("new_email" in data) {
@@ -65,7 +65,6 @@ export const handleCreateUser = async (
   } catch (error: any) {
     return {
       message: error?.response?.data?.message || "Tạo thất bại",
-      profile: {} as UserType,
     };
   }
 };

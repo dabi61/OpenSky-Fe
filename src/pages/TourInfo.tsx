@@ -1,16 +1,18 @@
 import { useEffect, type FC } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTour } from "../contexts/TourContext";
-import type { TourTypeWithImgs } from "../types/response/tour.type";
+import type { TourType, TourTypeWithImgs } from "../types/response/tour.type";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, MapPin, Star, Users } from "lucide-react";
 import OverlayReload from "../components/Loading";
 import { Button } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import TourItineraryItem from "../components/TourItineraryItem";
+import { useBookingRoom } from "../contexts/BookingRoomContext";
 
 const TourInfo: FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const {
     getTourById,
     loading,
@@ -19,6 +21,7 @@ const TourInfo: FC = () => {
     getTourItineraryByTour,
   } = useTour();
   const { user } = useUser();
+  const { addTourToBookingList } = useBookingRoom();
 
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
@@ -40,6 +43,19 @@ const TourInfo: FC = () => {
     }
   };
 
+  const summaryTour: TourType = {
+    tourID: selectedTour?.tourID || "",
+    tourName: selectedTour?.tourName || "",
+    address: selectedTour?.address || "",
+    province: selectedTour?.province || "",
+    star: selectedTour?.star || 0,
+    price: selectedTour?.price || 0,
+    maxPeople: selectedTour?.maxPeople || 1,
+    status: selectedTour?.status || "Inactive",
+    description: selectedTour?.description || "",
+    firstImage: selectedTour?.images?.[0]?.imageUrl || "",
+  };
+
   useEffect(() => {
     fetchTour();
   }, []);
@@ -58,8 +74,6 @@ const TourInfo: FC = () => {
   }
 
   const tour: TourTypeWithImgs = selectedTour;
-
-  console.log(tour);
 
   return (
     <div className="relative w-full md:w-[90%] mx-auto">
@@ -163,7 +177,7 @@ const TourInfo: FC = () => {
 
         <div className="mt-4 md:mt-5 pb-5 md:pb-10">
           <div className="font-semibold text-base md:text-lg mb-2 md:mb-3">
-            Lịch trình
+            Hành trình
           </div>
           <div className="space-y-3 relative border-l-3 border-blue-400 pl-6">
             {tourItineraryList.map((itinerary) => (
@@ -175,7 +189,7 @@ const TourInfo: FC = () => {
             ))}
           </div>
         </div>
-        {user?.role === "Customer" && (
+        {(user?.role === "Customer" || user?.role === "Hotel") && (
           <div className="flex justify-center md:w-100 items-center mx-auto mb-7">
             <Button
               variant="contained"
@@ -193,6 +207,10 @@ const TourInfo: FC = () => {
                   boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
                 },
                 transition: "all 0.2s ease-in-out",
+              }}
+              onClick={() => {
+                navigate("/booking");
+                addTourToBookingList(summaryTour);
               }}
             >
               Đặt tour ngay

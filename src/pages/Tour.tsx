@@ -10,9 +10,12 @@ import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
 import StarSort from "../components/StarSort";
 import { useNavigate } from "react-router-dom";
+import { useBookingRoom } from "../contexts/BookingRoomContext";
 
 const Tour: React.FC = () => {
   const { tourList, getAllTours } = useTour();
+  const { addTourToBookingList } = useBookingRoom();
+
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [totalPages, setTotalPages] = useState(0);
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -247,6 +250,10 @@ const Tour: React.FC = () => {
                           boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
                         },
                         transition: "all 0.2s ease-in-out",
+                      }}
+                      onClick={() => {
+                        navigate("/booking");
+                        addTourToBookingList(tour);
                       }}
                     >
                       Đặt tour ngay

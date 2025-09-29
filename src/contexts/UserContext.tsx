@@ -130,15 +130,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     size: number
   ): Promise<UserPage> => {
     const res = await handleSearchUserByRole(keyword, roles, page, size);
+    setUserList(res.users);
     return res;
   };
 
   const createUser = async (data: Partial<UserCreateType>) => {
     const validData = data as UserCreateType;
     const res = await handleCreateUser(validData);
-    if (Object.keys(res.profile).length > 0) {
-      toast.success(res.message);
-      addUserToList(res.profile);
+    if ("userID" in res) {
+      toast.success("Tạo thành công!");
+      addUserToList(res);
       setKeyword("");
     } else {
       toast.error(res.message);
@@ -151,6 +152,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     size: number
   ): Promise<UserPage> => {
     const res = await handleGetUserByRole(roles, page, size);
+    setUserList(res.users);
     return res;
   };
 

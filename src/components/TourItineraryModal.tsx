@@ -108,8 +108,13 @@ const TourItineraryModal: FC<ModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} reset={() => reset()}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      reset={() => reset()}
+      title={data ? "Thông tin lịch trình" : "Thêm lịch trình"}
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-3">
         <div className="flex gap-5">
           <TextField
             label="Điểm đến"

@@ -1,36 +1,30 @@
 import React, { useEffect, useState, type ChangeEvent } from "react";
-import { Search, User, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, User, Plus } from "lucide-react";
 import { useUser } from "../contexts/UserContext";
 import { Roles } from "../constants/role";
 import type { UserType } from "../types/response/user.type";
 import CustomerManageItem from "../components/CustomerManagerItem";
-import { useSearchParams } from "react-router-dom";
 import CustomerModal from "../components/CustomerModal";
+import Pagination from "../components/Pagination";
+import useQueryState from "../hooks/useQueryState";
 
 const CustomerManager: React.FC = () => {
   const { getUsersByRole, userList, keyword, setKeyword, searchUsersByRole } =
     useUser();
-  const [customers, setCustomers] = useState<UserType[]>([]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pageParam = searchParams.get("page");
+  const [page, setPage] = useQueryState("page", "1" as string);
+
   const [selectedCustomer, setSelectedCustomer] = useState<UserType | null>(
     null
   );
 
   const [currentPage, setCurrentPage] = useState(() => {
-    return pageParam ? parseInt(pageParam) : 1;
+    return page ? parseInt(page) : 1;
   });
 
   const [totalPages, setTotalPages] = useState(0);
   const [openAddCustomer, setOpenAddCustomer] = useState(false);
   const pageSize = 20;
-
-  useEffect(() => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("page", currentPage.toString());
-    setSearchParams(newSearchParams);
-  }, [currentPage, searchParams, setSearchParams]);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -42,7 +36,6 @@ const CustomerManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setCustomers(data.users);
           setTotalPages(data.totalPages);
         } else {
           const data = await getUsersByRole(
@@ -50,7 +43,6 @@ const CustomerManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setCustomers(data.users);
           setTotalPages(data.totalPages);
         }
       } catch (error) {
@@ -59,17 +51,12 @@ const CustomerManager: React.FC = () => {
     };
 
     fetchCustomers();
-  }, [currentPage, getUsersByRole, keyword]);
-
-  useEffect(() => {
-    if (currentPage === 0 && userList.length > 0) {
-      setCustomers(userList);
-    }
-  }, [userList, currentPage]);
+  }, [currentPage, keyword]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 0 && newPage < totalPages) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
+      setPage(newPage.toString());
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -80,48 +67,11 @@ const CustomerManager: React.FC = () => {
     return (
       <div className="flex items-center justify-center mt-4">
         <div className="flex flex-wrap gap-1 justify-center">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 0}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum;
-            if (totalPages <= 5) {
-              pageNum = i;
-            } else if (currentPage <= 2) {
-              pageNum = i;
-            } else if (currentPage >= totalPages - 3) {
-              pageNum = totalPages - 5 + i;
-            } else {
-              pageNum = currentPage - 2 + i;
-            }
-
-            return (
-              <button
-                key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
-                className={`px-3 py-1 border rounded-md text-sm ${
-                  currentPage === pageNum
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                {pageNum + 1}
-              </button>
-            );
-          })}
-
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages - 1}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronRight size={16} />
-          </button>
+          <Pagination
+            page={Number(page)}
+            totalPages={totalPages}
+            onChange={handlePageChange}
+          />
         </div>
       </div>
     );
@@ -172,7 +122,7 @@ const CustomerManager: React.FC = () => {
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            {customers.length > 0 ? (
+            {userList.length > 0 ? (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -194,7 +144,7 @@ const CustomerManager: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {customers.map((customer) => (
+                      {userList.map((customer) => (
                         <CustomerManageItem
                           customer={customer}
                           key={customer.userID}

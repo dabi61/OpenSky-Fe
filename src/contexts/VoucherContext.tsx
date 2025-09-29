@@ -9,6 +9,7 @@ import {
 import type { VoucherPage, VoucherType } from "../types/response/voucher.type";
 import {
   handleGetAvailableVoucher,
+  handleGetUnsavedVoucher,
   handleGetVoucherById,
   handleGetVoucherByType,
 } from "../api/voucher.api";
@@ -20,6 +21,7 @@ type VoucherContextType = {
   selectedVoucher: VoucherType | null;
   getVoucherById: (id: string) => Promise<VoucherType>;
   getAvailableVoucher: (page: number, limit: number) => Promise<VoucherPage>;
+  getUnsavedVoucher: (page: number, limit: number) => Promise<VoucherPage>;
   getVoucherByType: (
     type: VoucherEnum,
     page: number,
@@ -62,6 +64,20 @@ export const VoucherProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getUnsavedVoucher = async (
+    page: number,
+    limit: number
+  ): Promise<VoucherPage> => {
+    try {
+      setLoading(true);
+      const res = await handleGetUnsavedVoucher(page, limit);
+      setVoucherList(res.vouchers);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getVoucherByType = async (
     type: VoucherEnum,
     page: number,
@@ -87,6 +103,7 @@ export const VoucherProvider = ({ children }: { children: ReactNode }) => {
         getAvailableVoucher,
         getVoucherByType,
         setSelectedVoucher,
+        getUnsavedVoucher,
       }}
     >
       {children}

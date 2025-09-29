@@ -12,7 +12,7 @@ const RoomInfo: FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getRoomById, selectedRoom } = useRoom();
-  const { addToBookingList } = useBookingRoom();
+  const { addHotelToBookingList } = useBookingRoom();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const RoomInfo: FC = () => {
       }
     };
     fetchRoom();
-  }, []);
+  }, [id]);
 
   if (!selectedRoom) {
     return <OverlayReload />;
@@ -43,7 +43,7 @@ const RoomInfo: FC = () => {
           <div className="flex items-center gap-2 cursor-pointer">
             <div
               className="bg-blue-500 rounded-full p-1"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(`/hotel_info/${selectedRoom.hotelID}`)}
             >
               <ChevronLeft color="white" size={20} />
             </div>
@@ -127,39 +127,12 @@ const RoomInfo: FC = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <Typography
-                          variant="body2"
-                          className="font-medium mb-1"
-                        >
-                          Nhận phòng
-                        </Typography>
-                        <input
-                          type="date"
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <Typography
-                          variant="body2"
-                          className="font-medium mb-1"
-                        >
-                          Trả phòng
-                        </Typography>
-                        <input
-                          type="date"
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-                    </div>
-
                     <Button
                       variant="contained"
                       fullWidth
                       className="bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
                       disabled={status !== "Available"}
-                      onClick={() => addToBookingList(summaryRoom)}
+                      onClick={() => addHotelToBookingList(summaryRoom)}
                     >
                       Đặt phòng ngay
                     </Button>

@@ -6,23 +6,33 @@ import { useEffect, useState } from "react";
 import useQueryState from "../hooks/useQueryState";
 import OverlayReload from "../components/Loading";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useUser } from "../contexts/UserContext";
 
 const Discount: React.FC = () => {
-  const { getAvailableVoucher, voucherList, loading } = useVoucher();
+  const { getAvailableVoucher, getUnsavedVoucher, voucherList, loading } =
+    useVoucher();
+  const { user } = useUser();
   const [page, setPage] = useQueryState("page", "1" as string);
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const data = await getAvailableVoucher(Number(page), 20);
-        setTotalPages(data.totalPages);
+        if (user) {
+          const data = await getUnsavedVoucher(Number(page), 20);
+          setTotalPages(data.totalPages);
+          console.log("unsaved: ", data);
+        } else {
+          const data = await getAvailableVoucher(Number(page), 20);
+          setTotalPages(data.totalPages);
+          console.log("normal: ", data);
+        }
       } catch (error) {
         console.error("Failed to fetch tourList:", error);
       }
     };
     fetchVouchers();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return <OverlayReload />;
@@ -46,20 +56,44 @@ const Discount: React.FC = () => {
           </div>
         </div>
       </div>
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="flex justify-center mx-auto"
-      >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-5 mt-10 w-full max-w-screen-xl px-4">
-          {voucherList.map((item, index) => (
-            <VoucherItem key={index} item={item} />
-          ))}
-        </div>
-      </motion.div>
-      {totalPages > 1 && (
+
+      {/* Hiển thị thông báo khi danh sách trống */}
+      {voucherList.length === 0 && !loading && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="flex justify-center items-center py-20"
+        >
+          <div className="text-center">
+            <div className="text-2xl font-semibold text-gray-500 mb-2">
+              Không có voucher nào
+            </div>
+            <div className="text-gray-400">
+              Hiện tại không có voucher nào khả dụng
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Hiển thị danh sách voucher khi có dữ liệu */}
+      {voucherList.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.3 }}
+          className="flex justify-center mx-auto"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-5 mt-10 w-full max-w-screen-xl px-4">
+            {voucherList.map((item, index) => (
+              <VoucherItem key={index} item={item} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {totalPages > 1 && voucherList.length > 0 && (
         <div className="flex flex-wrap gap-1 py-5 justify-center">
           <button
             onClick={() => setPage((parseInt(page) - 1).toString())}

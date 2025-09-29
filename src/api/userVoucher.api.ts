@@ -18,8 +18,12 @@ export const handleSaveVouchers = async (
   }
 };
 
-export const handleGetMyVouchers = async (): Promise<UserVoucherPage> => {
-  const res = await axiosInstance.get("user_vouchers/my-vouchers");
-  console.log("vouchers:", res);
+export const handleGetMyVouchers = async (
+  page: number,
+  size: number
+): Promise<UserVoucherPage> => {
+  const res = await axiosInstance.get(
+    `user_vouchers/my-vouchers?page=${page}&size=${size}`
+  );
   return res.data;
 };

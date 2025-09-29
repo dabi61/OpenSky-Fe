@@ -20,7 +20,7 @@ const HotelInfo = () => {
   const { getHotelById, loading, selectedHotel } = useHotel();
   const [totalPages, setTotalPages] = useState(0);
   const { getRoomByHotel, roomList } = useRoom();
-  const { addToBookingList } = useBookingRoom();
+  const { addHotelToBookingList } = useBookingRoom();
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
     align: "center",
@@ -198,7 +198,7 @@ const HotelInfo = () => {
                   <RoomItem
                     key={room.roomID}
                     room={room}
-                    onClick={() => addToBookingList(room)}
+                    onClick={() => addHotelToBookingList(room)}
                   />
                 ))}
               </div>

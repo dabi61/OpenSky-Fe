@@ -35,7 +35,9 @@ import VoucherManage from "../pages/VoucherManage";
 import { VoucherProvider } from "../contexts/VoucherContext";
 import ProfileLayout from "../layouts/ProfileLayout";
 import UserVoucher from "../pages/UserVoucher";
+import Booking from "../pages/Booking";
 import { BookingRoomProvider } from "../contexts/BookingRoomContext";
+import { ScheduleProvider } from "../contexts/ScheduleContext";
 
 const router = createBrowserRouter([
   {
@@ -58,7 +60,9 @@ const router = createBrowserRouter([
         path: "tour",
         element: (
           <TourProvider>
-            <Tour />
+            <BookingRoomProvider>
+              <Tour />
+            </BookingRoomProvider>
           </TourProvider>
         ),
       },
@@ -66,7 +70,9 @@ const router = createBrowserRouter([
         path: "/tour_info/:id",
         element: (
           <TourProvider>
-            <TourInfo />
+            <BookingRoomProvider>
+              <TourInfo />
+            </BookingRoomProvider>
           </TourProvider>
         ),
       },
@@ -128,6 +134,17 @@ const router = createBrowserRouter([
       {
         element: <RoleGuard deniedRoles={[Roles.ADMIN]} />,
         children: [{ path: "contact", element: <Contact /> }],
+      },
+      {
+        element: (
+          <RoleGuard allowedRoles={[Roles.HOTELMANAGER, Roles.CUSTOMER]} />
+        ),
+        children: [
+          {
+            path: "booking",
+            element: <Booking />,
+          },
+        ],
       },
 
       {
@@ -247,9 +264,11 @@ const router = createBrowserRouter([
                 element: (
                   <ImageProvider>
                     <TourProvider>
-                      <ImageProvider>
-                        <TourEdit />
-                      </ImageProvider>
+                      <ScheduleProvider>
+                        <ImageProvider>
+                          <TourEdit />
+                        </ImageProvider>
+                      </ScheduleProvider>
                     </TourProvider>
                   </ImageProvider>
                 ),

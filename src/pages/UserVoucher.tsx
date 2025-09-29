@@ -2,18 +2,21 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import type { UserVoucherType } from "../types/response/userVoucher.type";
 import { handleGetMyVouchers } from "../api/userVoucher.api";
-import { Calendar, Clock, Tag } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Clock, Tag } from "lucide-react";
 import { Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import useQueryState from "../hooks/useQueryState";
 
 const UserVoucher = () => {
   const [voucherList, setVoucherList] = useState<UserVoucherType[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useQueryState("page", "1" as string);
 
   useEffect(() => {
     const fetchMyVouchers = async () => {
-      const res = await handleGetMyVouchers();
+      const res = await handleGetMyVouchers(Number(page), 20);
       if (res.userVouchers) {
         const mapped = res.userVouchers.map((v) => ({
           ...v,
@@ -22,6 +25,7 @@ const UserVoucher = () => {
           savedAt: dayjs(v.savedAt),
         }));
         setVoucherList(mapped);
+        setTotalPages(res.totalPages);
       }
       setLoading(false);
     };
@@ -121,6 +125,52 @@ const UserVoucher = () => {
           </div>
         ))}
       </div>
+      {totalPages > 1 && voucherList.length > 0 && (
+        <div className="flex flex-wrap gap-1 py-5 justify-center">
+          <button
+            onClick={() => setPage((parseInt(page) - 1).toString())}
+            disabled={parseInt(page) === 1}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (parseInt(page) <= 2) {
+              pageNum = i + 1;
+            } else if (parseInt(page) >= totalPages - 3) {
+              pageNum = totalPages - 5 + i;
+            } else {
+              pageNum = parseInt(page) - 2 + i;
+            }
+
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum.toString())}
+                className={`px-3 py-1 border rounded-md text-sm ${
+                  parseInt(page) === pageNum
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => setPage((parseInt(page) + 1).toString())}
+            disabled={parseInt(page) === totalPages}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

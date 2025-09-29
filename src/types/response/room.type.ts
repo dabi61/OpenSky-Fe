@@ -7,6 +7,7 @@ export type RoomType = {
   roomName: string;
   roomType: string;
   address: string;
+  hotelName: string;
   price: number;
   maxPeople: number;
   status: RoomStatus;
@@ -20,6 +21,7 @@ export type RoomTypeWithImgs = {
   roomName: string;
   roomType: string;
   address: string;
+  hotelName: string;
   price: number;
   maxPeople: number;
   status: RoomStatus;

@@ -1,43 +1,34 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useUser } from "../contexts/UserContext";
 import type { UserType } from "../types/response/user.type";
-import { useSearchParams } from "react-router-dom";
 import { Roles } from "../constants/role";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  Plus,
-  Search,
-  User,
-} from "lucide-react";
+import { Filter, Plus, Search, User } from "lucide-react";
 import StaffManageItem from "../components/StaffManageItem";
 import StaffModal from "../components/StaffModal";
+import Pagination from "../components/Pagination";
+import useQueryState from "../hooks/useQueryState";
 
 const StaffManager: React.FC = () => {
   const { getUsersByRole, userList, keyword, setKeyword, searchUsersByRole } =
     useUser();
-  const [staffs, setStaffs] = useState<UserType[]>([]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pageParam = searchParams.get("page");
-  const [selectedCustomer, setSelectedCustomer] = useState<UserType | null>(
-    null
-  );
+  const [selectedStaff, setSelectedStaff] = useState<UserType | null>(null);
+  const [page, setPage] = useQueryState("page", "1" as string);
 
   const [currentPage, setCurrentPage] = useState(() => {
-    return pageParam ? parseInt(pageParam) : 1;
+    return page ? parseInt(page) : 1;
   });
 
+  const handlePageChange = (value: number) => {
+    setCurrentPage(value);
+    setPage(value.toString());
+    window.scrollTo(0, 0);
+  };
+
   const [totalPages, setTotalPages] = useState(0);
-  const [openAddCustomer, setOpenAddCustomer] = useState(false);
+  const [openAddStaff, setOpenAddStaff] = useState(false);
   const pageSize = 20;
 
-  useEffect(() => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("page", currentPage.toString());
-    setSearchParams(newSearchParams);
-  }, [currentPage, searchParams, setSearchParams]);
   useEffect(() => {
     const fetchStaffs = async () => {
       try {
@@ -48,7 +39,6 @@ const StaffManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setStaffs(data.users);
           setTotalPages(data.totalPages);
         } else {
           const data = await getUsersByRole(
@@ -56,7 +46,6 @@ const StaffManager: React.FC = () => {
             currentPage,
             pageSize
           );
-          setStaffs(data.users);
           setTotalPages(Math.max(data.totalPages));
         }
       } catch (error) {
@@ -65,73 +54,7 @@ const StaffManager: React.FC = () => {
     };
 
     fetchStaffs();
-  }, [currentPage, getUsersByRole, keyword]);
-
-  useEffect(() => {
-    if (currentPage === 0 && userList.length > 0) {
-      setStaffs(userList);
-    }
-  }, [userList, currentPage]);
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setCurrentPage(newPage);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    return (
-      <div className="flex items-center justify-center mt-4">
-        <div className="flex flex-wrap gap-1 justify-center">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 0}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum;
-            if (totalPages <= 5) {
-              pageNum = i;
-            } else if (currentPage <= 2) {
-              pageNum = i;
-            } else if (currentPage >= totalPages - 3) {
-              pageNum = totalPages - 5 + i;
-            } else {
-              pageNum = currentPage - 2 + i;
-            }
-
-            return (
-              <button
-                key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
-                className={`px-3 py-1 border rounded-md text-sm ${
-                  currentPage === pageNum
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                {pageNum + 1}
-              </button>
-            );
-          })}
-
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages - 1}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      </div>
-    );
-  };
+  }, [currentPage, keyword]);
 
   return (
     <>
@@ -169,7 +92,7 @@ const StaffManager: React.FC = () => {
               <div className="flex gap-2 w-full md:w-auto">
                 <button
                   className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full md:w-auto cursor-pointer"
-                  onClick={() => setOpenAddCustomer(true)}
+                  onClick={() => setOpenAddStaff(true)}
                 >
                   <Plus size={18} className="mr-2" />
                   <span className="hidden sm:inline whitespace-nowrap">
@@ -181,7 +104,7 @@ const StaffManager: React.FC = () => {
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            {staffs.length > 0 ? (
+            {userList.length > 0 ? (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -206,13 +129,13 @@ const StaffManager: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {staffs.map((customer) => (
+                      {userList.map((staff) => (
                         <StaffManageItem
-                          staff={customer}
-                          key={customer.userID}
+                          staff={staff}
+                          key={staff.userID}
                           onEdit={() => {
-                            setSelectedCustomer(customer);
-                            setOpenAddCustomer(true);
+                            setSelectedStaff(staff);
+                            setOpenAddStaff(true);
                           }}
                         />
                       ))}
@@ -221,7 +144,11 @@ const StaffManager: React.FC = () => {
                 </div>
 
                 <div className="border-t border-gray-200 px-4 sm:px-6 py-4">
-                  {renderPagination()}
+                  <Pagination
+                    page={Number(page)}
+                    onChange={handlePageChange}
+                    totalPages={totalPages}
+                  />
                 </div>
               </>
             ) : (
@@ -239,14 +166,14 @@ const StaffManager: React.FC = () => {
         </div>
       </div>
       <StaffModal
-        isOpen={openAddCustomer}
+        isOpen={openAddStaff}
         onClose={() => {
-          setOpenAddCustomer(false);
+          setOpenAddStaff(false);
           setTimeout(() => {
-            setSelectedCustomer(null);
+            setSelectedStaff(null);
           }, 500);
         }}
-        data={selectedCustomer}
+        data={selectedStaff}
       />
     </>
   );

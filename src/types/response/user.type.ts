@@ -26,7 +26,7 @@ export type UserPage = {
 };
 
 export type UserSummaryType = {
-  id: string;
+  userID: string;
   email: string;
   fullName: string;
   phoneNumber: string;

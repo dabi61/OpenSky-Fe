@@ -1,6 +1,6 @@
 import { FileText, MapPin, Trash2 } from "lucide-react";
 import type { TourItineraryType } from "../types/response/tour_itinerary.type";
-import type { FC } from "react";
+import { type FC } from "react";
 
 type Props = {
   itinerary: TourItineraryType;
@@ -80,7 +80,7 @@ const TourItineraryItem: FC<Props> = ({
             e.stopPropagation();
             onDelete();
           }}
-          className={`flex items-center justify-center p-2 rounded-lg transition-all opacity-100 text-red-400 hover:bg-red-50 hover:text-red-600"}`}
+          className={`flex my-auto p-2 rounded-lg transition-all opacity-100 text-red-400 hover:bg-red-50 hover:text-red-600"}`}
         >
           <Trash2 size={20} />
         </div>
