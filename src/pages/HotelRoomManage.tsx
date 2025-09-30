@@ -79,7 +79,6 @@ const HotelRoomManage: FC = () => {
                     <div
                       key="all"
                       onClick={() => {
-                        // setSelectedStatus(undefined);
                         close();
                       }}
                       className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"
@@ -133,7 +132,7 @@ const HotelRoomManage: FC = () => {
                 onSuccess={() =>
                   getRoomByHotel(room.hotelID, parseInt(page), 15)
                 }
-                onClick={() => navigate(`/hotel_info/${room.roomID}`)}
+                onClick={() => navigate(`/room_info/${room.roomID}`)}
                 enableEdit={location.includes("my_hotel") ? true : false}
               />
             ))}

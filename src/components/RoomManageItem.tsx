@@ -14,6 +14,7 @@ import { handleUpdateRoomStatus } from "../api/hotelRoom.api";
 import type { RoomStatus } from "../constants/RoomStatus";
 import { toast } from "sonner";
 import Modal from "./Modal";
+import assets from "../assets";
 
 type Props = {
   room: RoomType;
@@ -79,7 +80,7 @@ const HotelRoomManageItem: FC<Props> = ({
         <Box className="w-full md:w-1/3 relative">
           <CardMedia
             component="img"
-            image={room.firstImage || "/default-room.jpg"}
+            image={room.firstImage || assets.logo}
             alt={room.roomName}
             className="w-full h-48 md:h-full object-cover"
           />

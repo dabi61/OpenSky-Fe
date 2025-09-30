@@ -13,9 +13,14 @@ export type UserType = {
   createdAt: Dayjs;
 };
 
-export type UserUpdateResponse = {
+export type UserUpdateCurrentResponse = {
   message: string;
   profile: UserType;
+};
+
+export type UserUpdateResponse = {
+  message: string;
+  user: UserType;
 };
 
 export type UserPage = {

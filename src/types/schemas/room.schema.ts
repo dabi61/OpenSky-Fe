@@ -19,5 +19,6 @@ export const RoomSchema = z.object({
 export type RoomCreateValidateType = z.infer<typeof RoomSchema>;
 export const RoomUpdateSchema = RoomSchema.extend({
   status: z.enum(RoomStatus),
+  deleteImageIds: z.array(z.number()),
 }).partial();
 export type RoomupdateValidateType = z.infer<typeof RoomUpdateSchema>;

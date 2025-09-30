@@ -14,7 +14,7 @@ import { useBookingRoom } from "../contexts/BookingRoomContext";
 
 const Tour: React.FC = () => {
   const { tourList, getAllTours } = useTour();
-  const { addTourToBookingList } = useBookingRoom();
+  // const { addTourToBookingList } = useBookingRoom();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [totalPages, setTotalPages] = useState(0);
@@ -253,7 +253,7 @@ const Tour: React.FC = () => {
                       }}
                       onClick={() => {
                         navigate("/booking");
-                        addTourToBookingList(tour);
+                        // addTourToBookingList(tour);
                       }}
                     >
                       Đặt tour ngay

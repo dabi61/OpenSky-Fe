@@ -64,7 +64,7 @@ const HotelEditAll: FC = () => {
               }`
             }
           >
-            Room Manage
+            Thông tin phòng
           </NavLink>
 
           <NavLink
@@ -81,7 +81,7 @@ const HotelEditAll: FC = () => {
               }`
             }
           >
-            Hotel Edit
+            Thông tin khách sạn
           </NavLink>
         </div>
         <div

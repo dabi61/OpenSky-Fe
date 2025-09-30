@@ -18,5 +18,6 @@ export const HotelSchema = z.object({
 export type HotelCreateValidateType = z.infer<typeof HotelSchema>;
 export const HotelUpdateSchema = HotelSchema.extend({
   status: z.enum(HotelStatus),
+  deleteImageIds: z.array(z.number()),
 }).partial();
 export type HotelupdateValidateType = z.infer<typeof HotelUpdateSchema>;

@@ -10,9 +10,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
   RoomSchema,
+  RoomUpdateSchema,
   type RoomCreateValidateType,
+  type RoomupdateValidateType,
 } from "../types/schemas/room.schema";
-import { handleCreateRoom } from "../api/hotelRoom.api";
+import { handleCreateRoom, handleUpdateRoom } from "../api/hotelRoom.api";
 import { useHotel } from "../contexts/HotelContext";
 import { useRoom } from "../contexts/RoomContext";
 
@@ -29,6 +31,7 @@ const RoomManageInfo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [emblaRefImages] = useEmblaCarousel({ axis: "x", dragFree: true });
   const { imageList, addImageList, deleteImage, previewImageList } = useImage();
+  const [deleteImgIds, setDeleteImgIds] = useState<number[]>([]);
   const { getMyHotel } = useHotel();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
@@ -37,10 +40,13 @@ const RoomManageInfo = () => {
     setValue,
     reset,
     formState: { errors },
-  } = useForm<RoomCreateValidateType>({
-    resolver: zodResolver(RoomSchema),
+  } = useForm<RoomCreateValidateType | RoomupdateValidateType>({
+    resolver: zodResolver(id ? RoomUpdateSchema : RoomSchema),
     mode: "onBlur",
   });
+
+  setValue("deleteImageIds", deleteImgIds);
+  setValue("files", imageList);
 
   const fetchRoom = async () => {
     try {
@@ -55,8 +61,6 @@ const RoomManageInfo = () => {
   useEffect(() => {
     fetchRoom();
   }, []);
-
-  console.log(errors);
 
   useEffect(() => {
     if (selectedRoom) {
@@ -78,8 +82,9 @@ const RoomManageInfo = () => {
     }
   }, [selectedRoom, reset]);
 
-  const onSubmit = async (data: RoomCreateValidateType) => {
+  const onCreateSubmit = async (data: RoomCreateValidateType) => {
     const currentHotel = await getMyHotel();
+
     const res = await handleCreateRoom(data, currentHotel.hotelID);
     if (res.roomID) {
       toast.success(res.message);
@@ -89,11 +94,28 @@ const RoomManageInfo = () => {
     }
   };
 
+  const onUpdateSubmit = async (data: RoomupdateValidateType) => {
+    const res = await handleUpdateRoom(data, id!);
+    if (res.success) {
+      toast.success(res.message);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const onSubmit = async (
+    data: RoomupdateValidateType | RoomCreateValidateType
+  ) => {
+    if (id) {
+      await onUpdateSubmit(data as RoomupdateValidateType);
+    } else {
+      await onCreateSubmit(data as RoomCreateValidateType);
+    }
+  };
+
   const submitForm = async () => {
     setIsLoading(true);
-    if (imageList.length > 0) {
-      setValue("files", imageList);
-    }
+
     try {
       await handleSubmit(onSubmit)();
     } catch (error) {
@@ -302,34 +324,39 @@ const RoomManageInfo = () => {
                 >
                   <div className="embla__container flex gap-3 md:gap-4 lg:gap-5">
                     {selectedRoom &&
-                      selectedRoom.images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="embla__slide relative group shadow-md hover:shadow-lg transition-shadow flex-shrink-0 w-32 h-24 md:w-40 md:h-32 lg:w-48 lg:h-40"
-                        >
-                          <img
-                            src={image}
-                            alt={`Hotel preview ${index}`}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                          <div className="absolute inset-0 bg-black/50 bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                if (!isLoading) {
-                                  e.stopPropagation();
-                                  deleteImage(index);
-                                }
-                              }}
-                              className="p-1 md:p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                              aria-label="Xóa ảnh"
-                              disabled={isLoading}
-                            >
-                              <Trash size={16} />
-                            </button>
+                      selectedRoom.images
+                        .filter((img) => !deleteImgIds.includes(img.imageId))
+                        .map((image) => (
+                          <div
+                            key={image.imageId}
+                            className="embla__slide relative group shadow-md hover:shadow-lg transition-shadow flex-shrink-0 w-32 h-24 md:w-40 md:h-32 lg:w-48 lg:h-40"
+                          >
+                            <img
+                              src={image.imageUrl}
+                              alt={`Hotel preview ${image.imageId}`}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black/50 bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  if (!isLoading) {
+                                    e.stopPropagation();
+                                    setDeleteImgIds((prev) => [
+                                      ...prev,
+                                      image.imageId,
+                                    ]);
+                                  }
+                                }}
+                                className="p-1 md:p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                                aria-label="Xóa ảnh"
+                                disabled={isLoading}
+                              >
+                                <Trash size={16} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     {previewImageList.map((image, index) => (
                       <div
                         key={index}

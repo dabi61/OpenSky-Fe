@@ -71,7 +71,9 @@ const router = createBrowserRouter([
         element: (
           <TourProvider>
             <BookingRoomProvider>
-              <TourInfo />
+              <ScheduleProvider>
+                <TourInfo />
+              </ScheduleProvider>
             </BookingRoomProvider>
           </TourProvider>
         ),
@@ -142,7 +144,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: "booking",
-            element: <Booking />,
+            element: (
+              <BookingRoomProvider>
+                <Booking />
+              </BookingRoomProvider>
+            ),
           },
         ],
       },

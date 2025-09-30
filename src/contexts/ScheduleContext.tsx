@@ -15,6 +15,7 @@ import {
   handleGetScheduleById,
   handleGetScheduleByTour,
 } from "../api/schedule.api";
+import type { ScheduleStatus } from "../constants/ScheduleStatus";
 
 type ScheduleContextType = {
   scheduleList: ScheduleType[];
@@ -22,6 +23,11 @@ type ScheduleContextType = {
   selectedSchedule: ScheduleType | null;
   getScheduleByTour: (
     id: string,
+    page: number,
+    size: number
+  ) => Promise<SchedulePage>;
+  getScheduleByStatus: (
+    status: ScheduleStatus,
     page: number,
     size: number
   ) => Promise<SchedulePage>;
@@ -53,6 +59,21 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getScheduleByStatus = async (
+    status: ScheduleStatus,
+    page: number,
+    size: number
+  ): Promise<SchedulePage> => {
+    try {
+      setLoading(true);
+      const res = await handleGetScheduleByTour(status, page, size);
+      setScheduleList(res.schedules);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getScheduleById = async (id: string): Promise<ScheduleType> => {
     try {
       setLoading(true);
@@ -72,6 +93,7 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
         getScheduleByTour,
         getScheduleById,
         setSelectedSchedule,
+        getScheduleByStatus,
         loading,
       }}
     >

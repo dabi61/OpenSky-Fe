@@ -1,4 +1,4 @@
-import { useState, type FC, useEffect } from "react";
+import { useState, type FC } from "react";
 import {
   Drawer,
   Box,
@@ -27,41 +27,18 @@ import dayjs from "dayjs";
 
 const RoomStackBooking: FC = () => {
   const [open, setOpen] = useState(false);
-  const { bookingRoomList, removeToBookingList } = useBookingRoom();
+  const { roomBill, removeRoom, setCheckInDate, setNumberOfNights } =
+    useBookingRoom();
   const navigate = useNavigate();
-  const [checkinDate, setCheckinDate] = useState("");
-  const [numberOfNights, setNumberOfNights] = useState(1);
-  const [totalPrice, setTotalPrice] = useState(0);
   const [error, setError] = useState("");
-  const [checkoutDate, setCheckoutDate] = useState("");
 
   const nightOptions = Array.from({ length: 30 }, (_, i) => i + 1);
-
-  useEffect(() => {
-    if (checkinDate) {
-      const checkout = dayjs(checkinDate).add(numberOfNights, "day");
-      setCheckoutDate(checkout.format("YYYY-MM-DD"));
-    } else {
-      setCheckoutDate("");
-    }
-  }, [checkinDate, numberOfNights]);
-
-  useEffect(() => {
-    if (bookingRoomList.length > 0) {
-      const total = bookingRoomList.reduce((sum, room) => {
-        return sum + room.price * numberOfNights;
-      }, 0);
-      setTotalPrice(total);
-    } else {
-      setTotalPrice(0);
-    }
-  }, [numberOfNights, bookingRoomList]);
 
   const toggleDrawer = (state: boolean) => () => setOpen(state);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setCheckinDate(value);
+    setCheckInDate(new Date(value));
 
     const minDate = dayjs().add(3, "day");
     const maxDate = dayjs().add(3, "year");
@@ -120,7 +97,11 @@ const RoomStackBooking: FC = () => {
             </Box>
             <TextField
               type="date"
-              value={checkinDate}
+              value={
+                roomBill.checkInDate
+                  ? dayjs(roomBill.checkInDate).format("YYYY-MM-DD")
+                  : ""
+              }
               onChange={handleChange}
               size="small"
               fullWidth
@@ -140,7 +121,7 @@ const RoomStackBooking: FC = () => {
               <InputLabel>Số đêm</InputLabel>
               <Select
                 size="small"
-                value={numberOfNights}
+                value={roomBill.numberOfNights}
                 onChange={(e) => setNumberOfNights(Number(e.target.value))}
                 label="Số đêm"
                 MenuProps={{
@@ -161,13 +142,13 @@ const RoomStackBooking: FC = () => {
           </Box>
 
           <List sx={{ flexGrow: 1, overflow: "auto" }}>
-            {bookingRoomList.length === 0 && (
+            {roomBill.roomList.length === 0 && (
               <Typography sx={{ mt: 2, textAlign: "center" }}>
                 Chưa có phòng nào
               </Typography>
             )}
-            {bookingRoomList.map((room) => {
-              const roomTotalPrice = room.price * numberOfNights;
+            {roomBill.roomList.map((room) => {
+              const roomTotalPrice = room.price * roomBill.numberOfNights;
 
               return (
                 <ListItem
@@ -180,7 +161,7 @@ const RoomStackBooking: FC = () => {
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeToBookingList(room.roomID);
+                        removeRoom(room.roomID);
                       }}
                     >
                       XÓA
@@ -199,7 +180,8 @@ const RoomStackBooking: FC = () => {
                           Tổng:{" "}
                           {Intl.NumberFormat("vi-VN").format(roomTotalPrice)}{" "}
                           VNĐ
-                          {numberOfNights > 1 && ` (${numberOfNights} đêm)`}
+                          {roomBill.numberOfNights > 1 &&
+                            ` (${roomBill.numberOfNights} đêm)`}
                         </div>
                       </Typography>
                     }
@@ -209,10 +191,13 @@ const RoomStackBooking: FC = () => {
             })}
           </List>
 
-          {bookingRoomList.length > 0 && (
+          {roomBill && (
             <Box sx={{ mt: "auto", pt: 2 }}>
               <Typography variant="subtitle1" gutterBottom>
-                Tổng tiền {numberOfNights > 1 && `(${numberOfNights} đêm)`}:
+                Tổng tiền{" "}
+                {roomBill.numberOfNights > 1 &&
+                  `(${roomBill.numberOfNights} đêm)`}
+                :
               </Typography>
 
               <Typography
@@ -222,25 +207,23 @@ const RoomStackBooking: FC = () => {
                 color="primary"
                 sx={{ mb: 2 }}
               >
-                {Intl.NumberFormat("vi-VN").format(totalPrice)} VNĐ
+                {Intl.NumberFormat("vi-VN").format(roomBill.totalPrice)} VNĐ
               </Typography>
 
               <Button
                 variant="contained"
                 fullWidth
                 sx={{ mt: 2 }}
-                disabled={!checkinDate}
-                onClick={() =>
-                  navigate("/booking", {
-                    state: {
-                      checkinDate,
-                      checkoutDate,
-                      numberOfNights,
-                    },
-                  })
+                disabled={
+                  !roomBill.checkInDate ||
+                  !!error ||
+                  roomBill.roomList.length === 0
                 }
+                onClick={() => {
+                  navigate("/booking", { state: roomBill });
+                }}
               >
-                {checkinDate ? "Đặt phòng" : "Chọn ngày nhận phòng"}
+                {roomBill.checkInDate ? "Đặt phòng" : "Chọn ngày nhận phòng"}
               </Button>
 
               {error && (

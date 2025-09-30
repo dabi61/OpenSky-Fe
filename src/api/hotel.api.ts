@@ -115,7 +115,7 @@ export const handleCreateHotel = async (
 export const handleUpdateHotel = async (
   hotelID: string,
   hotel: HotelupdateValidateType
-): Promise<HotelResponse> => {
+): Promise<{ success: boolean; message: string }> => {
   try {
     const formData = new FormData();
     if (hotel.hotelName) formData.append("hotelName", hotel.hotelName);
@@ -127,20 +127,28 @@ export const handleUpdateHotel = async (
       formData.append("longitude", hotel.longitude.toString());
       formData.append("latitude", hotel.latitude.toString());
     }
+    if (hotel.deleteImageIds)
+      formData.append("deleteImageIds", hotel.deleteImageIds.join(","));
     if (hotel.description) formData.append("description", hotel.description);
     if (hotel.files && hotel.files.length > 0) {
       hotel.files.forEach((file) => {
         formData.append("files", file);
       });
-      formData.append("imageAction", "replace");
     }
     if (hotel.province) formData.append("province", hotel.province);
-    const res = await axiosInstance.put(`hotels/${hotelID}`);
-    return res.data;
+    const res = await axiosInstance.put(`hotels/${hotelID}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return {
+      success: true,
+      message: res.data.message,
+    };
   } catch (error: any) {
     return {
-      message: error?.response?.data.message,
-      hotelID: null,
+      success: false,
+      message: error?.response?.data?.message || "Cập nhật thất bại!",
     };
   }
 };

@@ -9,20 +9,11 @@ import {
   Select,
   MenuItem,
   Button,
-  Divider,
   Typography,
   InputAdornment,
   FormHelperText,
 } from "@mui/material";
-import {
-  MapPin,
-  Camera,
-  Save,
-  Mail,
-  User,
-  Calendar,
-  MapPinned,
-} from "lucide-react";
+import { MapPin, Camera, Mail, User, MapPinned, Info } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import {
   HotelUpdateSchema,
@@ -34,13 +25,15 @@ import { toast } from "sonner";
 import { getProvinces } from "../api/province.api";
 import { handleUpdateHotel } from "../api/hotel.api";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useImage } from "../contexts/ImageContext";
 
 const HotelEdit: React.FC = () => {
   const { getHotelById, selectedHotel, loading, getMyHotel } = useHotel();
   const { id } = useParams();
-  const [isLoading, setIsLoading] = useState(false);
-  // const [imageList, setImageList] = useState<File[]>([]);
   const location = useLocation().pathname;
+  const [deleteImgIds, setDeleteImgIds] = useState<number[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addImageList, imageList, previewImageList, deleteImage } = useImage();
 
   const fetchHotel = async () => {
     try {
@@ -86,7 +79,8 @@ const HotelEdit: React.FC = () => {
     mode: "onBlur",
   });
 
-  console.log(location);
+  setValue("deleteImageIds", deleteImgIds);
+  setValue("files", imageList);
 
   useEffect(() => {
     if (selectedHotel) {
@@ -125,24 +119,24 @@ const HotelEdit: React.FC = () => {
 
   const onSubmit = async (data: HotelupdateValidateType) => {
     const res = await handleUpdateHotel(selectedHotel?.hotelID, data);
-    if (res.hotelID) {
+    console.log(selectedHotel.hotelID);
+    if (res.success) {
       toast.success(res.message);
     } else {
       toast.error(res.message);
     }
   };
 
-  const submitForm = async () => {
-    setIsLoading(true);
+  const submitForm = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setIsSubmitting(true);
 
     try {
       if (coordinates.lat !== 0 && coordinates.lon !== 0) {
         setValue("latitude", coordinates.lat);
         setValue("longitude", coordinates.lon);
       }
-      // if (imageList.length > 0) {
-      //   setValue("files", imageList);
-      // }
+
       const address = watch("address");
       const allProvinces = await getProvinces();
       if (address) {
@@ -163,7 +157,7 @@ const HotelEdit: React.FC = () => {
       console.error("Error submitting form:", error);
       toast.error("Có lỗi xảy ra khi gửi form!");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
   return (
@@ -173,12 +167,23 @@ const HotelEdit: React.FC = () => {
           <div className="flex justify-end">
             <Button
               variant="contained"
-              startIcon={<Save size={20} />}
               className="bg-blue-600 hover:bg-blue-700"
               type="submit"
+              sx={{
+                backgroundColor: "#3B82F6",
+                "&:hover": {
+                  backgroundColor: "#2563EB",
+                },
+                "&:disabled": {
+                  backgroundColor: "#93C5FD",
+                },
+              }}
+              disabled={isSubmitting}
+              startIcon={
+                isSubmitting && <CircularProgress size={16} color="inherit" />
+              }
             >
-              {isLoading && <CircularProgress size={20} color="inherit" />}
-              {isLoading ? "Đang xử lý..." : "Lưu thay đổi"}
+              {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </div>
           <Paper elevation={2} className="p-6 mt-3">
@@ -220,8 +225,6 @@ const HotelEdit: React.FC = () => {
               />
             </div>
 
-            <Divider className="my-4" />
-
             <Typography
               variant="h6"
               className="font-semibold mb-4 flex items-center gap-2"
@@ -230,7 +233,7 @@ const HotelEdit: React.FC = () => {
               Địa chỉ
             </Typography>
 
-            <div className="flex flex-col gap-4 mb-4 mt-3">
+            <div className="flex flex-col mb-4 mt-3">
               <div className="flex gap-2">
                 <TextField
                   fullWidth
@@ -267,11 +270,11 @@ const HotelEdit: React.FC = () => {
               )}
             </div>
 
-            <Divider className="my-4" />
-
-            <Divider className="my-4" />
-
-            <Typography variant="h6" className="font-semibold mb-4 ">
+            <Typography
+              variant="h6"
+              className="font-semibold mb-4 flex items-center gap-2"
+            >
+              <Info size={20} />
               Thông tin bổ sung
             </Typography>
 
@@ -295,27 +298,6 @@ const HotelEdit: React.FC = () => {
                   <FormHelperText>{errors.status.message}</FormHelperText>
                 )}
               </FormControl>
-
-              <TextField
-                fullWidth
-                label="Ngày tạo"
-                value={
-                  selectedHotel
-                    ? new Date(selectedHotel.createdAt).toLocaleDateString(
-                        "vi-VN"
-                      )
-                    : ""
-                }
-                variant="outlined"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Calendar size={18} className="text-gray-500" />
-                    </InputAdornment>
-                  ),
-                }}
-                disabled
-              />
             </div>
 
             <TextField
@@ -349,20 +331,61 @@ const HotelEdit: React.FC = () => {
                 startIcon={<Camera size={18} />}
               >
                 Tải lên hình ảnh
-                <input type="file" hidden accept="image/*" multiple />
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  multiple
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const files = e.target.files
+                      ? Array.from(e.target.files)
+                      : [];
+                    if (files.length > 0) {
+                      addImageList(files, 7);
+                    }
+                  }}
+                />
               </Button>
             </div>
 
             <div className="flex gap-2 mt-4">
-              {selectedHotel?.images?.map((img, index) => (
+              {selectedHotel?.images
+                .filter((img) => !deleteImgIds.includes(img.imageId))
+                .map((img) => (
+                  <div key={img.imageId} className="relative group">
+                    <img
+                      src={img.imageUrl}
+                      alt={`Tour image ${img.imageId}`}
+                      className="w-auto h-40 object-cover rounded-md"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-md transition-opacity">
+                      <Button
+                        onClick={() =>
+                          setDeleteImgIds((prev) => [...prev, img.imageId])
+                        }
+                        size="small"
+                        color="error"
+                        variant="contained"
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              {previewImageList.map((img, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={img.imageUrl}
-                    alt={`Hotel image ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-md"
+                    src={img}
+                    alt={`Tour image ${index + 1}`}
+                    className="w-auto h-40 object-cover rounded-md"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-md transition-opacity">
-                    <Button size="small" color="error" variant="contained">
+                    <Button
+                      onClick={() => deleteImage(index)}
+                      size="small"
+                      color="error"
+                      variant="contained"
+                    >
                       Xóa
                     </Button>
                   </div>

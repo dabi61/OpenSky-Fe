@@ -10,6 +10,7 @@ import type {
 } from "../types/schemas/schedule.schema";
 import dayjs from "dayjs";
 import axiosInstance from "../utils/AxisosInstance";
+import type { ScheduleStatus } from "../constants/ScheduleStatus";
 
 export const handleGetScheduleByTour = async (
   tourId: string,
@@ -20,6 +21,19 @@ export const handleGetScheduleByTour = async (
     `${
       import.meta.env.VITE_API_URL
     }schedules/tour/${tourId}?page=${page}&size=${size}`
+  );
+  return res.data;
+};
+
+export const handleGetScheduleByStatus = async (
+  status: ScheduleStatus,
+  page: number,
+  size: number
+): Promise<SchedulePage> => {
+  const res = await axios.get(
+    `${
+      import.meta.env.VITE_API_URL
+    }schedules/status/${status}?page=${page}&size=${size}`
   );
   return res.data;
 };
@@ -80,7 +94,7 @@ export const handleUpdateSchedule = async (
   } catch (error: any) {
     return {
       success: false,
-      message: error?.response?.data?.message || "Tạo thất bại",
+      message: error?.response?.data?.message || "Cập nhật thất bại!",
     };
   }
 };

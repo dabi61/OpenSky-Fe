@@ -1,6 +1,7 @@
 import type {
   UserPage,
   UserType,
+  UserUpdateCurrentResponse,
   UserUpdateResponse,
 } from "../types/response/user.type";
 import axiosInstance from "../utils/AxisosInstance";
@@ -19,7 +20,7 @@ export const handleGetUser = async (): Promise<UserType> => {
 
 export const handleUpdateCurrentUser = async (
   data: Partial<UserUpdateType>
-): Promise<UserUpdateResponse> => {
+): Promise<UserUpdateCurrentResponse> => {
   try {
     const formData = new FormData();
     if (data.fullname) formData.append("fullName", data.fullname);
@@ -81,13 +82,15 @@ export const handleUpdateUser = async (
     if (data.citizenId) formData.append("citizenId", data.citizenId || "");
     if (data.dob) formData.append("dob", dayjs(data.dob).format("YYYY-MM-DD"));
     if (data.avatar) formData.append("avatar", data.avatar);
-    const res = await axiosInstance.put(`users/${id}`, formData);
+    console.log(data);
+    console.log(formData);
+    const res = await axiosInstance.put(`users/${id}/update`, formData);
     return res.data;
   } catch (error: any) {
     console.log(error);
     return {
       message: error?.response?.data?.message || "Cập nhật thất bại",
-      profile: {} as UserType,
+      user: {} as UserType,
     };
   }
 };

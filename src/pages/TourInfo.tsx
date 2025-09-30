@@ -1,4 +1,4 @@
-import { useEffect, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTour } from "../contexts/TourContext";
 import type { TourType, TourTypeWithImgs } from "../types/response/tour.type";
@@ -9,6 +9,10 @@ import { Button } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import TourItineraryItem from "../components/TourItineraryItem";
 import { useBookingRoom } from "../contexts/BookingRoomContext";
+import { useSchedule } from "../contexts/ScheduleContext";
+import dayjs from "dayjs";
+import Pagination from "../components/Pagination";
+import type { ScheduleType } from "../types/response/schedule.type";
 
 const TourInfo: FC = () => {
   const { id } = useParams();
@@ -21,7 +25,14 @@ const TourInfo: FC = () => {
     getTourItineraryByTour,
   } = useTour();
   const { user } = useUser();
-  const { addTourToBookingList } = useBookingRoom();
+  // const { addTourToBookingList } = useBookingRoom();
+  const { getScheduleByTour, scheduleList } = useSchedule();
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 15;
+  const [totalPages, setTotalPages] = useState(0);
+  const [selectedSchedule, setSelectedSchedule] = useState<ScheduleType | null>(
+    null
+  );
 
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
@@ -43,6 +54,16 @@ const TourInfo: FC = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (id) {
+        const res = await getScheduleByTour(id, page, itemsPerPage);
+        setTotalPages(res.totalPages);
+      }
+    };
+    fetchSchedule();
+  }, [id, page]);
+
   const summaryTour: TourType = {
     tourID: selectedTour?.tourID || "",
     tourName: selectedTour?.tourName || "",
@@ -55,6 +76,10 @@ const TourInfo: FC = () => {
     description: selectedTour?.description || "",
     firstImage: selectedTour?.images?.[0]?.imageUrl || "",
   };
+
+  useEffect(() => {
+    fetchTour();
+  }, []);
 
   useEffect(() => {
     fetchTour();
@@ -177,7 +202,7 @@ const TourInfo: FC = () => {
 
         <div className="mt-4 md:mt-5 pb-5 md:pb-10">
           <div className="font-semibold text-base md:text-lg mb-2 md:mb-3">
-            Hành trình
+            Lịch trình
           </div>
           <div className="space-y-3 relative border-l-3 border-blue-400 pl-6">
             {tourItineraryList.map((itinerary) => (
@@ -189,6 +214,85 @@ const TourInfo: FC = () => {
             ))}
           </div>
         </div>
+
+        <div className="mt-4 md:mt-5 pb-5 md:pb-10">
+          <div className="font-semibold text-base md:text-lg mb-4 md:mb-6">
+            Lịch trình khởi hành
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {scheduleList.length > 0 ? (
+              scheduleList.map((schedule) => (
+                <div
+                  key={schedule.scheduleID}
+                  className="border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 bg-white hover:border-blue-300 min-h-[180px] cursor-pointer flex flex-col justify-between"
+                  onClick={() => setSelectedSchedule(schedule)}
+                >
+                  <div className="flex-1">
+                    <div className="text-center mb-4 flex flex-col gap-1">
+                      <div className="font-bold text-lg text-blue-600 mb-1">
+                        {dayjs(schedule.startTime).format("DD/MM")}
+                      </div>
+                      <div className=" text-xs md:text-sm text-gray-600 text-center ">
+                        {dayjs(schedule.startTime).format("DD/MM/YYYY")} -
+                        {dayjs(schedule.endTime).format("DD/MM/YYYY")}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Thời gian khởi hành:
+                        <span className="ml-1">
+                          {dayjs(schedule.startTime).format("HH:mm")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-evenly items-center pt-3 border-t border-gray-100">
+                    <div className="text-center">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Users size={14} />
+                        <span>Đã đặt</span>
+                      </div>
+                      <div className="font-bold text-blue-600 text-sm">
+                        {schedule.numberPeople}
+                      </div>
+                    </div>
+
+                    {schedule.remainingSlots !== null && (
+                      <div className="text-center">
+                        <div className="text-xs text-gray-600">Chỗ trống</div>
+                        <div
+                          className={`font-bold text-sm ${
+                            schedule.remainingSlots > 0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {schedule.remainingSlots}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-xl">
+                <Users size={48} className="mx-auto mb-3 text-gray-400" />
+                <div className="text-lg">
+                  Chưa có lịch trình nào cho tour này
+                </div>
+              </div>
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination
+              onChange={setPage}
+              page={page}
+              totalPages={totalPages}
+            />
+          )}
+        </div>
+
         {(user?.role === "Customer" || user?.role === "Hotel") && (
           <div className="flex justify-center md:w-100 items-center mx-auto mb-7">
             <Button
@@ -210,7 +314,7 @@ const TourInfo: FC = () => {
               }}
               onClick={() => {
                 navigate("/booking");
-                addTourToBookingList(summaryTour);
+                // addTourToBookingList(summaryTour);
               }}
             >
               Đặt tour ngay

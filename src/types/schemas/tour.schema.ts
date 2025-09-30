@@ -21,5 +21,7 @@ export const TourSchema = z.object({
 });
 
 export type TourCreateValidateType = z.infer<typeof TourSchema>;
-export const TourUpdateSchema = TourSchema.partial();
+export const TourUpdateSchema = TourSchema.partial().extend({
+  deleteImageIds: z.array(z.number()),
+});
 export type TourUpdateValidateType = z.infer<typeof TourUpdateSchema>;

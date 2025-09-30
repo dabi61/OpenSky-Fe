@@ -6,13 +6,11 @@ import { MapPin, Users, Bed, ChevronLeft } from "lucide-react";
 import OverlayReload from "../components/Loading";
 import RoomStackBooking from "../components/RoomStackBooking";
 import type { RoomType } from "../types/response/room.type";
-import { useBookingRoom } from "../contexts/BookingRoomContext";
 
 const RoomInfo: FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getRoomById, selectedRoom } = useRoom();
-  const { addHotelToBookingList } = useBookingRoom();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
@@ -33,7 +31,7 @@ const RoomInfo: FC = () => {
 
   const summaryRoom: RoomType = {
     ...selectedRoom,
-    firstImage: images[0].imageUrl,
+    firstImage: images && images.length > 0 ? images[0].imageUrl : "",
   };
 
   return (
@@ -132,7 +130,7 @@ const RoomInfo: FC = () => {
                       fullWidth
                       className="bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
                       disabled={status !== "Available"}
-                      onClick={() => addHotelToBookingList(summaryRoom)}
+                      // onClick={() => addHotelToBookingList(summaryRoom)}
                     >
                       Đặt phòng ngay
                     </Button>

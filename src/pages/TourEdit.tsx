@@ -17,13 +17,13 @@ import {
   Chip,
   Card,
   CardContent,
+  CircularProgress,
 } from "@mui/material";
 import {
   MapPin,
   Users,
   DollarSign,
   Camera,
-  Save,
   ChevronLeft,
   Milestone,
   Plus,
@@ -51,6 +51,8 @@ import type { ScheduleStatus } from "../constants/ScheduleStatus";
 import ScheduleModal from "../components/ScheduleModal";
 import Pagination from "../components/Pagination";
 import { handleSoftDeleteSchedule } from "../api/schedule.api";
+import { useImage } from "../contexts/ImageContext";
+import { handleUpdateTour } from "../api/tour.api";
 
 const TourEdit: FC = () => {
   const { id } = useParams();
@@ -101,12 +103,15 @@ const TourEdit: FC = () => {
     }
   };
 
+  const { addImageList, imageList, previewImageList, deleteImage } = useImage();
   const [openModal, setOpenModal] = useState(false);
   const [selectedItinerry, setSelectedItinerary] =
     useState<TourItineraryType | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openScheduleInfo, setOpenScheduleInfo] = useState(false);
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
+  const [deleteImgIds, setDeleteImgIds] = useState<number[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTour();
@@ -116,6 +121,7 @@ const TourEdit: FC = () => {
     handleSubmit,
     register,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<TourUpdateValidateType>({
     resolver: zodResolver(TourUpdateSchema),
@@ -141,6 +147,9 @@ const TourEdit: FC = () => {
       toast.error(res.message);
     }
   };
+
+  setValue("deleteImageIds", deleteImgIds);
+  setValue("files", imageList);
 
   useEffect(() => {
     if (selectedTour) {
@@ -195,8 +204,20 @@ const TourEdit: FC = () => {
     return <OverlayReload />;
   }
 
-  const onSubmit = () => {
-    console.log("access!");
+  const onSubmit = async (data: TourUpdateValidateType) => {
+    setIsSubmitting(true);
+    try {
+      const res = await handleUpdateTour(id!, data);
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi cập nhật tour");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteItinerary = async (tourId: string) => {
@@ -213,10 +234,10 @@ const TourEdit: FC = () => {
   return (
     <>
       <form
-        className="p-6 min-h-screen w-6/7 mx-auto"
+        className="py-6 md:px-6 min-h-screen md:w-6/7 mx-auto"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center px-3 md:px-0 justify-between mb-6">
           <div className="flex items-center gap-2 cursor-pointer">
             <div
               className="bg-blue-500 rounded-full p-1"
@@ -228,11 +249,23 @@ const TourEdit: FC = () => {
           </div>
           <Button
             variant="contained"
-            startIcon={<Save size={20} />}
             className="bg-blue-600 hover:bg-blue-700"
             type="submit"
+            sx={{
+              backgroundColor: "#3B82F6",
+              "&:hover": {
+                backgroundColor: "#2563EB",
+              },
+              "&:disabled": {
+                backgroundColor: "#93C5FD",
+              },
+            }}
+            disabled={isSubmitting}
+            startIcon={
+              isSubmitting && <CircularProgress size={16} color="inherit" />
+            }
           >
-            Lưu thay đổi
+            {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>
         </div>
 
@@ -292,7 +325,10 @@ const TourEdit: FC = () => {
                   fullWidth
                   label="Số người tối đa"
                   type="number"
-                  {...register("maxPeople")}
+                  {...register("maxPeople", {
+                    required: "Vui lòng nhập số người tối đa",
+                    valueAsNumber: true,
+                  })}
                   error={!!errors.maxPeople}
                   helperText={errors.maxPeople?.message || " "}
                   variant="outlined"
@@ -317,15 +353,16 @@ const TourEdit: FC = () => {
               />
             </Paper>
 
-            <Paper elevation={2} className="p-6 mb-6">
-              <div className="flex justify-between mb-5">
+            <Paper elevation={2} className="p-4 md:p-6 mb-6">
+              <div className="flex justify-between items-center mb-4 md:mb-5">
                 <Typography
                   variant="h6"
-                  className="font-semibold mb-7 flex items-center gap-2"
+                  className="font-semibold flex items-center gap-2 text-lg md:text-xl"
                 >
                   <Calendar size={20} />
                   Lịch trình
                 </Typography>
+
                 <Button
                   onClick={() => {
                     setSelectedSchedule(null);
@@ -342,60 +379,184 @@ const TourEdit: FC = () => {
                   <Plus />
                 </Button>
               </div>
+
               {scheduleList.length > 0 ? (
                 <>
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Ngày bắt đầu</TableCell>
-                          <TableCell>Ngày kết thúc</TableCell>
-                          <TableCell>Số người</TableCell>
-                          <TableCell>Còn lại</TableCell>
-                          <TableCell>TourGuide</TableCell>
-                          <TableCell>Trạng thái</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {scheduleList.map((schedule: ScheduleType) => (
-                          <TableRow
-                            key={schedule.scheduleID}
-                            hover
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => {
-                              setSelectedSchedule(schedule);
-                              setOpenScheduleInfo(true);
-                            }}
-                          >
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Calendar size={16} className="text-gray-500" />
-                                {formatDate(schedule.startTime)}
-                              </div>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Clock size={16} className="text-gray-500" />
-                                {formatTime(schedule.startTime)}
-                              </div>
+                  <div className="hidden md:block">
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell className="font-semibold">
+                              Ngày bắt đầu
                             </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Calendar size={16} className="text-gray-500" />
-                                {formatDate(schedule.endTime)}
-                              </div>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Clock size={16} className="text-gray-500" />
-                                {formatTime(schedule.endTime)}
-                              </div>
+                            <TableCell className="font-semibold">
+                              Ngày kết thúc
                             </TableCell>
+                            <TableCell className="font-semibold">
+                              Số người
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              Còn lại
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              TourGuide
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              Trạng thái
+                            </TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {scheduleList.map((schedule: ScheduleType) => (
+                            <TableRow
+                              key={schedule.scheduleID}
+                              hover
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => {
+                                setSelectedSchedule(schedule);
+                                setOpenScheduleInfo(true);
+                              }}
+                            >
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Calendar
+                                    size={16}
+                                    className="text-gray-500"
+                                  />
+                                  {formatDate(schedule.startTime)}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Clock size={16} className="text-gray-500" />
+                                  {formatTime(schedule.startTime)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Calendar
+                                    size={16}
+                                    className="text-gray-500"
+                                  />
+                                  {formatDate(schedule.endTime)}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Clock size={16} className="text-gray-500" />
+                                  {formatTime(schedule.endTime)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <User size={16} className="text-gray-500" />
+                                  {schedule.numberPeople}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {schedule.remainingSlots !== null ? (
+                                  <Chip
+                                    label={schedule.remainingSlots}
+                                    size="small"
+                                    color={
+                                      schedule.remainingSlots > 0
+                                        ? "success"
+                                        : "error"
+                                    }
+                                    variant="outlined"
+                                  />
+                                ) : (
+                                  <span className="text-gray-500">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-medium">
+                                  <div className="text-sm">
+                                    {schedule.user.fullName}
+                                  </div>
+                                  <div className="text-xs text-gray-600 mt-1">
+                                    {schedule.user.phoneNumber}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={schedule.status}
+                                  size="small"
+                                  color={getStatusColor(schedule.status)}
+                                  variant="filled"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <div
+                                  className="flex p-2 rounded-lg transition-all text-red-400 hover:bg-red-50 hover:text-red-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedSchedule(schedule);
+                                    setOpenScheduleDialog(true);
+                                  }}
+                                >
+                                  <Trash2 size={18} />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </div>
 
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <User size={16} className="text-gray-500" />
-                                {schedule.numberPeople}
+                  {/* Hiển thị Card trên mobile */}
+                  <div className="md:hidden space-y-4">
+                    {scheduleList.map((schedule: ScheduleType) => (
+                      <Card
+                        key={schedule.scheduleID}
+                        className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setSelectedSchedule(schedule);
+                          setOpenScheduleInfo(true);
+                        }}
+                      >
+                        <CardContent className="p-0">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Calendar size={16} className="text-gray-500" />
+                                <span className="font-medium text-sm">
+                                  {formatDate(schedule.startTime)} -{" "}
+                                  {formatDate(schedule.endTime)}
+                                </span>
                               </div>
-                            </TableCell>
-                            <TableCell>
+                              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                <Clock size={14} />
+                                <span>
+                                  {formatTime(schedule.startTime)} -{" "}
+                                  {formatTime(schedule.endTime)}
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex p-2 rounded-lg transition-all text-red-400 hover:bg-red-50 hover:text-red-600 ml-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSchedule(schedule);
+                                setOpenScheduleDialog(true);
+                              }}
+                            >
+                              <Trash2 size={16} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="flex items-center gap-2">
+                              <User size={14} className="text-gray-500" />
+                              <span>
+                                Số người:{" "}
+                                <strong>{schedule.numberPeople}</strong>
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 mr-2">
+                                Còn lại:
+                              </span>
                               {schedule.remainingSlots !== null ? (
                                 <Chip
                                   label={schedule.remainingSlots}
@@ -410,46 +571,39 @@ const TourEdit: FC = () => {
                               ) : (
                                 <span className="text-gray-500">-</span>
                               )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-medium flex flex-col">
-                                <div>{schedule.user.fullName}</div>
-                                <div className="mt-2">
+                            </div>
+                          </div>
+
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <div className="font-medium text-sm">
+                                  {schedule.user.fullName}
+                                </div>
+                                <div className="text-xs text-gray-600">
                                   {schedule.user.phoneNumber}
                                 </div>
                               </div>
-                            </TableCell>
-                            <TableCell>
                               <Chip
                                 label={schedule.status}
                                 size="small"
                                 color={getStatusColor(schedule.status)}
                                 variant="filled"
                               />
-                            </TableCell>
-                            <TableCell>
-                              <div
-                                className={`flex my-auto p-2 rounded-lg transition-all opacity-100 text-red-400 hover:bg-red-50 hover:text-red-600"}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedSchedule(schedule);
-                                  setOpenScheduleDialog(true);
-                                }}
-                              >
-                                <Trash2 size={20} />
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
 
-                  <Pagination
-                    page={page}
-                    onChange={setPage}
-                    totalPages={totalPages}
-                  />
+                  <div className="mt-4">
+                    <Pagination
+                      page={page}
+                      onChange={setPage}
+                      totalPages={totalPages}
+                    />
+                  </div>
                 </>
               ) : (
                 <Card variant="outlined">
@@ -458,10 +612,19 @@ const TourEdit: FC = () => {
                       size={48}
                       className="mx-auto mb-4 text-gray-400"
                     />
-                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                    <Typography
+                      variant="h6"
+                      color="textSecondary"
+                      gutterBottom
+                      className="text-lg"
+                    >
                       Chưa có lịch trình nào
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className="text-sm md:text-base"
+                    >
                       Hiện tại chưa có lịch trình nào được đặt cho tour này.
                     </Typography>
                   </CardContent>
@@ -486,20 +649,61 @@ const TourEdit: FC = () => {
                   startIcon={<Camera size={18} />}
                 >
                   Tải lên hình ảnh
-                  <input type="file" hidden accept="image/*" multiple />
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    multiple
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const files = e.target.files
+                        ? Array.from(e.target.files)
+                        : [];
+                      if (files.length > 0) {
+                        addImageList(files, 7);
+                      }
+                    }}
+                  />
                 </Button>
               </div>
 
               <div className="flex gap-2 mt-4">
-                {selectedTour?.images?.map((img, index) => (
+                {selectedTour?.images
+                  .filter((img) => !deleteImgIds.includes(img.imageId))
+                  .map((img) => (
+                    <div key={img.imageId} className="relative group">
+                      <img
+                        src={img.imageUrl}
+                        alt={`Tour image ${img.imageId}`}
+                        className="w-auto h-40 object-cover rounded-md"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-md transition-opacity">
+                        <Button
+                          onClick={() =>
+                            setDeleteImgIds((prev) => [...prev, img.imageId])
+                          }
+                          size="small"
+                          color="error"
+                          variant="contained"
+                        >
+                          Xóa
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                {previewImageList.map((img, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={img.imageUrl}
+                      src={img}
                       alt={`Tour image ${index + 1}`}
                       className="w-auto h-40 object-cover rounded-md"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-md transition-opacity">
-                      <Button size="small" color="error" variant="contained">
+                      <Button
+                        onClick={() => deleteImage(index)}
+                        size="small"
+                        color="error"
+                        variant="contained"
+                      >
                         Xóa
                       </Button>
                     </div>

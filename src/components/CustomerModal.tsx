@@ -136,11 +136,12 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
     setIsSubmitting(true);
     try {
       const submitData: Partial<UserUpdateType> = {
-        fullname: formData.fullname,
-        phoneNumber: formData.phoneNumber,
-        citizenId: formData.citizenId,
-        dob: formData.dob ?? null,
+        fullname: formData?.fullname || "",
+        phoneNumber: formData?.phoneNumber || "",
+        citizenId: formData?.citizenId || "",
+        dob: formData?.dob || undefined,
       };
+      console.log(submitData);
 
       if (avatarFile) {
         submitData.avatar = avatarFile;

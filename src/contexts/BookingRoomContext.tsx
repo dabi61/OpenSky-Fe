@@ -6,91 +6,163 @@ import {
   type ReactNode,
 } from "react";
 import type { RoomType } from "../types/response/room.type";
-import type { TourType } from "../types/response/tour.type";
 import { toast } from "sonner";
+import Dexie, { type Table } from "dexie";
+
+export type BookingRoomType = {
+  id?: number;
+  checkInDate: Date | null;
+  numberOfNights: number;
+  roomList: RoomType[];
+  totalPrice: number;
+};
+
+class BookingDB extends Dexie {
+  roomBill!: Table<BookingRoomType, number>;
+
+  constructor() {
+    super("HotelBookingDB");
+    this.version(1).stores({
+      roomBill: "++id",
+    });
+  }
+}
+
+const db = new BookingDB();
 
 type BookingRoomContextType = {
-  bookingRoomList: RoomType[];
-  bookingTourList: TourType[];
-  addHotelToBookingList: (room: RoomType) => void;
-  addTourToBookingList: (tour: TourType) => void;
-  removeToBookingList: (roomID: string) => void;
-  removeAllBookingList: () => void;
+  roomBill: BookingRoomType;
+  addRoom: (room: RoomType) => void;
+  removeRoom: (roomID: string) => void;
+  setCheckInDate: (date: Date) => void;
+  setNumberOfNights: (nights: number) => void;
 };
 
 const BookingRoomContext = createContext<BookingRoomContextType | null>(null);
 
 export const BookingRoomProvider = ({ children }: { children: ReactNode }) => {
-  const [bookingRoomList, setBookingRoomList] = useState<RoomType[]>(() => {
-    try {
-      const stored = localStorage.getItem("bookingRoomList");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [bookingTourList, setBookingTourList] = useState<TourType[]>(() => {
-    try {
-      const stored = localStorage.getItem("bookingTourList");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
+  const [roomBill, setRoomBill] = useState<BookingRoomType>({
+    id: 1,
+    checkInDate: null,
+    numberOfNights: 1,
+    roomList: [],
+    totalPrice: 0,
   });
 
   useEffect(() => {
-    localStorage.setItem("bookingRoomList", JSON.stringify(bookingRoomList));
-  }, [bookingRoomList]);
-
-  useEffect(() => {
-    localStorage.setItem("bookingTourList", JSON.stringify(bookingTourList));
-  }, [bookingTourList]);
-
-  const addHotelToBookingList = (room: RoomType) => {
-    if (bookingTourList.length > 0) {
-      setBookingTourList([]);
-      toast.success("Đã xóa tour cũ và thêm phòng mới.");
-    }
-    setBookingRoomList((prev) => {
-      if (prev.length > 0 && prev[0].hotelID !== room.hotelID) {
-        toast.success("Đã xóa phòng cũ và thêm phòng mới từ khách sạn khác.");
-        return [room];
+    const loadRoomBill = async () => {
+      try {
+        const saved = await db.roomBill.get(1);
+        console.log("Loaded from Dexie:", saved);
+        if (saved) {
+          setRoomBill({
+            ...saved,
+            checkInDate: saved.checkInDate ? new Date(saved.checkInDate) : null,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading from Dexie:", error);
       }
-      return prev.some((r) => r.roomID === room.roomID)
-        ? prev
-        : [...prev, room];
+    };
+    loadRoomBill();
+  }, []);
+
+  useEffect(() => {
+    const saveRoomBill = async () => {
+      try {
+        await db.roomBill.put(roomBill, 1);
+        await db.roomBill.get(1);
+      } catch (error) {
+        console.error("Error saving to Dexie:", error);
+      }
+    };
+
+    if (
+      roomBill.roomList.length > 0 ||
+      roomBill.checkInDate ||
+      roomBill.numberOfNights > 1
+    ) {
+      saveRoomBill();
+    }
+  }, [roomBill]);
+
+  const calculateTotalPrice = (
+    roomList: RoomType[],
+    numberOfNights: number
+  ) => {
+    return roomList.reduce((acc, room) => acc + room.price * numberOfNights, 0);
+  };
+
+  const addRoom = (room: RoomType) => {
+    setRoomBill((prev) => {
+      if (!prev) {
+        return {
+          hotelID: room.hotelID,
+          checkInDate: null,
+          numberOfNights: 1,
+          roomList: [room],
+          totalPrice: room.price,
+        };
+      }
+      if (
+        prev.roomList.length > 0 &&
+        prev.roomList[0].hotelID !== room.hotelID
+      ) {
+        toast.error("Bạn chỉ có thể đặt phòng trong cùng một khách sạn!");
+        return prev;
+      }
+
+      if (prev.roomList.some((r) => r.roomID === room.roomID)) {
+        toast.warning("Phòng này đã được thêm!");
+        return prev;
+      }
+
+      const updatedRoomList = [...prev.roomList, room];
+
+      return {
+        ...prev,
+        roomList: updatedRoomList,
+        totalPrice: calculateTotalPrice(updatedRoomList, prev.numberOfNights),
+      };
     });
   };
 
-  const addTourToBookingList = (tour: TourType) => {
-    if (bookingRoomList.length > 0) {
-      setBookingRoomList([]);
-      toast.success("Đã xóa phòng cũ và thêm tour mới.");
-    } else {
-      toast.success("Đã chọn tour mới, tour cũ bị xóa.");
-    }
-    setBookingTourList([tour]);
+  const removeRoom = (roomID: string) => {
+    setRoomBill((prev) => {
+      const updatedRoomList = prev.roomList.filter((r) => r.roomID !== roomID);
+
+      return {
+        ...prev,
+        roomList: updatedRoomList,
+        totalPrice: calculateTotalPrice(updatedRoomList, prev.numberOfNights),
+      };
+    });
   };
 
-  const removeToBookingList = (roomID: string) => {
-    setBookingRoomList((prev) => prev.filter((r) => r.roomID !== roomID));
+  const setCheckInDate = (date: Date) => {
+    setRoomBill((prev) => (prev ? { ...prev, checkInDate: date } : prev));
   };
 
-  const removeAllBookingList = () => {
-    setBookingRoomList([]);
-    setBookingTourList([]);
+  const setNumberOfNights = (nights: number) => {
+    setRoomBill((prev) =>
+      prev
+        ? {
+            ...prev,
+            numberOfNights: nights,
+            totalPrice: calculateTotalPrice(prev.roomList, nights),
+          }
+        : prev
+    );
   };
 
   return (
     <BookingRoomContext.Provider
       value={{
-        bookingRoomList,
-        bookingTourList,
-        addHotelToBookingList,
-        addTourToBookingList,
-        removeToBookingList,
-        removeAllBookingList,
+        addRoom,
+        roomBill,
+        removeRoom,
+        setCheckInDate,
+        setNumberOfNights,
       }}
     >
       {children}

@@ -114,9 +114,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUser = async (id: string, data: Partial<UserUpdateType>) => {
     const res = await handleUpdateUser(id, data);
-    if (Object.keys(res.profile).length > 0) {
+    console.log(res);
+    if (Object.keys(res.user).length > 0) {
       toast.success(res.message);
-      updateUserInList(id, res.profile);
+      updateUserInList(id, res.user);
       setKeyword("");
     } else {
       toast.error(res.message);

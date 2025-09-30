@@ -6,7 +6,10 @@ import type {
   RoomResponse,
   RoomTypeWithImgs,
 } from "../types/response/room.type";
-import type { RoomCreateValidateType } from "../types/schemas/room.schema";
+import type {
+  RoomCreateValidateType,
+  RoomupdateValidateType,
+} from "../types/schemas/room.schema";
 import type { RoomStatus } from "../constants/RoomStatus";
 
 export const handleGetRoomByHotel = async (
@@ -62,6 +65,42 @@ export const handleCreateRoom = async (
     return {
       message: error?.response?.data.message,
       roomID: null,
+    };
+  }
+};
+
+export const handleUpdateRoom = async (
+  data: RoomupdateValidateType,
+  roomId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const formData = new FormData();
+    if (data.roomName) formData.append("roomName", data.roomName);
+    if (data.roomType) formData.append("roomType", data.roomType);
+    if (data.address) formData.append("address", data.address);
+    if (data.maxPeople) formData.append("maxPeople", data.maxPeople.toString());
+    if (data.price) formData.append("price", data.price.toString());
+    if (data.deleteImageIds?.length)
+      formData.append("deleteImageIds", data.deleteImageIds.join(","));
+    if (data.files && data.files.length > 0) {
+      data.files.forEach((file) => {
+        formData.append("files", file);
+      });
+    }
+    console.log(data);
+    const res = await axiosInstance.put(`rooms/${roomId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return {
+      success: true,
+      message: res.data.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message || "Cập nhật thất bại!",
     };
   }
 };

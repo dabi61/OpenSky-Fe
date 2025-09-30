@@ -69,7 +69,7 @@ export const handleCreateTour = async (
 export const handleUpdateTour = async (
   tourID: string,
   tour: TourUpdateValidateType
-): Promise<TourResponse> => {
+): Promise<{ success: boolean; message: string }> => {
   try {
     const formData = new FormData();
     if (tour.tourName) formData.append("tourName", tour.tourName);
@@ -77,19 +77,27 @@ export const handleUpdateTour = async (
     if (tour.maxPeople) formData.append("maxPeople", tour.maxPeople.toString());
     if (tour.address) formData.append("address", tour.address.toString());
     if (tour.description) formData.append("description", tour.description);
+    if (tour.deleteImageIds)
+      formData.append("deleteImageIds", tour.deleteImageIds.join(","));
     if (tour.files && tour.files.length > 0) {
       tour.files.forEach((file) => {
         formData.append("files", file);
       });
-      formData.append("imageAction", "replace");
     }
     if (tour.province) formData.append("province", tour.province);
-    const res = await axiosInstance.put(`tours/${tourID}`);
-    return res.data;
+    const res = await axiosInstance.put(`tours/${tourID}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return {
+      success: true,
+      message: res.data.message,
+    };
   } catch (error: any) {
     return {
-      message: error?.response?.data.message,
-      tourID: null,
+      success: false,
+      message: error?.response?.data?.message || "Cập nhật thất bại!",
     };
   }
 };
