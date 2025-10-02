@@ -54,7 +54,6 @@ export const handleCreateSchedule = async (
     formData.append("userID", data.userID);
     formData.append("startTime", dayjs(data.startTime).toISOString());
     formData.append("endTime", dayjs(data.endTime).toISOString());
-    formData.append("numberPeople", data.numberPeople.toString());
     const res = await axiosInstance.post("schedules", formData, {
       headers: {
         "Content-Type": "application/json",

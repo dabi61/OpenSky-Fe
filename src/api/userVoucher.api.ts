@@ -1,3 +1,4 @@
+import type { VoucherEnum } from "../constants/VoucherEnum";
 import type {
   UserVoucherPage,
   UserVoucherResponse,
@@ -24,6 +25,17 @@ export const handleGetMyVouchers = async (
 ): Promise<UserVoucherPage> => {
   const res = await axiosInstance.get(
     `user_vouchers/my-vouchers?page=${page}&size=${size}`
+  );
+  return res.data;
+};
+
+export const handleGetActiveVouchersType = async (
+  type: VoucherEnum,
+  page: number,
+  size: number
+): Promise<UserVoucherPage> => {
+  const res = await axiosInstance.get(
+    `user_vouchers/my-vouchers/active?type=${type}&page=${page}&size=${size}`
   );
   return res.data;
 };

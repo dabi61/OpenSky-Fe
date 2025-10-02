@@ -15,8 +15,7 @@ const Login: React.FC = () => {
     password: "",
     remember: false,
   });
-  const { reloadUser, user } = useUser();
-  console.log(user);
+  const { reloadUser } = useUser();
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();

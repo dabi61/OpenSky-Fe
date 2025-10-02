@@ -21,3 +21,5 @@ export const handleApplyVoucherToBill = async (
     };
   }
 };
+
+export const handleGetBillById = async (id: string) => {};

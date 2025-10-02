@@ -18,7 +18,6 @@ export const handleCreateTourItinerary = async (
     if (data.description) formData.append("description", data.description);
     formData.append("location", data.location);
     formData.append("dayNumber", data.dayNumber.toString());
-    console.log(data);
     const res = await axiosInstance.post(`tour_itinerary`, formData, {
       headers: {
         "Content-Type": "application/json",

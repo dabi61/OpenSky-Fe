@@ -3,7 +3,6 @@ import Modal from "./Modal";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { User, Check } from "lucide-react";
 import {
-  TextField,
   Button,
   Box,
   Avatar,
@@ -90,15 +89,13 @@ const ScheduleModal: FC<ModalProps> = ({
       reset({
         endTime: dayjs(data.endTime).toDate() || id,
         startTime: dayjs(data.startTime).toDate() || undefined,
-        numberPeople: data.numberPeople || 0,
         userID: data.user.userID || undefined,
-        tourID: data.tourID || id,
+        tourID: data.tour.tourID || id,
       });
     } else {
       reset({
         endTime: undefined,
         startTime: undefined,
-        numberPeople: 0,
         userID: undefined,
         tourID: id,
       });
@@ -285,27 +282,13 @@ const ScheduleModal: FC<ModalProps> = ({
             />
           </LocalizationProvider>
 
-          <Box>
-            <TextField
-              {...register("numberPeople", { valueAsNumber: true })}
-              label="Số người"
-              type="number"
-              fullWidth
-              error={!!errors.numberPeople}
-              helperText={errors.numberPeople?.message}
-              margin="normal"
-              InputProps={{
-                inputProps: { min: 0 },
-              }}
-            />
-          </Box>
-
           {data && (
             <Box flex={1}>
               <FormControl
                 fullWidth
                 error={!!(errors as any).status}
                 size="medium"
+                margin="normal"
               >
                 <InputLabel id="status-label" shrink>
                   Trạng thái
@@ -332,7 +315,7 @@ const ScheduleModal: FC<ModalProps> = ({
                   )}
                 />
                 <FormHelperText>
-                  {(errors as any).status?.message ?? " "}
+                  {(errors as any).status?.message}
                 </FormHelperText>
               </FormControl>
             </Box>
@@ -343,6 +326,9 @@ const ScheduleModal: FC<ModalProps> = ({
             variant="contained"
             fullWidth
             size="large"
+            sx={{
+              ...(data ? {} : { marginTop: 2 }),
+            }}
             disabled={
               !selectedTourGuideID ||
               (data?.status && !["Active", "Suspend"].includes(data.status))

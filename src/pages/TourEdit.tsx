@@ -393,9 +393,7 @@ const TourEdit: FC = () => {
                             <TableCell className="font-semibold">
                               Ngày kết thúc
                             </TableCell>
-                            <TableCell className="font-semibold">
-                              Số người
-                            </TableCell>
+
                             <TableCell className="font-semibold">
                               Còn lại
                             </TableCell>
@@ -445,28 +443,8 @@ const TourEdit: FC = () => {
                                   {formatTime(schedule.endTime)}
                                 </div>
                               </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <User size={16} className="text-gray-500" />
-                                  {schedule.numberPeople}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                {schedule.remainingSlots !== null ? (
-                                  <Chip
-                                    label={schedule.remainingSlots}
-                                    size="small"
-                                    color={
-                                      schedule.remainingSlots > 0
-                                        ? "success"
-                                        : "error"
-                                    }
-                                    variant="outlined"
-                                  />
-                                ) : (
-                                  <span className="text-gray-500">-</span>
-                                )}
-                              </TableCell>
+
+                              <TableCell>{schedule.numberPeople}</TableCell>
                               <TableCell>
                                 <div className="font-medium">
                                   <div className="text-sm">
@@ -504,7 +482,6 @@ const TourEdit: FC = () => {
                     </TableContainer>
                   </div>
 
-                  {/* Hiển thị Card trên mobile */}
                   <div className="md:hidden space-y-4">
                     {scheduleList.map((schedule: ScheduleType) => (
                       <Card
@@ -521,7 +498,7 @@ const TourEdit: FC = () => {
                               <div className="flex items-center gap-2 mb-2">
                                 <Calendar size={16} className="text-gray-500" />
                                 <span className="font-medium text-sm">
-                                  {formatDate(schedule.startTime)} -{" "}
+                                  {formatDate(schedule.startTime)} -
                                   {formatDate(schedule.endTime)}
                                 </span>
                               </div>
@@ -549,7 +526,7 @@ const TourEdit: FC = () => {
                             <div className="flex items-center gap-2">
                               <User size={14} className="text-gray-500" />
                               <span>
-                                Số người:{" "}
+                                Số người:
                                 <strong>{schedule.numberPeople}</strong>
                               </span>
                             </div>
@@ -557,20 +534,16 @@ const TourEdit: FC = () => {
                               <span className="text-gray-600 mr-2">
                                 Còn lại:
                               </span>
-                              {schedule.remainingSlots !== null ? (
-                                <Chip
-                                  label={schedule.remainingSlots}
-                                  size="small"
-                                  color={
-                                    schedule.remainingSlots > 0
-                                      ? "success"
-                                      : "error"
-                                  }
-                                  variant="outlined"
-                                />
-                              ) : (
-                                <span className="text-gray-500">-</span>
-                              )}
+                              <Chip
+                                label={schedule.numberPeople}
+                                size="small"
+                                color={
+                                  schedule.numberPeople > 0
+                                    ? "success"
+                                    : "error"
+                                }
+                                variant="outlined"
+                              />
                             </div>
                           </div>
 

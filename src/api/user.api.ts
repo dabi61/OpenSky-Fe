@@ -82,8 +82,6 @@ export const handleUpdateUser = async (
     if (data.citizenId) formData.append("citizenId", data.citizenId || "");
     if (data.dob) formData.append("dob", dayjs(data.dob).format("YYYY-MM-DD"));
     if (data.avatar) formData.append("avatar", data.avatar);
-    console.log(data);
-    console.log(formData);
     const res = await axiosInstance.put(`users/${id}/update`, formData);
     return res.data;
   } catch (error: any) {

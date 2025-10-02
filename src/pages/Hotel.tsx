@@ -22,7 +22,7 @@ import { useUser } from "../contexts/UserContext";
 
 const Hotel: React.FC = () => {
   const { user } = useUser();
-  const { getAllHotelExceptRemoved, hotelList } = useHotel();
+  const { getActiveHotel, hotelList } = useHotel();
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedProvince, setSelectedProvince] = useState<number | "">("");
@@ -36,7 +36,7 @@ const Hotel: React.FC = () => {
   const fetchHotels = async () => {
     try {
       const currentPage = parseInt(page);
-      const data = await getAllHotelExceptRemoved(currentPage, 20);
+      const data = await getActiveHotel(currentPage, 20);
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Failed to fetch tourList:", error);

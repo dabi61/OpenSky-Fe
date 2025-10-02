@@ -114,7 +114,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUser = async (id: string, data: Partial<UserUpdateType>) => {
     const res = await handleUpdateUser(id, data);
-    console.log(res);
     if (Object.keys(res.user).length > 0) {
       toast.success(res.message);
       updateUserInList(id, res.user);

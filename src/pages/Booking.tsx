@@ -1,16 +1,11 @@
 import { Calendar, ChevronLeft, ChevronRight, Tag } from "lucide-react";
-import {
-  Navigate,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { User, Mail, Phone, CreditCard } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UserVoucherType } from "../types/response/userVoucher.type";
 import Modal from "../components/Modal";
-import { handleGetMyVouchers } from "../api/userVoucher.api";
+import { handleGetActiveVouchersType } from "../api/userVoucher.api";
 import dayjs from "dayjs";
 import type { TourType } from "../types/response/tour.type";
 import { type BookingRoomType } from "../contexts/BookingRoomContext";
@@ -30,11 +25,7 @@ const Booking: React.FC = () => {
     useState<UserVoucherType | null>(null);
   const [openVoucherModal, setOpenVoucherModal] = useState(false);
   const location = useLocation();
-  const [searchParams] = useSearchParams();
 
-  console.log(searchParams);
-  const myParam = searchParams.get("id");
-  console.log(myParam);
   const roomBill: BookingRoomType = location.state;
   if (!roomBill || roomBill.roomList.length === 0) {
     return <Navigate to="/unauthorized" replace />;
@@ -49,7 +40,7 @@ const Booking: React.FC = () => {
 
   useEffect(() => {
     const fetchMyVouchers = async () => {
-      const res = await handleGetMyVouchers(page, 6);
+      const res = await handleGetActiveVouchersType("Hotel", page, 6);
       if (res.userVouchers) {
         const mapped = res.userVouchers.map((v) => ({
           ...v,
@@ -72,9 +63,7 @@ const Booking: React.FC = () => {
         .toDate(),
       rooms: roomBill.roomList.map((r) => ({ roomID: r.roomID })),
     };
-    console.log(formData);
     const res = await handleCreateBooking(formData);
-    console.log(res);
     if (res.bookingId && res.billId) {
       if (selectedVoucher) {
         const billForm: BillApplyType = {

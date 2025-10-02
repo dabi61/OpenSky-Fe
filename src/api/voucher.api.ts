@@ -42,6 +42,14 @@ export const handleGetAvailableVoucher = async (
   return res.data;
 };
 
+export const handleGetAllVoucher = async (
+  page: number,
+  limit: number
+): Promise<VoucherPage> => {
+  const res = await axiosInstance(`vouchers?page=${page}&size=${limit}`);
+  return res.data;
+};
+
 export const handleGetUnsavedVoucher = async (
   page: number,
   limit: number

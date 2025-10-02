@@ -87,7 +87,6 @@ export const handleUpdateRoom = async (
         formData.append("files", file);
       });
     }
-    console.log(data);
     const res = await axiosInstance.put(`rooms/${roomId}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",

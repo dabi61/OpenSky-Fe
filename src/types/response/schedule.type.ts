@@ -1,17 +1,17 @@
 import type { Dayjs } from "dayjs";
 import type { ScheduleStatus } from "../../constants/ScheduleStatus";
 import type { UserSummaryType } from "./user.type";
+import type { TourSummary } from "./tour.type";
 
 export type ScheduleType = {
   scheduleID: string;
-  tourID: string;
+  tour: TourSummary;
   user: UserSummaryType;
   startTime: Dayjs;
   endTime: Dayjs;
   numberPeople: 20;
   status: ScheduleStatus;
   tourName: string;
-  remainingSlots: null;
   createdAt: Date;
 };
 

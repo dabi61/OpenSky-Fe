@@ -21,11 +21,9 @@ const Discount: React.FC = () => {
         if (user) {
           const data = await getUnsavedVoucher(Number(page), 20);
           setTotalPages(data.totalPages);
-          console.log("unsaved: ", data);
         } else {
           const data = await getAvailableVoucher(Number(page), 20);
           setTotalPages(data.totalPages);
-          console.log("normal: ", data);
         }
       } catch (error) {
         console.error("Failed to fetch tourList:", error);

@@ -38,6 +38,7 @@ import UserVoucher from "../pages/UserVoucher";
 import Booking from "../pages/Booking";
 import { BookingRoomProvider } from "../contexts/BookingRoomContext";
 import { ScheduleProvider } from "../contexts/ScheduleContext";
+import Bill from "../pages/Bill";
 
 const router = createBrowserRouter([
   {
@@ -128,6 +129,10 @@ const router = createBrowserRouter([
               {
                 path: "user_voucher",
                 element: <UserVoucher />,
+              },
+              {
+                path: "bill/:id",
+                element: <Bill />,
               },
             ],
           },

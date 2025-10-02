@@ -8,7 +8,6 @@ import OverlayReload from "../components/Loading";
 import { Button } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import TourItineraryItem from "../components/TourItineraryItem";
-import { useBookingRoom } from "../contexts/BookingRoomContext";
 import { useSchedule } from "../contexts/ScheduleContext";
 import dayjs from "dayjs";
 import Pagination from "../components/Pagination";
@@ -25,7 +24,6 @@ const TourInfo: FC = () => {
     getTourItineraryByTour,
   } = useTour();
   const { user } = useUser();
-  // const { addTourToBookingList } = useBookingRoom();
   const { getScheduleByTour, scheduleList } = useSchedule();
   const [page, setPage] = useState(1);
   const itemsPerPage = 15;
@@ -33,6 +31,26 @@ const TourInfo: FC = () => {
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleType | null>(
     null
   );
+  const [quantity, setQuantity] = useState(1);
+
+  const handleIncreaseQuantity = () => {
+    if (!selectedSchedule || !selectedTour) return;
+
+    const maxQuantity =
+      selectedSchedule.numberPeople !== null
+        ? selectedSchedule.numberPeople
+        : selectedTour?.maxPeople || 1;
+
+    if (quantity < maxQuantity) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
 
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
@@ -99,6 +117,8 @@ const TourInfo: FC = () => {
   }
 
   const tour: TourTypeWithImgs = selectedTour;
+
+  console.log(selectedSchedule);
 
   return (
     <div className="relative w-full md:w-[90%] mx-auto">
@@ -225,21 +245,33 @@ const TourInfo: FC = () => {
               scheduleList.map((schedule) => (
                 <div
                   key={schedule.scheduleID}
-                  className="border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 bg-white hover:border-blue-300 min-h-[180px] cursor-pointer flex flex-col justify-between"
+                  className={`${
+                    schedule.scheduleID === selectedSchedule?.scheduleID
+                      ? "bg-blue-100 border-blue-400"
+                      : "bg-white border-gray-200 hover:border-blue-300"
+                  } rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 min-h-[180px] cursor-pointer flex flex-col justify-between`}
                   onClick={() => setSelectedSchedule(schedule)}
                 >
                   <div className="flex-1">
                     <div className="text-center mb-4 flex flex-col gap-1">
-                      <div className="font-bold text-lg text-blue-600 mb-1">
+                      <div
+                        className={`font-bold text-lg mb-1 ${
+                          schedule.scheduleID === selectedSchedule?.scheduleID
+                            ? "text-blue-700"
+                            : "text-blue-600"
+                        }`}
+                      >
                         {dayjs(schedule.startTime).format("DD/MM")}
                       </div>
-                      <div className=" text-xs md:text-sm text-gray-600 text-center ">
-                        {dayjs(schedule.startTime).format("DD/MM/YYYY")} -
+
+                      <div className="text-xs md:text-sm text-gray-600">
+                        {dayjs(schedule.startTime).format("DD/MM/YYYY")} -{" "}
                         {dayjs(schedule.endTime).format("DD/MM/YYYY")}
                       </div>
+
                       <div className="text-xs text-gray-500">
                         Thời gian khởi hành:
-                        <span className="ml-1">
+                        <span className="ml-1 font-medium text-gray-700">
                           {dayjs(schedule.startTime).format("HH:mm")}
                         </span>
                       </div>
@@ -257,20 +289,18 @@ const TourInfo: FC = () => {
                       </div>
                     </div>
 
-                    {schedule.remainingSlots !== null && (
-                      <div className="text-center">
-                        <div className="text-xs text-gray-600">Chỗ trống</div>
-                        <div
-                          className={`font-bold text-sm ${
-                            schedule.remainingSlots > 0
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {schedule.remainingSlots}
-                        </div>
+                    <div className="text-center">
+                      <div className="text-xs text-gray-600">Chỗ trống</div>
+                      <div
+                        className={`font-bold text-sm ${
+                          schedule.numberPeople > 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {schedule.numberPeople}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))
@@ -293,34 +323,158 @@ const TourInfo: FC = () => {
           )}
         </div>
 
-        {(user?.role === "Customer" || user?.role === "Hotel") && (
-          <div className="flex justify-center md:w-100 items-center mx-auto mb-7">
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#3B82F6",
-                padding: "12px 24px",
-                borderRadius: "12px",
-                fontWeight: 600,
-                fontSize: "16px",
-                textTransform: "none",
-                flex: 1,
-                "&:hover": {
-                  backgroundColor: "#2563EB",
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
-                },
-                transition: "all 0.2s ease-in-out",
-              }}
-              onClick={() => {
-                navigate("/booking");
-                // addTourToBookingList(summaryTour);
-              }}
-            >
-              Đặt tour ngay
-            </Button>
+        {selectedSchedule && (
+          <div className="mt-6 p-6 bg-blue-50 rounded-xl mb-10 border border-blue-200">
+            <div className="font-semibold text-lg md:text-xl text-blue-800 mb-4">
+              Thông tin đặt tour
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="font-medium text-gray-700">
+                  Lịch trình đã chọn:
+                </div>
+                <div className="bg-white p-4 rounded-lg border border-blue-300">
+                  <div className="font-bold text-blue-600">
+                    {dayjs(selectedSchedule.startTime).format("DD/MM/YYYY")} -{" "}
+                    {dayjs(selectedSchedule.endTime).format("DD/MM/YYYY")}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Khởi hành:{" "}
+                    {dayjs(selectedSchedule.startTime).format("HH:mm")}
+                  </div>
+                  <div className="flex items-center mt-2 text-sm">
+                    <span className="text-gray-600">Chỗ trống:</span>
+                    <span
+                      className={`font-bold ml-1 ${
+                        selectedSchedule.numberPeople > 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {selectedSchedule.numberPeople}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="font-medium text-gray-700">Số lượng vé:</div>
+                <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-blue-300">
+                  <button
+                    onClick={handleDecreaseQuantity}
+                    disabled={quantity <= 1}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      quantity <= 1
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                    } text-white`}
+                  >
+                    -
+                  </button>
+
+                  <span className="text-xl font-bold min-w-[40px] text-center">
+                    {quantity}
+                  </span>
+
+                  <button
+                    onClick={handleIncreaseQuantity}
+                    disabled={
+                      selectedSchedule.numberPeople > 0
+                        ? quantity >= selectedSchedule.numberPeople
+                        : quantity >= (selectedTour?.maxPeople || 1)
+                    }
+                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      (
+                        selectedTour.maxPeople -
+                          selectedSchedule.numberPeople !==
+                        null
+                          ? quantity >= selectedSchedule.numberPeople
+                          : quantity >= (selectedTour?.maxPeople || 1)
+                      )
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                    } text-white`}
+                  >
+                    +
+                  </button>
+
+                  <div className="ml-4 text-sm text-gray-600">
+                    Tổng tiền:{" "}
+                    <span className="font-bold text-blue-600 text-lg">
+                      {new Intl.NumberFormat("vi-VN").format(
+                        summaryTour.price * quantity
+                      )}{" "}
+                      VNĐ
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {(user?.role === "Customer" || user?.role === "Hotel") && (
+              <div className="flex justify-center mt-6">
+                <Button
+                  variant="contained"
+                  // onClick={handleBookTour}
+                  sx={{
+                    backgroundColor: "#3B82F6",
+                    padding: "12px 24px",
+                    borderRadius: "12px",
+                    fontWeight: 600,
+                    fontSize: "16px",
+                    textTransform: "none",
+                    "&:hover": {
+                      backgroundColor: "#2563EB",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                    },
+                    transition: "all 0.2s ease-in-out",
+                  }}
+                >
+                  Đặt {quantity} vé -{" "}
+                  {new Intl.NumberFormat("vi-VN").format(
+                    summaryTour.price * quantity
+                  )}{" "}
+                  VNĐ
+                </Button>
+              </div>
+            )}
           </div>
         )}
+
+        {(user?.role === "Customer" || user?.role === "Hotel") &&
+          !selectedSchedule && (
+            <div className="flex justify-center md:w-100 items-center mx-auto mb-7">
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#3B82F6",
+                  padding: "12px 24px",
+                  borderRadius: "12px",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                  textTransform: "none",
+                  flex: 1,
+                  "&:hover": {
+                    backgroundColor: "#2563EB",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+                onClick={() => {
+                  if (!selectedSchedule) {
+                    alert("Vui lòng chọn lịch trình trước khi đặt tour");
+                    return;
+                  }
+                  navigate("/booking");
+                }}
+              >
+                Đặt tour ngay
+              </Button>
+            </div>
+          )}
       </div>
     </div>
   );

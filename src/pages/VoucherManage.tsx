@@ -25,8 +25,8 @@ const VoucherManage: React.FC = () => {
     loading,
     selectedVoucher,
     getVoucherByType,
-    getAvailableVoucher,
     setSelectedVoucher,
+    getAllVoucher,
   } = useVoucher();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useQueryState("page", "1" as string);
@@ -39,7 +39,7 @@ const VoucherManage: React.FC = () => {
   const fetchVouchers = async () => {
     try {
       if (!selectedType) {
-        const data = await getAvailableVoucher(parseInt(page), 20);
+        const data = await getAllVoucher(parseInt(page), 20);
         setTotalPages(data.totalPages);
       } else {
         const data = await getVoucherByType(selectedType, parseInt(page), 20);
@@ -50,12 +50,14 @@ const VoucherManage: React.FC = () => {
     }
   };
 
+  console.log(voucherList);
+
   const handleDelete = async () => {
     if (!selectedVoucher?.voucherID) return;
     const res = await handleSoftDeleteVoucher(selectedVoucher.voucherID);
     if (res.success) {
       toast.success(res.message);
-      getAvailableVoucher(parseInt(page), 20);
+      getAllVoucher(parseInt(page), 20);
     } else {
       toast.error(res.message);
     }
@@ -266,7 +268,7 @@ const VoucherManage: React.FC = () => {
           }, 500);
         }}
         data={selectedVoucher || null}
-        onSuccess={() => getAvailableVoucher(Number(page), 20)}
+        onSuccess={() => getAllVoucher(Number(page), 20)}
       />
     </>
   );

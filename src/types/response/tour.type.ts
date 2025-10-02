@@ -38,3 +38,12 @@ export type TourPage = {
   pageNumber: number;
   pageSize: number;
 };
+
+export type TourSummary = {
+  tourID: string;
+  tourName: string;
+  description: string;
+  maxPeople: number;
+  price: number;
+  star: number;
+};
