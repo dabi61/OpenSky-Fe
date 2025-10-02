@@ -12,6 +12,7 @@ import { useSchedule } from "../contexts/ScheduleContext";
 import dayjs from "dayjs";
 import Pagination from "../components/Pagination";
 import type { ScheduleType } from "../types/response/schedule.type";
+import { useBooking } from "../contexts/BookingContext";
 
 const TourInfo: FC = () => {
   const { id } = useParams();
@@ -25,6 +26,7 @@ const TourInfo: FC = () => {
   } = useTour();
   const { user } = useUser();
   const { getScheduleByTour, scheduleList } = useSchedule();
+  const { setBill } = useBooking();
   const [page, setPage] = useState(1);
   const itemsPerPage = 15;
   const [totalPages, setTotalPages] = useState(0);
@@ -100,10 +102,6 @@ const TourInfo: FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchTour();
-  }, []);
-
-  useEffect(() => {
     if (selectedTour?.images?.length && emblaApi) {
       emblaApi.reInit();
     }
@@ -119,6 +117,17 @@ const TourInfo: FC = () => {
   const tour: TourTypeWithImgs = selectedTour;
 
   console.log(selectedSchedule);
+  const handleSubmitBill = () => {
+    if (selectedSchedule) {
+      setBill({
+        id: 1,
+        type: "schedule",
+        schedule: selectedSchedule,
+        numberOfGuest: quantity,
+      });
+    }
+    navigate(`/booking`);
+  };
 
   return (
     <div className="relative w-full md:w-[90%] mx-auto">
@@ -329,12 +338,12 @@ const TourInfo: FC = () => {
               Thông tin đặt tour
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+              <div className="flex flex-col space-y-3">
                 <div className="font-medium text-gray-700">
                   Lịch trình đã chọn:
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-blue-300">
+                <div className="flex-1 bg-white p-4 rounded-lg border border-blue-300">
                   <div className="font-bold text-blue-600">
                     {dayjs(selectedSchedule.startTime).format("DD/MM/YYYY")} -{" "}
                     {dayjs(selectedSchedule.endTime).format("DD/MM/YYYY")}
@@ -358,9 +367,9 @@ const TourInfo: FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="flex flex-col space-y-3">
                 <div className="font-medium text-gray-700">Số lượng vé:</div>
-                <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-blue-300">
+                <div className="flex-1 flex items-center gap-4 bg-white p-4 rounded-lg border border-blue-300">
                   <button
                     onClick={handleDecreaseQuantity}
                     disabled={quantity <= 1}
@@ -416,7 +425,7 @@ const TourInfo: FC = () => {
               <div className="flex justify-center mt-6">
                 <Button
                   variant="contained"
-                  // onClick={handleBookTour}
+                  onClick={handleSubmitBill}
                   sx={{
                     backgroundColor: "#3B82F6",
                     padding: "12px 24px",
@@ -442,39 +451,6 @@ const TourInfo: FC = () => {
             )}
           </div>
         )}
-
-        {(user?.role === "Customer" || user?.role === "Hotel") &&
-          !selectedSchedule && (
-            <div className="flex justify-center md:w-100 items-center mx-auto mb-7">
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: "#3B82F6",
-                  padding: "12px 24px",
-                  borderRadius: "12px",
-                  fontWeight: 600,
-                  fontSize: "16px",
-                  textTransform: "none",
-                  flex: 1,
-                  "&:hover": {
-                    backgroundColor: "#2563EB",
-                    transform: "translateY(-1px)",
-                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
-                  },
-                  transition: "all 0.2s ease-in-out",
-                }}
-                onClick={() => {
-                  if (!selectedSchedule) {
-                    alert("Vui lòng chọn lịch trình trước khi đặt tour");
-                    return;
-                  }
-                  navigate("/booking");
-                }}
-              >
-                Đặt tour ngay
-              </Button>
-            </div>
-          )}
       </div>
     </div>
   );

@@ -12,15 +12,12 @@ import { handleUpdateHotelStatus } from "../api/hotel.api";
 import type { HotelStatus } from "../constants/HotelStatus";
 import { toast } from "sonner";
 import RoomItem from "../components/RoomItem";
-import RoomStackBooking from "../components/RoomStackBooking";
-import { useBookingRoom } from "../contexts/BookingRoomContext";
 
 const HotelInfo = () => {
   const { id } = useParams();
   const { getHotelById, loading, selectedHotel } = useHotel();
   const [totalPages, setTotalPages] = useState(0);
   const { getRoomByHotel, roomList } = useRoom();
-  const { addRoom } = useBookingRoom();
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
     axis: "x",
     align: "center",
@@ -195,11 +192,7 @@ const HotelInfo = () => {
 
               <div>
                 {roomList.map((room) => (
-                  <RoomItem
-                    key={room.roomID}
-                    room={room}
-                    onClick={() => addRoom(room)}
-                  />
+                  <RoomItem key={room.roomID} room={room} />
                 ))}
               </div>
 
@@ -315,7 +308,6 @@ const HotelInfo = () => {
           )}
         </div>
       </div>
-      <RoomStackBooking />
     </>
   );
 };

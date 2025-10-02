@@ -26,8 +26,6 @@ function Header() {
   const { user, loading, reloadUser } = useUser();
   const navigate = useNavigate();
 
-  console.log(user);
-
   const settingMenuItems = [
     { name: "Cá nhân", to: "/profile" },
     ...(user?.role === Roles.HOTELMANAGER

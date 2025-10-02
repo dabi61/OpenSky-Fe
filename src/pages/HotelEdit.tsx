@@ -48,6 +48,8 @@ const HotelEdit: React.FC = () => {
     }
   };
 
+  console.log(selectedHotel);
+
   useEffect(() => {
     fetchHotel();
   }, []);

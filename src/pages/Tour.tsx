@@ -10,7 +10,6 @@ import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
 import StarSort from "../components/StarSort";
 import { useNavigate } from "react-router-dom";
-import { useBookingRoom } from "../contexts/BookingRoomContext";
 
 const Tour: React.FC = () => {
   const { tourList, getAllTours } = useTour();
@@ -209,7 +208,7 @@ const Tour: React.FC = () => {
                       {tour.tourName}
                     </h3>
                     <span className="text-2xl font-bold text-blue-600 whitespace-nowrap">
-                      {new Intl.NumberFormat("vi-VN").format(tour.price)} ₫
+                      {new Intl.NumberFormat("vi-VN").format(tour.price)} VNĐ
                     </span>
                   </div>
 

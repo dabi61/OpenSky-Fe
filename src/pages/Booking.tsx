@@ -1,19 +1,29 @@
 import { Calendar, ChevronLeft, ChevronRight, Tag } from "lucide-react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { User, Mail, Phone, CreditCard } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { UserVoucherType } from "../types/response/userVoucher.type";
+import type {
+  UserVoucherPage,
+  UserVoucherType,
+} from "../types/response/userVoucher.type";
 import Modal from "../components/Modal";
 import { handleGetActiveVouchersType } from "../api/userVoucher.api";
 import dayjs from "dayjs";
-import type { TourType } from "../types/response/tour.type";
-import { type BookingRoomType } from "../contexts/BookingRoomContext";
-import type { BookingCreateType } from "../types/schemas/booking.schema";
-import { handleCreateBooking } from "../api/booking.api";
 import { toast } from "sonner";
 import { handleApplyVoucherToBill } from "../api/bill.api";
 import type { BillApplyType } from "../types/schemas/bill.schema";
+import { useBooking, type BookingBill } from "../contexts/BookingContext";
+import {
+  handleCreateRoomBooking,
+  handleCreateScheduleBooking,
+} from "../api/booking.api";
+import type {
+  BookingRoomCreateType,
+  BookingScheduleCreateType,
+} from "../types/schemas/booking.schema";
+import OverlayReload from "../components/Loading";
+import { Typography } from "@mui/material";
 
 const Booking: React.FC = () => {
   const navigate = useNavigate();
@@ -24,23 +34,17 @@ const Booking: React.FC = () => {
   const [selectedVoucher, setSelectedVoucher] =
     useState<UserVoucherType | null>(null);
   const [openVoucherModal, setOpenVoucherModal] = useState(false);
-  const location = useLocation();
-
-  const roomBill: BookingRoomType = location.state;
-  if (!roomBill || roomBill.roomList.length === 0) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
-  const bookingTourList: TourType[] = JSON.parse(
-    sessionStorage.getItem("bookingTourList") || "[]"
-  );
-
-  const bookingTour: TourType | null =
-    bookingTourList.length > 0 ? bookingTourList[0] : null;
+  const { bill, loading } = useBooking();
+  console.log(bill);
 
   useEffect(() => {
     const fetchMyVouchers = async () => {
-      const res = await handleGetActiveVouchersType("Hotel", page, 6);
+      let res: UserVoucherPage;
+      if (bill?.type === "room") {
+        res = await handleGetActiveVouchersType("Hotel", page, 6);
+      } else {
+        res = await handleGetActiveVouchersType("Hotel", page, 6);
+      }
       if (res.userVouchers) {
         const mapped = res.userVouchers.map((v) => ({
           ...v,
@@ -55,15 +59,36 @@ const Booking: React.FC = () => {
     fetchMyVouchers();
   }, [page]);
 
+  if (loading) {
+    return <OverlayReload />;
+  }
+
+  if (!bill) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   const createBookingSubmit = async () => {
-    const formData: BookingCreateType = {
-      checkInDate: roomBill.checkInDate!,
-      checkOutDate: dayjs(roomBill.checkInDate)
-        .add(roomBill.numberOfNights, "day")
-        .toDate(),
-      rooms: roomBill.roomList.map((r) => ({ roomID: r.roomID })),
-    };
-    const res = await handleCreateBooking(formData);
+    let res;
+
+    if (bill.type === "room") {
+      const formData: BookingRoomCreateType = {
+        roomID: bill.room?.roomID!,
+        checkInDate: bill.checkInDate!,
+        checkOutDate: dayjs(bill.checkInDate)
+          .add(bill.numberOfNights, "day")
+          .toDate(),
+      };
+
+      res = await handleCreateRoomBooking(formData);
+    } else {
+      const formData: BookingScheduleCreateType = {
+        scheduleID: bill.schedule?.scheduleID!,
+        numberOfGuests: bill.numberOfGuest,
+      };
+
+      res = await handleCreateScheduleBooking(formData);
+    }
+
     if (res.bookingId && res.billId) {
       if (selectedVoucher) {
         const billForm: BillApplyType = {
@@ -83,6 +108,13 @@ const Booking: React.FC = () => {
     } else {
       toast.error(res.message);
     }
+  };
+
+  const getBillTotalPrice = (bill: BookingBill): number => {
+    if (bill.type === "room") {
+      return (bill.room?.price || 0) * bill.numberOfNights;
+    }
+    return (bill.schedule?.tour.price || 0) * bill.numberOfGuest;
   };
 
   return (
@@ -164,23 +196,74 @@ const Booking: React.FC = () => {
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                   Thông tin hóa đơn
                 </h2>
-                {bookingTour && (
+                {bill.type === "schedule" && (
                   <div className="space-y-4">
+                    <div className="space-y-4">
+                      <div className="border rounded-lg p-4 shadow-sm hover:shadow-md space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Tên tour:</span>
+                          <span className="font-medium">
+                            {bill.schedule?.tour.tourName}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Giá:</span>
+                          <span className="font-medium">
+                            {Intl.NumberFormat("vi-VN").format(
+                              bill.schedule?.tour.price ?? 0
+                            )}{" "}
+                            VNĐ
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Số lượng:</span>
+                          <span className="font-medium">
+                            {bill.numberOfGuest} người
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-3 flex justify-between text-lg font-semibold">
+                      <span>Tổng cộng:</span>
+                      <span className="text-blue-600">
+                        {Intl.NumberFormat("vi-VN").format(
+                          getBillTotalPrice(bill)
+                        ) + " VNĐ"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {bill.type === "room" && bill.room && bill.room && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Khách sạn:</span>
+                      <span className="font-medium">{bill.room.hotelName}</span>
+                    </div>
+
                     <div className="space-y-4">
                       <div className="border rounded-lg p-4 shadow-sm hover:shadow-md space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Tên phòng:</span>
                           <span className="font-medium">
-                            {bookingTour.tourName}
+                            {bill.room.roomName}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Loại:</span>
+                          <span className="font-medium">
+                            {bill.room.roomType.charAt(0).toUpperCase() +
+                              bill.room.roomType.slice(1)}
+                            ({bill.room.maxPeople} người)
                           </span>
                         </div>
 
                         <div className="flex justify-between">
                           <span className="text-gray-600">Giá:</span>
                           <span className="font-medium">
-                            {Intl.NumberFormat("vi-VN").format(
-                              bookingTour.price
-                            )}
+                            {Intl.NumberFormat("vi-VN").format(bill.room.price)}
                             VNĐ
                           </span>
                         </div>
@@ -191,58 +274,7 @@ const Booking: React.FC = () => {
                       <span>Tổng cộng:</span>
                       <span className="text-blue-600">
                         {Intl.NumberFormat("vi-VN").format(
-                          roomBill.totalPrice
-                        ) + " VNĐ"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {roomBill.roomList && roomBill.roomList.length > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Khách sạn:</span>
-                      <span className="font-medium">
-                        {roomBill.roomList[0].hotelName}
-                      </span>
-                    </div>
-
-                    <div className="space-y-4">
-                      {roomBill.roomList.map((room, index) => (
-                        <div
-                          key={index}
-                          className="border rounded-lg p-4 shadow-sm hover:shadow-md space-y-3"
-                        >
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Tên phòng:</span>
-                            <span className="font-medium">{room.roomName}</span>
-                          </div>
-
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Loại:</span>
-                            <span className="font-medium">
-                              {room.roomType.charAt(0).toUpperCase() +
-                                room.roomType.slice(1)}
-                              ({room.maxPeople} người)
-                            </span>
-                          </div>
-
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Giá:</span>
-                            <span className="font-medium">
-                              {Intl.NumberFormat("vi-VN").format(room.price)}
-                              VNĐ
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="border-t pt-3 flex justify-between text-lg font-semibold">
-                      <span>Tổng cộng:</span>
-                      <span className="text-blue-600">
-                        {Intl.NumberFormat("vi-VN").format(
-                          roomBill.totalPrice
+                          getBillTotalPrice(bill)
                         ) + " VNĐ"}
                       </span>
                     </div>
@@ -264,7 +296,7 @@ const Booking: React.FC = () => {
                       <span>Tổng tiền:</span>
                       <span className="text-blue-600">
                         {Intl.NumberFormat("vi-VN").format(
-                          roomBill.totalPrice
+                          getBillTotalPrice(bill)
                         ) + " VNĐ"}
                       </span>
                     </div>
@@ -277,7 +309,7 @@ const Booking: React.FC = () => {
                         <span className="text-blue-600">
                           -
                           {Intl.NumberFormat("vi-VN").format(
-                            roomBill.totalPrice *
+                            getBillTotalPrice(bill) *
                               (selectedVoucher.voucherPercent / 100)
                           ) + " VNĐ"}
                         </span>
@@ -289,7 +321,7 @@ const Booking: React.FC = () => {
                         <span>Tổng thanh toán:</span>
                         <span className="text-blue-600">
                           {Intl.NumberFormat("vi-VN").format(
-                            roomBill.totalPrice *
+                            getBillTotalPrice(bill) *
                               (1 - selectedVoucher.voucherPercent / 100)
                           ) + " VNĐ"}
                         </span>
@@ -342,109 +374,134 @@ const Booking: React.FC = () => {
         title="Voucher của tôi"
       >
         <>
-          <div className="grid md:grid-cols-2 flex-col gap-3 p-4">
-            {voucherList.map((voucher) => (
-              <div
-                key={voucher.voucherID}
-                className="bg-white rounded-xl shadow-sm border cursor-pointer hover:scale-105 border-gray-200 p-3 hover:shadow-md transition-all"
-                onClick={() => {
-                  setSelectedVoucher(voucher);
-                  setOpenVoucherModal(false);
-                }}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center space-x-2">
-                    <Tag className="w-4 h-4 text-blue-600" />
-                    <code className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs font-mono font-semibold">
-                      {voucher.voucherCode}
-                    </code>
-                    <span className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded text-xs font-mono font-semibold">
-                      {voucher.voucherTableType}
-                    </span>
-                  </div>
-                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-                    -{voucher.voucherPercent}%
-                  </span>
-                </div>
-
-                <div className="text-gray-600 text-xs mb-3 line-clamp-2">
-                  {voucher.voucherDescription || <div className="mt-4"></div>}
-                </div>
-
-                <div className="space-y-1 text-xs text-gray-500">
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>
-                      {voucher.voucherStartDate.format("DD/MM/YYYY")} →
-                      {voucher.voucherEndDate.format("DD/MM/YYYY")}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-xs font-medium ${
-                      voucher.isUsed
-                        ? "bg-gray-100 text-gray-600"
-                        : voucher.voucherIsExpired
-                        ? "bg-red-100 text-red-600"
-                        : "bg-green-100 text-green-600"
-                    }`}
+          {voucherList.length > 0 ? (
+            <>
+              <div className="grid md:grid-cols-2 flex-col gap-3 p-4">
+                {voucherList.map((voucher) => (
+                  <div
+                    key={voucher.voucherID}
+                    className="bg-white rounded-xl shadow-sm border cursor-pointer hover:scale-105 border-gray-200 p-3 hover:shadow-md transition-all"
+                    onClick={() => {
+                      setSelectedVoucher(voucher);
+                      setOpenVoucherModal(false);
+                    }}
                   >
-                    {voucher.isUsed
-                      ? "Đã sử dụng"
-                      : voucher.voucherIsExpired
-                      ? "Hết hạn"
-                      : "Có thể sử dụng"}
-                  </span>
-                </div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Tag className="w-4 h-4 text-blue-600" />
+                        <code className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs font-mono font-semibold">
+                          {voucher.voucherCode}
+                        </code>
+                        <span className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded text-xs font-mono font-semibold">
+                          {voucher.voucherTableType}
+                        </span>
+                      </div>
+                      <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        -{voucher.voucherPercent}%
+                      </span>
+                    </div>
+
+                    <div className="text-gray-600 text-xs mb-3 line-clamp-2">
+                      {voucher.voucherDescription || (
+                        <div className="mt-4"></div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1 text-xs text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>
+                          {voucher.voucherStartDate.format("DD/MM/YYYY")} →
+                          {voucher.voucherEndDate.format("DD/MM/YYYY")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                          voucher.isUsed
+                            ? "bg-gray-100 text-gray-600"
+                            : voucher.voucherIsExpired
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
+                      >
+                        {voucher.isUsed
+                          ? "Đã sử dụng"
+                          : voucher.voucherIsExpired
+                          ? "Hết hạn"
+                          : "Có thể sử dụng"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          {totalPages > 1 && voucherList.length > 0 && (
-            <div className="flex flex-wrap gap-1 py-5 justify-center">
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={16} />
-              </button>
-
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (page <= 2) {
-                  pageNum = i + 1;
-                } else if (page >= totalPages - 3) {
-                  pageNum = totalPages - 5 + i;
-                } else {
-                  pageNum = page - 2 + i;
-                }
-
-                return (
+              {totalPages > 1 && (
+                <div className="flex flex-wrap gap-1 py-5 justify-center">
                   <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`px-3 py-1 border rounded-md text-sm ${
-                      page === pageNum
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {pageNum}
+                    <ChevronLeft size={16} />
                   </button>
-                );
-              })}
 
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page === totalPages}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 2) {
+                      pageNum = i + 1;
+                    } else if (page >= totalPages - 3) {
+                      pageNum = totalPages - 5 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`px-3 py-1 border rounded-md text-sm ${
+                          page === pageNum
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className="bg-gray-100 rounded-full p-6 mb-4">
+                <Tag className="w-12 h-12 text-gray-400" />
+              </div>
+              <Typography
+                variant="h6"
+                className="text-gray-500 mb-2 text-center"
               >
-                <ChevronRight size={16} />
-              </button>
+                Không có voucher nào
+              </Typography>
+              <Typography
+                variant="body2"
+                className="text-gray-400 text-center max-w-sm"
+              >
+                Hiện tại bạn không có voucher nào khả dụng. Voucher sẽ xuất hiện
+                ở đây khi bạn nhận được.
+              </Typography>
             </div>
           )}
         </>

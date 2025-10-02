@@ -36,9 +36,9 @@ import { VoucherProvider } from "../contexts/VoucherContext";
 import ProfileLayout from "../layouts/ProfileLayout";
 import UserVoucher from "../pages/UserVoucher";
 import Booking from "../pages/Booking";
-import { BookingRoomProvider } from "../contexts/BookingRoomContext";
 import { ScheduleProvider } from "../contexts/ScheduleContext";
 import Bill from "../pages/Bill";
+import { BookingProvider } from "../contexts/BookingContext";
 
 const router = createBrowserRouter([
   {
@@ -61,9 +61,9 @@ const router = createBrowserRouter([
         path: "tour",
         element: (
           <TourProvider>
-            <BookingRoomProvider>
+            <BookingProvider>
               <Tour />
-            </BookingRoomProvider>
+            </BookingProvider>
           </TourProvider>
         ),
       },
@@ -71,11 +71,11 @@ const router = createBrowserRouter([
         path: "/tour_info/:id",
         element: (
           <TourProvider>
-            <BookingRoomProvider>
+            <BookingProvider>
               <ScheduleProvider>
                 <TourInfo />
               </ScheduleProvider>
-            </BookingRoomProvider>
+            </BookingProvider>
           </TourProvider>
         ),
       },
@@ -150,9 +150,9 @@ const router = createBrowserRouter([
           {
             path: "booking",
             element: (
-              <BookingRoomProvider>
+              <BookingProvider>
                 <Booking />
-              </BookingRoomProvider>
+              </BookingProvider>
             ),
           },
         ],

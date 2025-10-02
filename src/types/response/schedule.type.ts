@@ -11,7 +11,6 @@ export type ScheduleType = {
   endTime: Dayjs;
   numberPeople: 20;
   status: ScheduleStatus;
-  tourName: string;
   createdAt: Date;
 };
 

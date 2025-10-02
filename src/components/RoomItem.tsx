@@ -6,7 +6,7 @@ import type { FC } from "react";
 
 type Props = {
   room: RoomType;
-  onClick: () => void;
+  onClick?: () => void;
 };
 
 const RoomItem: FC<Props> = ({ room, onClick }) => {

@@ -5,15 +5,15 @@ import { RouterProvider } from "react-router-dom";
 import router from "./router/index.tsx";
 import { Toaster } from "sonner";
 import { UserProvider } from "./contexts/UserContext.tsx";
-import { BookingRoomProvider } from "./contexts/BookingRoomContext.tsx";
+import { BookingProvider } from "./contexts/BookingContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <UserProvider>
-      <BookingRoomProvider>
+      <BookingProvider>
         <RouterProvider router={router} />
         <Toaster position="top-center" richColors />
-      </BookingRoomProvider>
+      </BookingProvider>
     </UserProvider>
   </StrictMode>
 );

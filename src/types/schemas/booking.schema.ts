@@ -1,11 +1,9 @@
 import z from "zod";
 
-const RoomIDSchema = z.object({
-  roomID: z.string().uuid({ message: "roomID phải là UUID hợp lệ" }),
-});
-
-export const BookingSchema = z.object({
-  rooms: z.array(RoomIDSchema).nonempty({ message: "Phải có ít nhất 1 phòng" }),
+export const BookingRoomSchema = z.object({
+  roomID: z.string().uuid({
+    message: "roomID phải là UUID hợp lệ",
+  }),
   checkInDate: z
     .date({
       error: () => {
@@ -28,4 +26,16 @@ export const BookingSchema = z.object({
       message: "Vui lòng nhập ngày kết thúc hợp lệ",
     }),
 });
-export type BookingCreateType = z.infer<typeof BookingSchema>;
+export type BookingRoomCreateType = z.infer<typeof BookingRoomSchema>;
+
+export const BookingScheduleSchema = z.object({
+  scheduleID: z.string().uuid({
+    message: "scheduleID phải là UUID hợp lệ",
+  }),
+  numberOfGuests: z.number({
+    error: () => {
+      return "Số khách hàng không hợp lệ";
+    },
+  }),
+});
+export type BookingScheduleCreateType = z.infer<typeof BookingScheduleSchema>;
