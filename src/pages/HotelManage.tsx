@@ -133,12 +133,6 @@ const HotelManage: React.FC = () => {
                   )}
                 </PopoverPanel>
               </Popover>
-              {/* <div className="flex items-center space-x-4">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Add Hotel
-                </button>
-              </div> */}
             </div>
           </div>
 

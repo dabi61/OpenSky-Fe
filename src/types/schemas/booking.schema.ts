@@ -39,3 +39,8 @@ export const BookingScheduleSchema = z.object({
   }),
 });
 export type BookingScheduleCreateType = z.infer<typeof BookingScheduleSchema>;
+
+export type BookingCancelType = {
+  bookingId: string;
+  reason: string;
+};

@@ -39,6 +39,16 @@ import Booking from "../pages/Booking";
 import { ScheduleProvider } from "../contexts/ScheduleContext";
 import Bill from "../pages/Bill";
 import { BookingProvider } from "../contexts/BookingContext";
+import { BillProvider } from "../contexts/BillContext";
+import BillManage from "../pages/BillManage";
+import MyBill from "../pages/MyBill";
+import ScheduleManage from "../pages/ScheduleManage";
+import { ScheduleItineraryProvider } from "../contexts/ScheduleItineraryContext";
+import ScheduleItinerary from "../pages/ScheduleItinerary";
+import MySchedule from "../pages/MySchedule";
+import { FeedbackProvider } from "../contexts/FeedbackContext";
+import { RefundProvider } from "../contexts/RefundContext";
+import RefundManage from "../pages/RefundManage";
 
 const router = createBrowserRouter([
   {
@@ -73,7 +83,9 @@ const router = createBrowserRouter([
           <TourProvider>
             <BookingProvider>
               <ScheduleProvider>
-                <TourInfo />
+                <FeedbackProvider>
+                  <TourInfo />
+                </FeedbackProvider>
               </ScheduleProvider>
             </BookingProvider>
           </TourProvider>
@@ -92,7 +104,9 @@ const router = createBrowserRouter([
         element: (
           <HotelProvider>
             <RoomProvider>
-              <HotelInfo />
+              <FeedbackProvider>
+                <HotelInfo />
+              </FeedbackProvider>
             </RoomProvider>
           </HotelProvider>
         ),
@@ -120,6 +134,26 @@ const router = createBrowserRouter([
         element: <AuthGuard />,
         children: [
           {
+            path: "bill/:id",
+            element: (
+              <BillProvider>
+                <RefundProvider>
+                  <Bill />
+                </RefundProvider>
+              </BillProvider>
+            ),
+          },
+          {
+            path: "schedule_itinerary/:id",
+            element: (
+              <ScheduleProvider>
+                <ScheduleItineraryProvider>
+                  <ScheduleItinerary />
+                </ScheduleItineraryProvider>
+              </ScheduleProvider>
+            ),
+          },
+          {
             element: <ProfileLayout />,
             children: [
               {
@@ -131,8 +165,12 @@ const router = createBrowserRouter([
                 element: <UserVoucher />,
               },
               {
-                path: "bill/:id",
-                element: <Bill />,
+                path: "my_bills",
+                element: (
+                  <BillProvider>
+                    <MyBill />
+                  </BillProvider>
+                ),
               },
             ],
           },
@@ -159,6 +197,20 @@ const router = createBrowserRouter([
       },
 
       {
+        element: <RoleGuard allowedRoles={[Roles.TOURGUIDE]} />,
+        children: [
+          {
+            path: "my_schedules",
+            element: (
+              <ScheduleProvider>
+                <MySchedule />
+              </ScheduleProvider>
+            ),
+          },
+        ],
+      },
+
+      {
         element: <RoleGuard allowedRoles={[Roles.HOTELMANAGER]} />,
         path: "my_hotel",
         children: [
@@ -166,6 +218,7 @@ const router = createBrowserRouter([
             path: "/my_hotel",
             element: <Navigate to="room_manage" replace />,
           },
+
           {
             path: "room_create",
             element: (
@@ -237,6 +290,14 @@ const router = createBrowserRouter([
               { path: "customer", element: <CustomerManager /> },
               { path: "staff", element: <StaffManager /> },
               {
+                path: "bill",
+                element: (
+                  <BillProvider>
+                    <BillManage />
+                  </BillProvider>
+                ),
+              },
+              {
                 path: "voucher",
                 element: (
                   <VoucherProvider>
@@ -258,6 +319,22 @@ const router = createBrowserRouter([
                   <TourProvider>
                     <TourManage />
                   </TourProvider>
+                ),
+              },
+              {
+                path: "schedule",
+                element: (
+                  <ScheduleProvider>
+                    <ScheduleManage />
+                  </ScheduleProvider>
+                ),
+              },
+              {
+                path: "refund",
+                element: (
+                  <RefundProvider>
+                    <RefundManage />
+                  </RefundProvider>
                 ),
               },
               {

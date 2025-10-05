@@ -43,7 +43,7 @@ const Booking: React.FC = () => {
       if (bill?.type === "room") {
         res = await handleGetActiveVouchersType("Hotel", page, 6);
       } else {
-        res = await handleGetActiveVouchersType("Hotel", page, 6);
+        res = await handleGetActiveVouchersType("Tour", page, 6);
       }
       if (res.userVouchers) {
         const mapped = res.userVouchers.map((v) => ({
@@ -105,6 +105,7 @@ const Booking: React.FC = () => {
         }
       }
       toast.success(res.message);
+      navigate(`/bill/${res.billId}`);
     } else {
       toast.error(res.message);
     }
@@ -211,7 +212,7 @@ const Booking: React.FC = () => {
                           <span className="font-medium">
                             {Intl.NumberFormat("vi-VN").format(
                               bill.schedule?.tour.price ?? 0
-                            )}{" "}
+                            )}
                             VNĐ
                           </span>
                         </div>

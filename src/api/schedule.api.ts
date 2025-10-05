@@ -12,6 +12,26 @@ import dayjs from "dayjs";
 import axiosInstance from "../utils/AxisosInstance";
 import type { ScheduleStatus } from "../constants/ScheduleStatus";
 
+export const handleGetAllSchedule = async (
+  page: number,
+  size: number
+): Promise<SchedulePage> => {
+  const res = await axios.get(
+    `${import.meta.env.VITE_API_URL}schedules?page=${page}&size=${size}`
+  );
+  return res.data;
+};
+
+export const handleGetMychedule = async (
+  page: number,
+  size: number
+): Promise<SchedulePage> => {
+  const res = await axiosInstance(
+    `schedules/my-assignments?page=${page}&size=${size}`
+  );
+  return res.data;
+};
+
 export const handleGetScheduleByTour = async (
   tourId: string,
   page: number,

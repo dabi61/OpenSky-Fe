@@ -1,11 +1,12 @@
+import type { Dayjs } from "dayjs";
 import type { BillStatus } from "../../constants/BillStatus";
 import type { VoucherEnum } from "../../constants/VoucherEnum";
 import type { billDetailType } from "./billDetail.type";
+import type { UserSummaryType } from "./user.type";
+import type { VoucherSummary } from "./voucher.type";
 
 export type BillType = {
   billID: string;
-  userID: string;
-  userName: string;
   bookingID: string;
   deposit: number;
   refundPrice?: number;
@@ -14,10 +15,13 @@ export type BillType = {
   discountAmount: 0.0;
   discountPercent: 0;
   status: BillStatus;
+  startTime: Dayjs;
+  endTime: Dayjs;
   createdAt: Date;
-  userVoucherID: null;
-  voucherInfo: null;
-  billDetails: billDetailType[];
+  userVoucherID: string;
+  user: UserSummaryType;
+  voucherInfo: VoucherSummary;
+  billDetails: billDetailType;
 };
 
 export type BillResponse = {
@@ -33,4 +37,19 @@ export type BillResponse = {
     description: string;
   };
   message: string;
+};
+
+export type BillPage = {
+  bills: BillType[];
+  totalPages: number;
+  pageNumber: number;
+  pageSize: number;
+};
+
+export type BillSummaryType = {
+  billID: string;
+  totalPrice: number;
+  refundPrice: number;
+  status: BillStatus;
+  createdAt: Date;
 };

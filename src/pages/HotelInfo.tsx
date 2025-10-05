@@ -12,10 +12,14 @@ import { handleUpdateHotelStatus } from "../api/hotel.api";
 import type { HotelStatus } from "../constants/HotelStatus";
 import { toast } from "sonner";
 import RoomItem from "../components/RoomItem";
+import { useFeedback } from "../contexts/FeedbackContext";
+import dayjs from "dayjs";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const HotelInfo = () => {
   const { id } = useParams();
   const { getHotelById, loading, selectedHotel } = useHotel();
+  const { feedbackList, getFeedbackByHotel } = useFeedback();
   const [totalPages, setTotalPages] = useState(0);
   const { getRoomByHotel, roomList } = useRoom();
   const [emblaRefImgs, emblaApi] = useEmblaCarousel({
@@ -28,6 +32,30 @@ const HotelInfo = () => {
   const navigate = useNavigate();
   const [page, setPage] = useQueryState("page", "1" as string);
   const { user } = useUser();
+
+  const [feedbackPage, setFeedbackPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      setFeedbackPage(1);
+      setHasMore(true);
+      getFeedbackByHotel(id, 1, 10, false);
+    }
+  }, [id]);
+
+  const fetchMoreFeedbacks = async () => {
+    if (!id) return;
+    const nextPage = feedbackPage + 1;
+    const res = await getFeedbackByHotel(id, nextPage, 10, true);
+
+    if (!res || res.reviews.length === 0) {
+      setHasMore(false);
+      return;
+    }
+
+    setFeedbackPage(nextPage);
+  };
 
   const fetchRooms = async () => {
     try {
@@ -306,6 +334,82 @@ const HotelInfo = () => {
               )}
             </div>
           )}
+          <div>
+            <div className="font-semibold text-xl md:text-2xl mb-6">
+              Đánh giá từ khách hàng
+            </div>
+            <div className="space-y-4">
+              {feedbackList.length > 0 ? (
+                <InfiniteScroll
+                  dataLength={feedbackList.length}
+                  next={fetchMoreFeedbacks}
+                  hasMore={hasMore}
+                  loader={
+                    <h4 className="text-center py-3">Đang tải thêm...</h4>
+                  }
+                  endMessage={
+                    <p className="text-center text-gray-500 py-3">
+                      Bạn đã xem hết tất cả đánh giá
+                    </p>
+                  }
+                >
+                  {feedbackList.map((feedback) => (
+                    <div
+                      key={feedback.feedBackID}
+                      className="bg-white mb-3 rounded-xl p-6 border border-gray-200"
+                    >
+                      <div className="flex items-start gap-4">
+                        <img
+                          src={
+                            feedback.userAvatar ||
+                            `${import.meta.env.VITE_AVATAR_API}${
+                              feedback.userName
+                            }`
+                          }
+                          alt={feedback.userName}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div className="font-semibold text-gray-900">
+                                {feedback.userName}
+                              </div>
+                              <div className="flex gap-1">
+                                {Array.from({ length: feedback.rate }).map(
+                                  (_, index) => (
+                                    <Star
+                                      key={index}
+                                      className="text-yellow-400"
+                                      fill="currentColor"
+                                      size={16}
+                                    />
+                                  )
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {dayjs(feedback.createdAt).format("DD/MM/YYYY")}
+                            </div>
+                          </div>
+                          <p className="text-gray-700 text-sm">
+                            {feedback.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </InfiniteScroll>
+              ) : (
+                <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-xl">
+                  <Star size={48} className="mx-auto mb-3 text-gray-400" />
+                  <div className="text-lg">
+                    Chưa có đánh giá nào cho tour này
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>

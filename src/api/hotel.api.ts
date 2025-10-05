@@ -31,20 +31,20 @@ export const handleGetCurrentHotel = async (): Promise<HotelTypeWithImgs> => {
 
 export const handleGetActiveHotel = async (
   page: number,
-  limit: number
+  size: number
 ): Promise<HotelPage> => {
   const res = await axiosInstance.get(
-    `${import.meta.env.VITE_API_URL}hotels/active?page=${page}&size=${limit}`
+    `${import.meta.env.VITE_API_URL}hotels/active?page=${page}&size=${size}`
   );
   return res.data;
 };
 
 export const handleAllHotelExceptRemove = async (
   page: number,
-  limit: number
+  size: number
 ): Promise<HotelPage> => {
   const res = await axiosInstance.get(
-    `${import.meta.env.VITE_API_URL}hotels/all?page=${page}&limit=${limit}`
+    `${import.meta.env.VITE_API_URL}hotels/all?page=${page}&limit=${size}`
   );
   return res.data;
 };

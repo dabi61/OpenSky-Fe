@@ -36,4 +36,5 @@ export type UserSummaryType = {
   fullName: string;
   phoneNumber: string;
   avatarURL: string;
+  citizendId: string;
 };

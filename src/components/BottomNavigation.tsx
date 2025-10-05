@@ -34,19 +34,19 @@ const BottomNavigation: React.FC = () => {
       id: "bill",
       icon: <ReceiptText size={24} />,
       label: "Bill",
-      to: "/unauthorized",
+      to: "bill",
     },
     {
       id: "schedule",
       icon: <Bus size={24} />,
       label: "Lịch trình",
-      to: "/unauthorized",
+      to: "schedule",
     },
     {
       id: "refund",
       icon: <TicketX size={24} />,
       label: "Hoàn tiền",
-      to: "/unauthorized",
+      to: "refund",
     },
     { id: "tour", icon: <TentTree size={24} />, label: "Tour", to: "tour" },
     {

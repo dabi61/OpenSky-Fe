@@ -31,19 +31,7 @@ export const ScheduleSchema = z
         message: "Vui lòng nhập ngày kết thúc hợp lệ",
       }),
   })
-  .refine(
-    (data) => {
-      const start = new Date(data.startTime);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const minDate = new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000);
-      return start > minDate;
-    },
-    {
-      message: "ngày khởi hành phải lớn hơn hôm nay ít nhất 5 ngày",
-      path: ["startTime"],
-    }
-  )
+
   .refine(
     (data) => {
       return new Date(data.endTime) > new Date(data.startTime);

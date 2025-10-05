@@ -1,10 +1,4 @@
-import {
-  MessageCircle,
-  ReceiptText,
-  Star,
-  TicketPercent,
-  User,
-} from "lucide-react";
+import { ReceiptText, Star, TicketPercent, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface MenuItem {
@@ -17,8 +11,7 @@ function Sidebar() {
   const menuItems: MenuItem[] = [
     { icon: <User />, label: "Hồ sơ", to: "/profile" },
     { icon: <TicketPercent />, label: "Mã giảm giá", to: "/user_voucher" },
-    { icon: <ReceiptText />, label: "Đơn đặt chỗ", to: "/booking" },
-    { icon: <MessageCircle />, label: "Tin nhắn", to: "/message" },
+    { icon: <ReceiptText />, label: "Đơn đặt chỗ", to: "/my_bills" },
     { icon: <Star />, label: "Đánh giá của bạn", to: "/review" },
   ];
 

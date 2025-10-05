@@ -31,6 +31,9 @@ function Header() {
     ...(user?.role === Roles.HOTELMANAGER
       ? [{ name: "Khách sạn của tôi", to: "/my_hotel" }]
       : []),
+    ...(user?.role === Roles.TOURGUIDE
+      ? [{ name: "Quản lý lịch trình", to: "/my_schedules" }]
+      : []),
     { name: "Đổi mật khẩu", to: "/" },
   ];
 

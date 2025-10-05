@@ -83,5 +83,6 @@ export const handleGetTourItineraryByTour = async (
   const res = await axios.get(
     `${import.meta.env.VITE_API_URL}tour_itinerary/tour/${id}`
   );
+  console.log(res.data);
   return res.data;
 };

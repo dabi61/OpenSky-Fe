@@ -13,6 +13,8 @@ import dayjs from "dayjs";
 import Pagination from "../components/Pagination";
 import type { ScheduleType } from "../types/response/schedule.type";
 import { useBooking } from "../contexts/BookingContext";
+import { useFeedback } from "../contexts/FeedbackContext";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const TourInfo: FC = () => {
   const { id } = useParams();
@@ -26,6 +28,7 @@ const TourInfo: FC = () => {
   } = useTour();
   const { user } = useUser();
   const { getScheduleByTour, scheduleList } = useSchedule();
+  const { feedbackList, getFeedbackByTour } = useFeedback();
   const { setBill } = useBooking();
   const [page, setPage] = useState(1);
   const itemsPerPage = 15;
@@ -34,6 +37,30 @@ const TourInfo: FC = () => {
     null
   );
   const [quantity, setQuantity] = useState(1);
+
+  const [feedbackPage, setFeedbackPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      setFeedbackPage(1);
+      setHasMore(true);
+      getFeedbackByTour(id, 1, 10, false);
+    }
+  }, [id]);
+
+  const fetchMoreFeedbacks = async () => {
+    if (!id) return;
+    const nextPage = feedbackPage + 1;
+    const res = await getFeedbackByTour(id, nextPage, 10, true);
+
+    if (!res || res.reviews.length === 0) {
+      setHasMore(false);
+      return;
+    }
+
+    setFeedbackPage(nextPage);
+  };
 
   const handleIncreaseQuantity = () => {
     if (!selectedSchedule || !selectedTour) return;
@@ -197,27 +224,8 @@ const TourInfo: FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between mt-4 md:mt-5 items-center gap-3 md:gap-4">
-          <div className="font-bold text-blue-500 text-xl md:text-3xl">
-            {new Intl.NumberFormat("vi-VN").format(tour.price)} VNĐ
-          </div>
-          {user?.role === "Customer" && (
-            <Button
-              variant="contained"
-              type="submit"
-              sx={{
-                backgroundColor: "#3B82F6",
-                "&:hover": {
-                  backgroundColor: "#2563EB",
-                },
-                padding: "12px 30px",
-                borderRadius: "1rem",
-                width: { xs: "100%", md: "auto" },
-              }}
-            >
-              <div className="font-semibold text-base md:text-lg">Đặt vé</div>
-            </Button>
-          )}
+        <div className="font-bold text-blue-500 text-xl md:text-3xl mt-3">
+          {new Intl.NumberFormat("vi-VN").format(tour.price)} VNĐ
         </div>
 
         {tour.description && (
@@ -251,68 +259,72 @@ const TourInfo: FC = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {scheduleList.length > 0 ? (
-              scheduleList.map((schedule) => (
-                <div
-                  key={schedule.scheduleID}
-                  className={`${
-                    schedule.scheduleID === selectedSchedule?.scheduleID
-                      ? "bg-blue-100 border-blue-400"
-                      : "bg-white border-gray-200 hover:border-blue-300"
-                  } rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 min-h-[180px] cursor-pointer flex flex-col justify-between`}
-                  onClick={() => setSelectedSchedule(schedule)}
-                >
-                  <div className="flex-1">
-                    <div className="text-center mb-4 flex flex-col gap-1">
-                      <div
-                        className={`font-bold text-lg mb-1 ${
-                          schedule.scheduleID === selectedSchedule?.scheduleID
-                            ? "text-blue-700"
-                            : "text-blue-600"
-                        }`}
-                      >
-                        {dayjs(schedule.startTime).format("DD/MM")}
+              scheduleList
+                .filter((schedule) =>
+                  dayjs(schedule.startTime).isAfter(dayjs().add(5, "day"))
+                )
+                .map((schedule) => (
+                  <div
+                    key={schedule.scheduleID}
+                    className={`${
+                      schedule.scheduleID === selectedSchedule?.scheduleID
+                        ? "bg-blue-100 border-blue-400"
+                        : "bg-white border-gray-200 hover:border-blue-300"
+                    } rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 min-h-[180px] cursor-pointer flex flex-col justify-between`}
+                    onClick={() => setSelectedSchedule(schedule)}
+                  >
+                    <div className="flex-1">
+                      <div className="text-center mb-4 flex flex-col gap-1">
+                        <div
+                          className={`font-bold text-lg mb-1 ${
+                            schedule.scheduleID === selectedSchedule?.scheduleID
+                              ? "text-blue-700"
+                              : "text-blue-600"
+                          }`}
+                        >
+                          {dayjs(schedule.startTime).format("DD/MM")}
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600">
+                          {dayjs(schedule.startTime).format("DD/MM/YYYY")} -{" "}
+                          {dayjs(schedule.endTime).format("DD/MM/YYYY")}
+                        </div>
+
+                        <div className="text-xs text-gray-500">
+                          Thời gian khởi hành:
+                          <span className="ml-1 font-medium text-gray-700">
+                            {dayjs(schedule.startTime).format("HH:mm")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-evenly items-center pt-3 border-t border-gray-100">
+                      <div className="text-center">
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <Users size={14} />
+                          <span>Đã đặt</span>
+                        </div>
+                        <div className="font-bold text-blue-600 text-sm">
+                          {schedule.numberPeople}
+                        </div>
                       </div>
 
-                      <div className="text-xs md:text-sm text-gray-600">
-                        {dayjs(schedule.startTime).format("DD/MM/YYYY")} -{" "}
-                        {dayjs(schedule.endTime).format("DD/MM/YYYY")}
-                      </div>
-
-                      <div className="text-xs text-gray-500">
-                        Thời gian khởi hành:
-                        <span className="ml-1 font-medium text-gray-700">
-                          {dayjs(schedule.startTime).format("HH:mm")}
-                        </span>
+                      <div className="text-center">
+                        <div className="text-xs text-gray-600">Chỗ trống</div>
+                        <div
+                          className={`font-bold text-sm ${
+                            schedule.numberPeople > 0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {schedule.numberPeople}
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex justify-evenly items-center pt-3 border-t border-gray-100">
-                    <div className="text-center">
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <Users size={14} />
-                        <span>Đã đặt</span>
-                      </div>
-                      <div className="font-bold text-blue-600 text-sm">
-                        {schedule.numberPeople}
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="text-xs text-gray-600">Chỗ trống</div>
-                      <div
-                        className={`font-bold text-sm ${
-                          schedule.numberPeople > 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {schedule.numberPeople}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
+                ))
             ) : (
               <div className="col-span-full text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-xl">
                 <Users size={48} className="mx-auto mb-3 text-gray-400" />
@@ -441,16 +453,88 @@ const TourInfo: FC = () => {
                     transition: "all 0.2s ease-in-out",
                   }}
                 >
-                  Đặt {quantity} vé -{" "}
+                  Đặt {quantity} vé -
                   {new Intl.NumberFormat("vi-VN").format(
                     summaryTour.price * quantity
-                  )}{" "}
+                  )}
                   VNĐ
                 </Button>
               </div>
             )}
           </div>
         )}
+        <div>
+          <div className="font-semibold text-xl md:text-2xl mb-6">
+            Đánh giá từ khách hàng
+          </div>
+          <div className="space-y-4 mb-10">
+            {feedbackList.length > 0 ? (
+              <InfiniteScroll
+                dataLength={feedbackList.length}
+                next={fetchMoreFeedbacks}
+                hasMore={hasMore}
+                loader={<h4 className="text-center py-3">Đang tải thêm...</h4>}
+                endMessage={
+                  <p className="text-center text-gray-500 py-3">
+                    Bạn đã xem hết tất cả đánh giá
+                  </p>
+                }
+              >
+                {feedbackList.map((feedback) => (
+                  <div
+                    key={feedback.feedBackID}
+                    className="bg-white mb-3 rounded-xl p-6 border border-gray-200"
+                  >
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={
+                          feedback.userAvatar ||
+                          `${import.meta.env.VITE_AVATAR_API}${
+                            feedback.userName
+                          }`
+                        }
+                        alt={feedback.userName}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className="font-semibold text-gray-900">
+                              {feedback.userName}
+                            </div>
+                            <div className="flex gap-1">
+                              {Array.from({ length: feedback.rate }).map(
+                                (_, index) => (
+                                  <Star
+                                    key={index}
+                                    className="text-yellow-400"
+                                    fill="currentColor"
+                                    size={16}
+                                  />
+                                )
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {dayjs(feedback.createdAt).format("DD/MM/YYYY")}
+                          </div>
+                        </div>
+                        <p className="text-gray-700 text-sm">
+                          {feedback.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </InfiniteScroll>
+            ) : (
+              <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-xl">
+                <Star size={48} className="mx-auto mb-3 text-gray-400" />
+                <div className="text-lg">Chưa có đánh giá nào cho tour này</div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

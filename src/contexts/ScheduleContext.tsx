@@ -12,6 +12,8 @@ import type {
   ScheduleType,
 } from "../types/response/schedule.type";
 import {
+  handleGetAllSchedule,
+  handleGetMychedule,
   handleGetScheduleById,
   handleGetScheduleByTour,
 } from "../api/schedule.api";
@@ -21,6 +23,7 @@ type ScheduleContextType = {
   scheduleList: ScheduleType[];
   loading: boolean;
   selectedSchedule: ScheduleType | null;
+  getAllSchedule: (page: number, size: number) => Promise<SchedulePage>;
   getScheduleByTour: (
     id: string,
     page: number,
@@ -33,6 +36,7 @@ type ScheduleContextType = {
   ) => Promise<SchedulePage>;
   getScheduleById: (id: string) => Promise<ScheduleType>;
   setSelectedSchedule: Dispatch<SetStateAction<ScheduleType | null>>;
+  getMychedule: (page: number, size: number) => Promise<SchedulePage>;
 };
 
 const ScheduleContext = createContext<ScheduleContextType | null>(null);
@@ -43,6 +47,34 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [loading, setLoading] = useState(false);
+
+  const getAllSchedule = async (
+    page: number,
+    size: number
+  ): Promise<SchedulePage> => {
+    try {
+      setLoading(true);
+      const res = await handleGetAllSchedule(page, size);
+      setScheduleList(res.schedules);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getMychedule = async (
+    page: number,
+    size: number
+  ): Promise<SchedulePage> => {
+    try {
+      setLoading(true);
+      const res = await handleGetMychedule(page, size);
+      setScheduleList(res.schedules);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getScheduleByTour = async (
     id: string,
@@ -90,10 +122,12 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
       value={{
         scheduleList,
         selectedSchedule,
+        getAllSchedule,
         getScheduleByTour,
         getScheduleById,
         setSelectedSchedule,
         getScheduleByStatus,
+        getMychedule,
         loading,
       }}
     >

@@ -25,3 +25,10 @@ export type VoucherPage = {
   pageNumber: number;
   pageSize: number;
 };
+
+export type VoucherSummary = {
+  code: string;
+  percent: number;
+  tableType: VoucherEnum;
+  description: string;
+};

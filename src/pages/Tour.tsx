@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 
 const Tour: React.FC = () => {
   const { tourList, getAllTours } = useTour();
-  // const { addTourToBookingList } = useBookingRoom();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [totalPages, setTotalPages] = useState(0);
@@ -250,33 +249,9 @@ const Tour: React.FC = () => {
                         },
                         transition: "all 0.2s ease-in-out",
                       }}
-                      onClick={() => {
-                        navigate("/booking");
-                        // addTourToBookingList(tour);
-                      }}
+                      onClick={() => navigate(`/tour_info/${tour.tourID}`)}
                     >
                       Đặt tour ngay
-                    </Button>
-
-                    <Button
-                      variant="outlined"
-                      onClick={() => navigate(`/tour_info/${tour.tourID}`)}
-                      sx={{
-                        borderColor: "#3B82F6",
-                        color: "#3B82F6",
-                        padding: "12px 16px",
-                        borderRadius: "12px",
-                        fontWeight: 500,
-                        textTransform: "none",
-                        "&:hover": {
-                          borderColor: "#2563EB",
-                          backgroundColor: "rgba(37, 99, 235, 0.04)",
-                          transform: "translateY(-1px)",
-                        },
-                        transition: "all 0.2s ease-in-out",
-                      }}
-                    >
-                      Chi tiết
                     </Button>
                   </div>
                 </div>
