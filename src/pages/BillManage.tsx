@@ -2,28 +2,65 @@ import { useEffect, useState, type FC } from "react";
 import { useBill } from "../contexts/BillContext";
 import useQueryState from "../hooks/useQueryState";
 import OverlayReload from "../components/Loading";
-import { CreditCard, Search } from "lucide-react";
+import { CreditCard, Funnel, Search } from "lucide-react";
 import type { BillType } from "../types/response/bill.type";
 import Pagination from "../components/Pagination";
 import BillManageItem from "../components/BillManageItem";
+import { BillStatus } from "../constants/BillStatus";
+import useOptionalQueryState from "../hooks/useOptionalQueryState";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 
 const BillManage: FC = () => {
-  const { getAllBill, billList, loading } = useBill();
+  const {
+    getAllBill,
+    billList,
+    loading,
+    searchManageBill,
+    keyword,
+    setKeyword,
+  } = useBill();
   const [page, setPage] = useQueryState("page", "1" as string);
   const [totalPages, setTotalPages] = useState(0);
+  const [selectedStatus, setSelectedStatus] =
+    useOptionalQueryState<BillStatus>("status");
+  const [__, setKeywordQuery] = useOptionalQueryState("keyword");
+  const [inputValue, setInputValue] = useState(keyword ?? "");
 
   const fetchBills = async () => {
     try {
-      const res = await getAllBill(Number(page), 20);
-      setTotalPages(res.totalPages);
+      const currentPage = parseInt(page);
+      let data;
+      if (keyword.trim()) {
+        data = await searchManageBill(
+          currentPage,
+          20,
+          selectedStatus ?? undefined
+        );
+      } else {
+        data = await getAllBill(Number(page), 20);
+      }
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Failed to fetch billList:", error);
     }
   };
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      setKeyword(inputValue);
+      setKeywordQuery(inputValue || undefined);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
+
+  useEffect(() => {
     fetchBills();
-  }, [page]);
+  }, [selectedStatus, page, keyword]);
+
+  useEffect(() => {
+    setPage("1");
+  }, [selectedStatus]);
 
   if (loading || !billList) {
     return <OverlayReload />;
@@ -44,11 +81,54 @@ const BillManage: FC = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
                 type="text"
                 placeholder="Search bill..."
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+            <Popover className="p-2 border rounded-md border-gray-400">
+              <PopoverButton className="block text-sm/6 font-semibold cursor-pointer text-white/50 focus:outline-none data-active:text-white data-focus:outline data-focus:outline-white data-hover:text-white">
+                <Funnel className="text-gray-500" />
+              </PopoverButton>
+
+              <PopoverPanel
+                transition
+                anchor="bottom start"
+                className="divide-y border bg-white shadow-2xl border-gray-100 divide-white/5 rounded-xl text-sm/6 transition duration-200 ease-in-out [--anchor-gap:--spacing(5)] data-closed:-translate-y-1 data-closed:opacity-0"
+              >
+                {({ close }) => (
+                  <>
+                    <div
+                      key="all"
+                      onClick={() => {
+                        setSelectedStatus(undefined);
+                        close();
+                      }}
+                      className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"
+                    >
+                      All
+                    </div>
+
+                    {(Object.values(BillStatus) as BillStatus[]).map(
+                      (status) => (
+                        <div
+                          key={status}
+                          onClick={() => {
+                            setSelectedStatus(status);
+                            close();
+                          }}
+                          className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"
+                        >
+                          {status}
+                        </div>
+                      )
+                    )}
+                  </>
+                )}
+              </PopoverPanel>
+            </Popover>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -78,7 +158,7 @@ const BillManage: FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {billList.map((bill: BillType) => (
-                  <BillManageItem bill={bill} />
+                  <BillManageItem bill={bill} key={bill.billID} />
                 ))}
               </tbody>
             </table>

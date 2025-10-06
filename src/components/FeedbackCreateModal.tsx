@@ -52,7 +52,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     mode: "onChange",
     reValidateMode: "onChange",
   });
-
   const descriptionValue = watch("description");
   const rateValue = watch("rate");
 

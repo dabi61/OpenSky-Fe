@@ -49,6 +49,38 @@ export const handleAllHotelExceptRemove = async (
   return res.data;
 };
 
+export const handleSearchHotel = async (
+  keyword: string,
+  page: number,
+  size: number
+): Promise<HotelPage> => {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}hotels/search`, {
+    params: {
+      keyword,
+      page,
+      limit: size,
+    },
+  });
+  return res.data;
+};
+
+export const handleSearchManageHotel = async (
+  keyword: string,
+  page: number,
+  size: number,
+  status?: HotelStatus
+): Promise<HotelPage> => {
+  const res = await axiosInstance.get(`hotels/admin/search`, {
+    params: {
+      keyword,
+      page,
+      limit: size,
+      ...(status && { status }),
+    },
+  });
+  return res.data;
+};
+
 export const handleUpdateHotelStatus = async (
   id: string,
   status: HotelStatus

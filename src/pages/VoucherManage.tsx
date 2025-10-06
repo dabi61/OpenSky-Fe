@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  MapPin,
-  Plus,
-  Search,
-  Funnel,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { MapPin, Plus, Search, Funnel } from "lucide-react";
 import { useVoucher } from "../contexts/VoucherContext";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { CircularProgress } from "@mui/material";
@@ -18,6 +11,7 @@ import VoucherMangeItem from "../components/VoucherManageItem";
 import VoucherModal from "../components/VoucherModal";
 import { toast } from "sonner";
 import { handleSoftDeleteVoucher } from "../api/voucher.api";
+import Pagination from "../components/Pagination";
 
 const VoucherManage: React.FC = () => {
   const {
@@ -27,30 +21,47 @@ const VoucherManage: React.FC = () => {
     getVoucherByType,
     setSelectedVoucher,
     getAllVoucher,
+    keyword,
+    setKeyword,
+    searchManageVoucher,
   } = useVoucher();
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useQueryState("page", "1" as string);
   const [openModal, setOpenModal] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedType, setSelectedType] =
     useOptionalQueryState<VoucherEnum>("type");
+  const [keywordQuery, setKeywordQuery] = useOptionalQueryState("keyword");
+  const [inputValue, setInputValue] = useState(keyword ?? "");
   const [openCreateModal, setOpenCreateModal] = useState(false);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage.toString());
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const fetchVouchers = async () => {
     try {
-      if (!selectedType) {
-        const data = await getAllVoucher(parseInt(page), 20);
-        setTotalPages(data.totalPages);
+      const currentPage = parseInt(page);
+      let data;
+
+      if (keyword?.trim()) {
+        data = await searchManageVoucher(
+          currentPage,
+          20,
+          selectedType ?? undefined
+        );
+      } else if (selectedType) {
+        data = await getVoucherByType(selectedType, currentPage, 20);
       } else {
-        const data = await getVoucherByType(selectedType, parseInt(page), 20);
-        setTotalPages(data.totalPages);
+        data = await getAllVoucher(currentPage, 20);
       }
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Failed to fetch voucherList:", error);
     }
   };
-
-  console.log(voucherList);
 
   const handleDelete = async () => {
     if (!selectedVoucher?.voucherID) return;
@@ -65,8 +76,21 @@ const VoucherManage: React.FC = () => {
   };
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      setKeyword(inputValue);
+      setKeywordQuery(inputValue || undefined);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
+
+  useEffect(() => {
     fetchVouchers();
-  }, [selectedType, page]);
+  }, [selectedType, page, keyword]);
+
+  useEffect(() => {
+    setPage("1");
+  }, [selectedType]);
 
   useEffect(() => {
     setPage("1");
@@ -76,15 +100,6 @@ const VoucherManage: React.FC = () => {
     <>
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Quản lý voucher
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Quản lý những voucher có trong hệ thống
-            </p>
-          </div>
-
           <div className="bg-white rounded-lg shadow mb-8 p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="relative flex-1">
@@ -93,8 +108,8 @@ const VoucherManage: React.FC = () => {
                   type="text"
                   placeholder="Tìm kiếm voucher theo mã hoặc mô tả..."
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
                 />
               </div>
 
@@ -175,52 +190,11 @@ const VoucherManage: React.FC = () => {
             )}
           </div>
 
-          {totalPages > 1 && (
-            <div className="flex flex-wrap gap-1 py-5 justify-center">
-              <button
-                onClick={() => setPage((parseInt(page) - 1).toString())}
-                disabled={parseInt(page) === 1}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={16} />
-              </button>
-
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (parseInt(page) <= 2) {
-                  pageNum = i + 1;
-                } else if (parseInt(page) >= totalPages - 3) {
-                  pageNum = totalPages - 5 + i;
-                } else {
-                  pageNum = parseInt(page) - 2 + i;
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum.toString())}
-                    className={`px-3 py-1 border rounded-md text-sm ${
-                      parseInt(page) === pageNum
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-
-              <button
-                onClick={() => setPage((parseInt(page) + 1).toString())}
-                disabled={parseInt(page) === totalPages}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
+          <Pagination
+            page={Number(page)}
+            onChange={handlePageChange}
+            totalPages={totalPages}
+          />
 
           {voucherList.length === 0 && !loading && (
             <div className="bg-white rounded-lg shadow p-12 text-center mt-8">
@@ -229,7 +203,7 @@ const VoucherManage: React.FC = () => {
                 Không tìm thấy voucher
               </h3>
               <p className="text-gray-500 mb-6">
-                {searchQuery
+                {keywordQuery
                   ? "Hãy thử điều chỉnh tìm kiếm hoặc bộ lọc để tìm thấy nội dung bạn cần."
                   : "Bắt đầu bằng cách thêm voucher mới."}
               </p>

@@ -81,14 +81,6 @@ const CustomerManager: React.FC = () => {
     <>
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-              Quản Lý Khách Hàng
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Danh sách khách hàng trong hệ thống
-            </p>
-          </div>
           <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
               <div className="relative w-full md:flex-grow">

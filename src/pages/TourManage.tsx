@@ -8,9 +8,18 @@ import useQueryState from "../hooks/useQueryState";
 import Modal from "../components/Modal";
 import { toast } from "sonner";
 import { handleSoftDeleteTour } from "../api/tour.api";
+import useOptionalQueryState from "../hooks/useOptionalQueryState";
+import type { TourPage } from "../types/response/tour.type";
 
 const TourManage: FC = () => {
-  const { getAllTours, tourList } = useTour();
+  const {
+    getAllTours,
+    tourList,
+    keyword,
+    setKeyword,
+    tourSearchList,
+    searchTour,
+  } = useTour();
 
   const navigate = useNavigate();
   const [provinceFilter, setProvinceFilter] = useState<string>("All");
@@ -18,11 +27,18 @@ const TourManage: FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedTourId, setSelectedTourId] = useState<string>("");
   const [page, setPage] = useQueryState("page", "1" as string);
+  const [__, setKeywordQuery] = useOptionalQueryState("keyword");
+  const [inputValue, setInputValue] = useState(keyword ?? "");
 
   const fetchTours = async () => {
     try {
       const currentPage = parseInt(page);
-      const data = await getAllTours(currentPage, 20);
+      let data: TourPage;
+      if (keyword === "") {
+        data = await getAllTours(currentPage, 20);
+      } else {
+        data = await searchTour(currentPage, 20, false);
+      }
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Failed to fetch tourList:", error);
@@ -31,7 +47,16 @@ const TourManage: FC = () => {
 
   useEffect(() => {
     fetchTours();
-  }, [page, getAllTours]);
+  }, [page, getAllTours, keyword]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setKeyword(inputValue);
+      setKeywordQuery(inputValue || undefined);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
 
   const handleDelete = async (id: string) => {
     const res = await handleSoftDeleteTour(id);
@@ -51,11 +76,6 @@ const TourManage: FC = () => {
     <>
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Quản lý tour</h1>
-            <p className="text-gray-600 mt-2">Quản lý thông tin các tour</p>
-          </div>
-
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <div className="flex gap-3">
               <div className="relative w-full flex flex-col">
@@ -68,6 +88,8 @@ const TourManage: FC = () => {
                     type="text"
                     placeholder="Tìm kiếm theo tên tour"
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
                   />
                 </div>
               </div>
@@ -101,24 +123,27 @@ const TourManage: FC = () => {
 
           <div className="overflow-hidden h-full">
             <div className="overflow-x-auto flex flex-col gap-10">
-              {tourList.length > 0 ? (
-                tourList.map((tour) => (
-                  <TourManageItem
-                    tour={tour}
-                    key={tour.tourID}
-                    onClick={() => navigate(`/tour_info/${tour.tourID}`)}
-                    onEdit={() => {
-                      navigate(`/manager/tour_edit/${tour.tourID}`);
-                    }}
-                    onDelete={() => {
-                      setSelectedTourId(tour.tourID);
-                      setOpenModal(true);
-                    }}
-                  />
-                ))
+              {(keyword.trim().length > 0 ? tourSearchList : tourList).length >
+              0 ? (
+                (keyword.trim().length > 0 ? tourSearchList : tourList).map(
+                  (tour) => (
+                    <TourManageItem
+                      tour={tour}
+                      key={tour.tourID}
+                      onClick={() => navigate(`/tour_info/${tour.tourID}`)}
+                      onEdit={() =>
+                        navigate(`/manager/tour_edit/${tour.tourID}`)
+                      }
+                      onDelete={() => {
+                        setSelectedTourId(tour.tourID);
+                        setOpenModal(true);
+                      }}
+                    />
+                  )
+                )
               ) : (
                 <div className="px-6 py-4 text-center text-sm text-gray-500">
-                  No tourList found matching your criteria.
+                  Không tìm thấy tour nào phù hợp.
                 </div>
               )}
             </div>

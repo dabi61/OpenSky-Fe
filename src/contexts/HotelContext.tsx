@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import type {
   HotelPage,
   HotelType,
@@ -10,13 +18,18 @@ import {
   handleGetCurrentHotel,
   handleGetHotelById,
   handleGetHotelByStatus,
+  handleSearchHotel,
+  handleSearchManageHotel,
 } from "../api/hotel.api";
 import { HotelStatus } from "../constants/HotelStatus";
 
 type HotelContextType = {
   hotelList: HotelType[];
+  hotelSearchList: HotelType[];
   loading: boolean;
+  keyword: string;
   selectedHotel: HotelTypeWithImgs | null;
+  setKeyword: Dispatch<SetStateAction<string>>;
   setSelectedHotel: (hotel: HotelTypeWithImgs | null) => void;
   getActiveHotel: (page: number, limit: number) => Promise<HotelPage>;
   getAllHotelExceptRemoved: (page: number, limit: number) => Promise<HotelPage>;
@@ -26,6 +39,16 @@ type HotelContextType = {
     status: HotelStatus,
     page: number,
     limit: number
+  ) => Promise<HotelPage>;
+  searchManageHotel: (
+    page: number,
+    size: number,
+    status?: HotelStatus
+  ) => Promise<HotelPage>;
+  searchHotel: (
+    page: number,
+    size: number,
+    append: boolean
   ) => Promise<HotelPage>;
 };
 
@@ -37,6 +60,14 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [loading, setLoading] = useState(false);
+  const [hotelSearchList, setHotelSearchList] = useState<HotelType[]>([]);
+  const [keyword, setKeyword] = useState("");
+
+  useEffect(() => {
+    if (keyword === "") {
+      setHotelSearchList([]);
+    }
+  }, [keyword]);
 
   const getAllHotelExceptRemoved = async (
     page: number,
@@ -61,6 +92,28 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const searchManageHotel = async (
+    page: number,
+    size: number,
+    status?: HotelStatus
+  ): Promise<HotelPage> => {
+    const res = await handleSearchManageHotel(keyword, page, size, status);
+    setHotelList(res.hotels);
+    return res;
+  };
+
+  const searchHotel = async (
+    page: number,
+    size: number,
+    append = false
+  ): Promise<HotelPage> => {
+    const res = await handleSearchHotel(keyword, page, size);
+    setHotelSearchList((prev) =>
+      append ? [...prev, ...res.hotels] : res.hotels
+    );
+    return res;
   };
 
   const getActiveHotel = async (
@@ -107,6 +160,8 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
     <HotelContext.Provider
       value={{
         hotelList,
+        hotelSearchList,
+        setKeyword,
         selectedHotel,
         setSelectedHotel,
         getAllHotelExceptRemoved,
@@ -115,6 +170,9 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
         getHotelBySatus,
         getHotelById,
         getMyHotel,
+        keyword,
+        searchHotel,
+        searchManageHotel,
       }}
     >
       {children}

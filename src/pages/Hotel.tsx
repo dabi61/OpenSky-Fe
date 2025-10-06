@@ -2,16 +2,10 @@ import Sticky from "react-stickynode";
 import StarSort from "../components/StarSort";
 import HotelItem from "../components/HotelItem";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
-import {
-  Button,
-  FormControl,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-} from "@mui/material";
+import { Button, FormControl, MenuItem, Select } from "@mui/material";
 import { Search } from "lucide-react";
 import assets from "../assets";
 import { useNavigate } from "react-router-dom";
@@ -19,19 +13,64 @@ import { useHotel } from "../contexts/HotelContext";
 import useQueryState from "../hooks/useQueryState";
 import OverlayReload from "../components/Loading";
 import { useUser } from "../contexts/UserContext";
+import { Popover, Transition } from "@headlessui/react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import type { HotelType } from "../types/response/hotel.type";
 
 const Hotel: React.FC = () => {
   const { user } = useUser();
-  const { getActiveHotel, hotelList } = useHotel();
+  const {
+    getActiveHotel,
+    hotelList,
+    hotelSearchList,
+    searchHotel,
+    keyword,
+    setKeyword,
+  } = useHotel();
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedProvince, setSelectedProvince] = useState<number | "">("");
-  const [priceFilter, setPriceFilter] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const [page, setPage] = useQueryState("page", "1" as string);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [visibleResults, setVisibleResults] = useState<HotelType[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (keyword.trim().length > 0) {
+        await searchHotel(1, 5, false);
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delaySearch);
+  }, [keyword]);
+
+  useEffect(() => {
+    if (hotelSearchList.length > 0) {
+      const initial = hotelSearchList.slice(0, 5);
+      setVisibleResults(initial);
+      setHasMore(hotelSearchList.length > 5);
+      setShowDropdown(true);
+    } else {
+      setVisibleResults([]);
+      setShowDropdown(false);
+    }
+  }, [hotelSearchList]);
+
+  const loadMoreResults = () => {
+    const next = hotelSearchList.slice(
+      visibleResults.length,
+      visibleResults.length + 5
+    );
+    setVisibleResults((prev) => [...prev, ...next]);
+    setHasMore(hotelSearchList.length > visibleResults.length + 5);
+  };
 
   const fetchHotels = async () => {
     try {
@@ -78,10 +117,6 @@ const Hotel: React.FC = () => {
     },
   };
 
-  const handlePriceFilterChange = (event: SelectChangeEvent<string>) => {
-    setPriceFilter(event.target.value);
-  };
-
   const handlePageChange = (value: number) => {
     setCurrentPage(value);
     setPage(value.toString());
@@ -99,19 +134,65 @@ const Hotel: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex justify-center">
-        <div className="relative w-275 ">
+      <div className="flex justify-center relative">
+        <Popover className="relative w-275">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={20} className="text-gray-400" />
           </div>
+
           <input
             type="text"
-            placeholder="Tìm kiếm tour hoặc điểm đến..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tìm kiếm khách sạn hoặc điểm đến..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
           />
-        </div>
+
+          <Transition
+            as={Fragment}
+            show={showDropdown && visibleResults.length > 0}
+            enter="transition ease-out duration-200"
+            enterFrom="opacity-0 translate-y-1"
+            enterTo="opacity-100 translate-y-0"
+            leave="transition ease-in duration-150"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 translate-y-1"
+          >
+            <Popover.Panel className="absolute z-50 mt-2 w-full bg-white shadow-lg rounded-lg border h-fit border-gray-200 max-h-80 overflow-hidden">
+              <InfiniteScroll
+                dataLength={visibleResults.length}
+                next={loadMoreResults}
+                hasMore={hasMore}
+                loader={
+                  <div className="text-center py-2 text-sm text-gray-400">
+                    Đang tải thêm...
+                  </div>
+                }
+                style={{
+                  overflowY: visibleResults.length > 5 ? "auto" : "visible",
+                  maxHeight:
+                    visibleResults.length > 5 ? "20rem" : "fit-content",
+                }}
+                scrollThreshold={0.9}
+              >
+                {visibleResults.map((hotel) => (
+                  <div
+                    key={hotel.hotelID}
+                    onClick={() => navigate(`/hotel_info/${hotel.hotelID}`)}
+                    className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  >
+                    <span className="font-medium text-gray-800">
+                      {hotel.hotelName}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {hotel.address}
+                    </span>
+                  </div>
+                ))}
+              </InfiniteScroll>
+            </Popover.Panel>
+          </Transition>
+        </Popover>
       </div>
 
       <div className="flex flex-col lg:flex-row justify-center items-start mt-5 gap-4 lg:gap-6 px-4 lg:px-0 md:mx-auto">
@@ -157,21 +238,6 @@ const Hotel: React.FC = () => {
                   </FormControl>
                 </div>
 
-                <div>
-                  <div className="font-bold mb-2">Mức giá</div>
-                  <FormControl fullWidth variant="outlined" size="small">
-                    <Select
-                      value={priceFilter}
-                      onChange={handlePriceFilterChange}
-                    >
-                      <MenuItem value="all">Tất cả mức giá</MenuItem>
-                      <MenuItem value="low">Dưới 1 triệu</MenuItem>
-                      <MenuItem value="medium">1 - 3 triệu</MenuItem>
-                      <MenuItem value="high">Trên 3 triệu</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
-
                 <div className="mt-4">
                   <StarSort />
                 </div>
@@ -202,22 +268,6 @@ const Hotel: React.FC = () => {
                     </Select>
                   </FormControl>
                 </div>
-
-                <div>
-                  <div className="font-bold mb-2">Mức giá</div>
-                  <FormControl fullWidth variant="outlined" size="small">
-                    <Select
-                      value={priceFilter}
-                      onChange={handlePriceFilterChange}
-                    >
-                      <MenuItem value="all">Tất cả mức giá</MenuItem>
-                      <MenuItem value="low">Dưới 1 triệu</MenuItem>
-                      <MenuItem value="medium">1 - 3 triệu</MenuItem>
-                      <MenuItem value="high">Trên 3 triệu</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
-
                 <div className="mt-4">
                   <StarSort />
                 </div>

@@ -93,6 +93,5 @@ export const handleGetHotelBookingById = async (
 ): Promise<BookingTourType> => {
   const res = await axiosInstance.get(`bookings/hotel/${id}/detail`);
   console.log(res.data);
-
   return res.data;
 };

@@ -52,9 +52,9 @@ const Bill: FC = () => {
     const fetchPopulation = async () => {
       if (!selectedBill) return;
 
-      try {
-        let resPopulation: BookingTourType | BookingHotelType;
+      let resPopulation: BookingTourType | BookingHotelType;
 
+      if (user?.role === "Customer") {
         if (selectedBill.billDetails?.itemType === "Hotel") {
           resPopulation = await handleGetHotelBookingById(
             selectedBill.bookingID
@@ -64,15 +64,16 @@ const Bill: FC = () => {
             selectedBill.bookingID
           );
         }
-
-        setPopulationValue(resPopulation);
-      } catch (error) {
-        console.error("Failed to fetch population:", error);
+        if (resPopulation.bookingID) {
+          setPopulationValue(resPopulation);
+        }
       }
     };
 
     fetchPopulation();
   }, [selectedBill]);
+
+  console.log(populationValue);
 
   if (loading || !selectedBill) {
     return <OverlayReload />;
@@ -112,6 +113,7 @@ const Bill: FC = () => {
     if (res.refundID) {
       toast.success(res.message);
       await getBillById(id!);
+      await getRefundByBill(id!);
     } else {
       toast.error(res.message);
     }

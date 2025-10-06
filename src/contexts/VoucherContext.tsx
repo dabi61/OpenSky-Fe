@@ -13,6 +13,7 @@ import {
   handleGetUnsavedVoucher,
   handleGetVoucherById,
   handleGetVoucherByType,
+  handleSearchManageVoucher,
 } from "../api/voucher.api";
 import type { VoucherEnum } from "../constants/VoucherEnum";
 
@@ -20,10 +21,11 @@ type VoucherContextType = {
   voucherList: VoucherType[];
   loading: boolean;
   selectedVoucher: VoucherType | null;
+  keyword: string;
+  setKeyword: Dispatch<SetStateAction<string>>;
   getVoucherById: (id: string) => Promise<VoucherType>;
   getAvailableVoucher: (page: number, limit: number) => Promise<VoucherPage>;
   getAllVoucher: (page: number, limit: number) => Promise<VoucherPage>;
-
   getUnsavedVoucher: (page: number, limit: number) => Promise<VoucherPage>;
   getVoucherByType: (
     type: VoucherEnum,
@@ -31,6 +33,11 @@ type VoucherContextType = {
     limit: number
   ) => Promise<VoucherPage>;
   setSelectedVoucher: Dispatch<SetStateAction<VoucherType | null>>;
+  searchManageVoucher: (
+    page: number,
+    size: number,
+    type?: VoucherEnum
+  ) => Promise<VoucherPage>;
 };
 
 const VoucherContext = createContext<VoucherContextType | null>(null);
@@ -41,6 +48,7 @@ export const VoucherProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [loading, setLoading] = useState(false);
+  const [keyword, setKeyword] = useState("");
 
   const getVoucherById = async (id: string): Promise<VoucherType> => {
     try {
@@ -51,6 +59,16 @@ export const VoucherProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const searchManageVoucher = async (
+    page: number,
+    size: number,
+    type?: VoucherEnum
+  ): Promise<VoucherPage> => {
+    const res = await handleSearchManageVoucher(keyword, page, size, type);
+    setVoucherList(res.vouchers);
+    return res;
   };
 
   const getAvailableVoucher = async (
@@ -116,6 +134,9 @@ export const VoucherProvider = ({ children }: { children: ReactNode }) => {
         voucherList,
         selectedVoucher,
         loading,
+        keyword,
+        searchManageVoucher,
+        setKeyword,
         getVoucherById,
         getAvailableVoucher,
         getVoucherByType,

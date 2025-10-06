@@ -91,6 +91,23 @@ export const handleCreateVoucher = async (
   }
 };
 
+export const handleSearchManageVoucher = async (
+  keyword: string,
+  page: number,
+  size: number,
+  type?: VoucherEnum
+): Promise<VoucherPage> => {
+  const res = await axiosInstance.get(`vouchers/admin/search`, {
+    params: {
+      keyword,
+      page,
+      limit: size,
+      ...(type && { type }),
+    },
+  });
+  return res.data;
+};
+
 export const handleUpdateVoucher = async (
   id: string,
   data: VoucherUpdateValidateType

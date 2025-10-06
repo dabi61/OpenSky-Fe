@@ -20,34 +20,61 @@ import { handleUpdateHotelStatus } from "../api/hotel.api";
 import { toast } from "sonner";
 
 const HotelManage: React.FC = () => {
-  const { hotelList, loading, getHotelBySatus, getAllHotelExceptRemoved } =
-    useHotel();
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const {
+    hotelList,
+    loading,
+    getHotelBySatus,
+    getAllHotelExceptRemoved,
+    keyword,
+    setKeyword,
+    searchManageHotel,
+  } = useHotel();
+  const navigate = useNavigate();
   const [page, setPage] = useQueryState("page", "1" as string);
   const [selectedHotelId, setSelectedHotelId] = useState<string>("");
   const [openModal, setOpenModal] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedStatus, setSelectedStatus] =
     useOptionalQueryState<HotelStatus>("status");
+  const [keywordQuery, setKeywordQuery] = useOptionalQueryState("keyword");
+  const [inputValue, setInputValue] = useState(keyword ?? "");
 
   const fetchHotel = async () => {
     try {
-      if (!selectedStatus) {
-        const data = await getAllHotelExceptRemoved(parseInt(page), 20);
-        setTotalPages(data.totalPages);
+      const currentPage = parseInt(page);
+
+      let data;
+
+      if (keyword?.trim()) {
+        data = await searchManageHotel(
+          currentPage,
+          20,
+          selectedStatus ?? undefined
+        );
+      } else if (selectedStatus) {
+        data = await getHotelBySatus(selectedStatus, currentPage, 20);
       } else {
-        const data = await getHotelBySatus(selectedStatus, parseInt(page), 20);
-        setTotalPages(data.totalPages);
+        data = await getAllHotelExceptRemoved(currentPage, 20);
       }
+
+      setTotalPages(data.totalPages);
     } catch (error) {
-      console.error("Failed to fetch tourList:", error);
+      console.error("Failed to fetch hotel list:", error);
     }
   };
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setKeyword(inputValue);
+      setKeywordQuery(inputValue || undefined);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
+
   useEffect(() => {
     fetchHotel();
-  }, [selectedStatus, page]);
+  }, [selectedStatus, page, keyword]);
 
   useEffect(() => {
     setPage("1");
@@ -68,15 +95,6 @@ const HotelManage: React.FC = () => {
     <>
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Quản lý khách sạn
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Quản lý những khách sạn có trong hệ thống
-            </p>
-          </div>
-
           <div className="bg-white rounded-lg shadow mb-8 p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="relative flex-1">
@@ -85,8 +103,8 @@ const HotelManage: React.FC = () => {
                   type="text"
                   placeholder="Search hotels by name or province..."
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
                 />
               </div>
               <Popover className="p-2 border rounded-md border-gray-400">
@@ -122,7 +140,7 @@ const HotelManage: React.FC = () => {
                             key={status}
                             onClick={() => {
                               setSelectedStatus(status);
-                              close(); // đóng popover
+                              close();
                             }}
                             className="block rounded-lg px-3 pr-10 py-2 transition hover:bg-gray-100 cursor-pointer"
                           >
@@ -212,7 +230,7 @@ const HotelManage: React.FC = () => {
                 No hotels found
               </h3>
               <p className="text-gray-500 mb-6">
-                {searchQuery
+                {keywordQuery
                   ? "Try adjusting your search or filter to find what you are looking for."
                   : "Get started by adding a new hotel property."}
               </p>

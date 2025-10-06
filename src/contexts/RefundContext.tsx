@@ -15,7 +15,7 @@ type RefundContextType = {
   setSelectedRefund: (refund: RefundType | null) => void;
   getAllRefunds: (page: number, limit: number) => Promise<RefundPage>;
   getRefundById: (id: string) => Promise<RefundType>;
-  getRefundByBill: (id: string) => Promise<RefundType>;
+  getRefundByBill: (id: string) => Promise<RefundType | null>;
   getRefundBySatus: (
     status: RefundStatus,
     page: number,
@@ -52,7 +52,7 @@ export const RefundProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const res = await handleGetRefundByStatus(status, page, limit);
-      setRefundList(res.refunds);
+      if (res) setRefundList(res.refunds);
       return res;
     } finally {
       setLoading(false);
@@ -70,12 +70,15 @@ export const RefundProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getRefundByBill = async (id: string): Promise<RefundType> => {
+  const getRefundByBill = async (id: string): Promise<RefundType | null> => {
     try {
       setLoading(true);
       const res = await handleGetRefundByBill(id);
-      setSelectedRefund(res);
-      return res;
+      if ("billID" in res) {
+        setSelectedRefund(res);
+        return res;
+      }
+      return null;
     } finally {
       setLoading(false);
     }

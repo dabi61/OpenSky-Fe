@@ -41,8 +41,17 @@ export const handleGetRefundById = async (id: string): Promise<RefundType> => {
 
 export const handleGetRefundByBill = async (
   id: string
-): Promise<RefundType> => {
-  const res = await axiosInstance.get(`refunds/bill/${id}`);
+): Promise<RefundType | { message: string }> => {
+  const res = await axiosInstance.get(`refunds/bill/${id}`, {
+    validateStatus: () => true,
+  });
+
+  console.log(res.status);
+
+  if (res.status === 404) {
+    return { message: res.data?.message || "Không tìm thấy yêu cầu hoàn tiền" };
+  }
+
   return res.data;
 };
 

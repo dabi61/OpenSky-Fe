@@ -49,6 +49,7 @@ import MySchedule from "../pages/MySchedule";
 import { FeedbackProvider } from "../contexts/FeedbackContext";
 import { RefundProvider } from "../contexts/RefundContext";
 import RefundManage from "../pages/RefundManage";
+import RefundInfo from "../pages/RefundInfo";
 
 const router = createBrowserRouter([
   {
@@ -338,6 +339,16 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: "refund_info/:id",
+                element: (
+                  <RefundProvider>
+                    <BillProvider>
+                      <RefundInfo />
+                    </BillProvider>
+                  </RefundProvider>
+                ),
+              },
+              {
                 path: "tour_create",
                 element: (
                   <ImageProvider>
@@ -356,6 +367,18 @@ const router = createBrowserRouter([
                         <ImageProvider>
                           <TourEdit />
                         </ImageProvider>
+                      </ScheduleProvider>
+                    </TourProvider>
+                  </ImageProvider>
+                ),
+              },
+              {
+                path: "refund/:id",
+                element: (
+                  <ImageProvider>
+                    <TourProvider>
+                      <ScheduleProvider>
+                        <RefundInfo />
                       </ScheduleProvider>
                     </TourProvider>
                   </ImageProvider>

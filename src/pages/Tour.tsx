@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Calendar, Search, MapPin, Star, Filter, User } from "lucide-react";
 import { Button, FormControl, MenuItem, Select } from "@mui/material";
 import { motion } from "framer-motion";
@@ -10,19 +10,64 @@ import { getProvinces } from "../api/province.api";
 import type { Province } from "../types/api/province";
 import StarSort from "../components/StarSort";
 import { useNavigate } from "react-router-dom";
+import type { TourType } from "../types/response/tour.type";
+import { Popover, Transition } from "@headlessui/react";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const Tour: React.FC = () => {
-  const { tourList, getAllTours } = useTour();
+  const {
+    tourList,
+    getAllTours,
+    tourSearchList,
+    searchTour,
+    keyword,
+    setKeyword,
+  } = useTour();
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [totalPages, setTotalPages] = useState(0);
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [isMobile, setIsMobile] = useState(false);
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [page, setPage] = useQueryState("page", "1" as string);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [visibleResults, setVisibleResults] = useState<TourType[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (keyword.trim().length > 0) {
+        await searchTour(1, 5, false);
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delaySearch);
+  }, [keyword]);
+
+  useEffect(() => {
+    if (tourSearchList.length > 0) {
+      const initial = tourSearchList.slice(0, 5);
+      setVisibleResults(initial);
+      setHasMore(tourSearchList.length > 5);
+      setShowDropdown(true);
+    } else {
+      setVisibleResults([]);
+      setShowDropdown(false);
+    }
+  }, [tourSearchList]);
+
+  const loadMoreResults = () => {
+    const next = tourSearchList.slice(
+      visibleResults.length,
+      visibleResults.length + 5
+    );
+    setVisibleResults((prev) => [...prev, ...next]);
+    setHasMore(tourSearchList.length > visibleResults.length + 5);
+  };
 
   useEffect(() => {
     async function fetchProvinces() {
@@ -87,18 +132,64 @@ const Tour: React.FC = () => {
       </div>
 
       <div className="flex justify-center mb-8">
-        <div className="relative w-275 ">
+        <Popover className="relative w-275">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={20} className="text-gray-400" />
           </div>
+
           <input
             type="text"
-            placeholder="Tìm kiếm tour hoặc điểm đến..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tìm kiếm khách sạn hoặc điểm đến..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
           />
-        </div>
+
+          <Transition
+            as={Fragment}
+            show={showDropdown && visibleResults.length > 0}
+            enter="transition ease-out duration-200"
+            enterFrom="opacity-0 translate-y-1"
+            enterTo="opacity-100 translate-y-0"
+            leave="transition ease-in duration-150"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 translate-y-1"
+          >
+            <Popover.Panel className="absolute z-50 mt-2 w-full bg-white shadow-lg rounded-lg border h-fit border-gray-200 max-h-80 overflow-hidden">
+              <InfiniteScroll
+                dataLength={visibleResults.length}
+                next={loadMoreResults}
+                hasMore={hasMore}
+                loader={
+                  <div className="text-center py-2 text-sm text-gray-400">
+                    Đang tải thêm...
+                  </div>
+                }
+                style={{
+                  overflowY: visibleResults.length > 5 ? "auto" : "visible",
+                  maxHeight:
+                    visibleResults.length > 5 ? "20rem" : "fit-content",
+                }}
+                scrollThreshold={0.9}
+              >
+                {visibleResults.map((tour) => (
+                  <div
+                    key={tour.tourID}
+                    onClick={() => navigate(`/tour_info/${tour.tourID}`)}
+                    className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  >
+                    <span className="font-medium text-gray-800">
+                      {tour.tourName}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {tour.address}
+                    </span>
+                  </div>
+                ))}
+              </InfiniteScroll>
+            </Popover.Panel>
+          </Transition>
+        </Popover>
       </div>
 
       <div className="flex flex-col lg:flex-row justify-center items-start gap-4 lg:gap-6">

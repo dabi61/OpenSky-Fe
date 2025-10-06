@@ -2,27 +2,38 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import {
   type TourPage,
   type TourType,
   type TourTypeWithImgs,
 } from "../types/response/tour.type";
-import { getTours, handleGetTourById } from "../api/tour.api";
+import { getTours, handleGetTourById, handleSearchTour } from "../api/tour.api";
 import type { TourItineraryType } from "../types/response/tour_itinerary.type";
 import { handleGetTourItineraryByTour } from "../api/tourItinerary.api";
 
 type TourContextType = {
   tourList: TourType[];
   loading: boolean;
+  keyword: string;
+  tourSearchList: TourType[];
+  setKeyword: Dispatch<SetStateAction<string>>;
   getAllTours: (page: number, limit: number) => Promise<TourPage>;
   selectedTour: TourTypeWithImgs | null;
   getTourItineraryByTour: (id: string) => Promise<TourItineraryType[]>;
   setSelectedTour: (tour: TourTypeWithImgs | null) => void;
   getTourById: (id: string) => Promise<TourTypeWithImgs>;
   tourItineraryList: TourItineraryType[];
+  searchTour: (
+    page: number,
+    size: number,
+    append: boolean
+  ) => Promise<TourPage>;
 };
 
 const TourContext = createContext<TourContextType | null>(null);
@@ -36,6 +47,24 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
   const [tourItineraryList, setTourItineraryList] = useState<
     TourItineraryType[]
   >([]);
+  const [tourSearchList, setTourSearchList] = useState<TourType[]>([]);
+  const [keyword, setKeyword] = useState("");
+
+  useEffect(() => {
+    if (keyword === "") {
+      setTourSearchList([]);
+    }
+  }, [keyword]);
+
+  const searchTour = async (
+    page: number,
+    size: number,
+    append = false
+  ): Promise<TourPage> => {
+    const res = await handleSearchTour(keyword, page, size);
+    setTourSearchList((prev) => (append ? [...prev, ...res.tours] : res.tours));
+    return res;
+  };
 
   const getTourById = async (id: string): Promise<TourTypeWithImgs> => {
     try {
@@ -77,6 +106,10 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
         tourList,
         loading,
         selectedTour,
+        keyword,
+        searchTour,
+        setKeyword,
+        tourSearchList,
         setSelectedTour,
         getAllTours,
         getTourById,

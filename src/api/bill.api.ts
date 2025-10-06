@@ -7,6 +7,7 @@ import type {
 import type { BillApplyType } from "../types/schemas/bill.schema";
 import axiosInstance from "../utils/AxisosInstance";
 import type { QrResponse, QrType } from "../types/response/qr.type";
+import type { BillStatus } from "../constants/BillStatus";
 
 export const handleApplyVoucherToBill = async (
   data: BillApplyType
@@ -26,6 +27,34 @@ export const handleApplyVoucherToBill = async (
       message: error?.response?.data?.message ?? "Có lỗi xảy ra",
     };
   }
+};
+
+export const handleGetBillByStatus = async (
+  status: BillStatus,
+  page: number,
+  limit: number
+): Promise<BillPage> => {
+  const res = await axiosInstance.get(
+    `bills/status/${status}?page=${page}&size=${limit}`
+  );
+  return res.data;
+};
+
+export const handleSearchManageBill = async (
+  keyword: string,
+  page: number,
+  size: number,
+  status?: BillStatus
+): Promise<BillPage> => {
+  const res = await axiosInstance.get(`bills/admin/search`, {
+    params: {
+      keyword,
+      page,
+      limit: size,
+      ...(status && { status }),
+    },
+  });
+  return res.data;
 };
 
 export const handleGetBillById = async (id: string): Promise<BillType> => {

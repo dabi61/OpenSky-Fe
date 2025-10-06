@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { useUser } from "../contexts/UserContext";
 import type { UserType } from "../types/response/user.type";
 import { Roles } from "../constants/role";
-import { Filter, Plus, Search, User } from "lucide-react";
+import { Plus, Search, User } from "lucide-react";
 import StaffManageItem from "../components/StaffManageItem";
 import StaffModal from "../components/StaffModal";
 import Pagination from "../components/Pagination";
@@ -60,14 +60,6 @@ const StaffManager: React.FC = () => {
     <>
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-              Quản Lý Nhân viên
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Danh sách nhân viên trong hệ thống
-            </p>
-          </div>
           <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
               <div className="relative w-full md:flex-grow">
@@ -85,10 +77,7 @@ const StaffManager: React.FC = () => {
                   }
                 />
               </div>
-              <button className="flex items-center justify-center border gap-2 text-gray-700 px-4 py-2 rounded-lg hover:text-gray-900 w-full md:w-auto cursor-pointer">
-                <Filter />
-                <span>Lọc</span>
-              </button>
+
               <div className="flex gap-2 w-full md:w-auto">
                 <button
                   className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full md:w-auto cursor-pointer"

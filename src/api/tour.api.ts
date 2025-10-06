@@ -20,6 +20,21 @@ export const getTours = async (
   return res.data;
 };
 
+export const handleSearchTour = async (
+  keyword: string,
+  page: number,
+  size: number
+): Promise<TourPage> => {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}tours/search`, {
+    params: {
+      keyword,
+      page,
+      limit: size,
+    },
+  });
+  return res.data;
+};
+
 export const handleSoftDeleteTour = async (
   id: string
 ): Promise<{ success: boolean; message: string }> => {
