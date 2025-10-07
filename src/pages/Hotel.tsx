@@ -3,8 +3,6 @@ import StarSort from "../components/StarSort";
 import HotelItem from "../components/HotelItem";
 import { motion } from "framer-motion";
 import { Fragment, useEffect, useState } from "react";
-import { getProvinces } from "../api/province.api";
-import type { Province } from "../types/api/province";
 import { Button, FormControl, MenuItem, Select } from "@mui/material";
 import { Search } from "lucide-react";
 import assets from "../assets";
@@ -16,6 +14,8 @@ import { useUser } from "../contexts/UserContext";
 import { Popover, Transition } from "@headlessui/react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import type { HotelType } from "../types/response/hotel.type";
+import useOptionalQueryState from "../hooks/useOptionalQueryState";
+import { handleGetProvinceByHotel } from "../api/hotel.api";
 
 const Hotel: React.FC = () => {
   const { user } = useUser();
@@ -26,10 +26,13 @@ const Hotel: React.FC = () => {
     searchHotel,
     keyword,
     setKeyword,
+    getHotelByStar,
+    getHotelByProvince,
   } = useHotel();
-  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [provinces, setProvinces] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedProvince, setSelectedProvince] = useState<number | "">("");
+  const [selectedProvince, setSelectedProvince] =
+    useOptionalQueryState("province");
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const [page, setPage] = useQueryState("page", "1" as string);
@@ -37,7 +40,15 @@ const Hotel: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [visibleResults, setVisibleResults] = useState<HotelType[]>([]);
   const [hasMore, setHasMore] = useState(false);
+  const [selectedStarQuery, setSelectedStarQuery] =
+    useOptionalQueryState("star");
 
+  const selectedStar: number | null = selectedStarQuery
+    ? Number(selectedStarQuery)
+    : null;
+  const handleStarChange = (star: number | null) => {
+    setSelectedStarQuery(star !== null ? String(star) : undefined);
+  };
   useEffect(() => {
     const delaySearch = setTimeout(async () => {
       if (keyword.trim().length > 0) {
@@ -72,19 +83,28 @@ const Hotel: React.FC = () => {
     setHasMore(hotelSearchList.length > visibleResults.length + 5);
   };
 
-  const fetchHotels = async () => {
-    try {
-      const currentPage = parseInt(page);
-      const data = await getActiveHotel(currentPage, 20);
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      console.error("Failed to fetch tourList:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchHotels();
-  }, [page]);
+    const fetchHotelsByProvince = async () => {
+      try {
+        const currentPage = parseInt(page);
+        let data;
+
+        if (selectedProvince) {
+          data = await getHotelByProvince(selectedProvince, currentPage, 20);
+        } else if (selectedStar) {
+          data = await getHotelByStar(selectedStar, currentPage, 20);
+        } else {
+          data = await getActiveHotel(currentPage, 20);
+        }
+
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error("Failed to fetch hotels:", error);
+      }
+    };
+
+    fetchHotelsByProvince();
+  }, [selectedProvince, page, selectedStar]);
 
   if (!hotelList) {
     return <OverlayReload />;
@@ -92,7 +112,7 @@ const Hotel: React.FC = () => {
 
   useEffect(() => {
     async function fetchProvinces() {
-      const data = await getProvinces();
+      const data = await handleGetProvinceByHotel();
       setProvinces(data);
     }
     fetchProvinces();
@@ -221,17 +241,13 @@ const Hotel: React.FC = () => {
                     <Select
                       labelId="province-label"
                       value={selectedProvince}
-                      onChange={(e) =>
-                        setSelectedProvince(e.target.value as number)
-                      }
+                      onChange={(e) => setSelectedProvince(e.target.value)}
                       MenuProps={MenuProps}
                     >
-                      <MenuItem value="">
-                        <em>-- Chọn tỉnh --</em>
-                      </MenuItem>
-                      {provinces.map((p) => (
-                        <MenuItem key={p.province_id} value={p.province_id}>
-                          {p.province_name}
+                      <MenuItem value="">Tất cả</MenuItem>
+                      {provinces.map((p, key) => (
+                        <MenuItem key={key} value={p}>
+                          {p}
                         </MenuItem>
                       ))}
                     </Select>
@@ -239,7 +255,10 @@ const Hotel: React.FC = () => {
                 </div>
 
                 <div className="mt-4">
-                  <StarSort />
+                  <StarSort
+                    selectedStar={selectedStar}
+                    onChange={handleStarChange}
+                  />
                 </div>
               </div>
             </details>
@@ -252,24 +271,23 @@ const Hotel: React.FC = () => {
                     <Select
                       labelId="province-label"
                       value={selectedProvince}
-                      onChange={(e) =>
-                        setSelectedProvince(e.target.value as number)
-                      }
+                      onChange={(e) => setSelectedProvince(e.target.value)}
                       MenuProps={MenuProps}
                     >
-                      <MenuItem value="">
-                        <em>-- Chọn tỉnh --</em>
-                      </MenuItem>
-                      {provinces.map((p) => (
-                        <MenuItem key={p.province_id} value={p.province_id}>
-                          {p.province_name}
+                      <MenuItem value="">Tất cả</MenuItem>
+                      {provinces.map((p, key) => (
+                        <MenuItem key={key} value={p}>
+                          {p}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                 </div>
                 <div className="mt-4">
-                  <StarSort />
+                  <StarSort
+                    selectedStar={selectedStar}
+                    onChange={handleStarChange}
+                  />
                 </div>
               </div>
             </Sticky>
@@ -288,8 +306,14 @@ const Hotel: React.FC = () => {
               <HotelItem item={hotel} key={hotel.hotelID} />
             ))
           ) : (
-            <div className="text-center py-10 text-gray-500">
-              Không tìm thấy khách sạn nào phù hợp với tiêu chí của bạn
+            <div className="md:w-200 text-center py-16 bg-white rounded-2xl shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                Không tìm thấy khách sạn nào phù hợp
+              </h3>
+              <p className="text-gray-500 max-w-md mx-auto">
+                Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác để khám
+                phá thêm nhiều tour hấp dẫn
+              </p>
             </div>
           )}
         </motion.div>

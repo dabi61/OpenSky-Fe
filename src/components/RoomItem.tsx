@@ -6,10 +6,9 @@ import type { FC } from "react";
 
 type Props = {
   room: RoomType;
-  onClick?: () => void;
 };
 
-const RoomItem: FC<Props> = ({ room, onClick }) => {
+const RoomItem: FC<Props> = ({ room }) => {
   const navigate = useNavigate();
   return (
     <div className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 mb-4 overflow-hidden">
@@ -63,22 +62,6 @@ const RoomItem: FC<Props> = ({ room, onClick }) => {
             </div>
             <div className="mt-4 flex gap-2 justify-end whitespace-nowrap">
               <Button
-                variant="outlined"
-                startIcon={<Eye size={18} />}
-                onClick={() => navigate(`/room_info/${room.roomID}`)}
-                sx={{
-                  backgroundColor: "#fff",
-                  borderColor: "#D1D5DB",
-                  color: "#374151",
-                  "&:hover": {
-                    backgroundColor: "#F9FAFB",
-                    borderColor: "#9CA3AF",
-                  },
-                }}
-              >
-                Xem chi tiết
-              </Button>
-              <Button
                 variant="contained"
                 sx={{
                   backgroundColor: "#3B82F6",
@@ -87,7 +70,7 @@ const RoomItem: FC<Props> = ({ room, onClick }) => {
                   },
                 }}
                 type="submit"
-                onClick={onClick}
+                onClick={() => navigate(`/room_info/${room.roomID}`)}
               >
                 Đặt phòng
               </Button>

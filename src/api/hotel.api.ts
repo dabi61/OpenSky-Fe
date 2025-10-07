@@ -184,3 +184,36 @@ export const handleUpdateHotel = async (
     };
   }
 };
+
+export const handleGetHotelByStar = async (
+  star: number,
+  page: number,
+  size: number
+): Promise<HotelPage> => {
+  const res = await axios.get(
+    `${
+      import.meta.env.VITE_API_URL
+    }hotels/star/${star}?page=${page}&size=${size}`
+  );
+  return res.data;
+};
+
+export const handleGetProvinceByHotel = async (): Promise<string[]> => {
+  const res = await axios.get(
+    `${import.meta.env.VITE_API_URL}hotels/provinces`
+  );
+  return res.data.provinces;
+};
+
+export const handleGetHotelByProvince = async (
+  province: string,
+  page: number,
+  size: number
+): Promise<HotelPage> => {
+  const res = await axios.get(
+    `${
+      import.meta.env.VITE_API_URL
+    }hotels/province/${province}?page=${page}&size=${size}`
+  );
+  return res.data;
+};

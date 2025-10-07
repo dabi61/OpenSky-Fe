@@ -22,7 +22,6 @@ const TourManage: FC = () => {
   } = useTour();
 
   const navigate = useNavigate();
-  const [provinceFilter, setProvinceFilter] = useState<string>("All");
   const [totalPages, setTotalPages] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [selectedTourId, setSelectedTourId] = useState<string>("");
@@ -70,8 +69,6 @@ const TourManage: FC = () => {
     }
   };
 
-  const provinces = Array.from(new Set(tourList.map((tour) => tour.province)));
-
   return (
     <>
       <div className="min-h-screen bg-gray-50 p-6">
@@ -92,21 +89,6 @@ const TourManage: FC = () => {
                     onChange={(e) => setInputValue(e.target.value)}
                   />
                 </div>
-              </div>
-
-              <div>
-                <select
-                  className="block w-40 border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={provinceFilter}
-                  onChange={(e) => setProvinceFilter(e.target.value)}
-                >
-                  <option value="All">All Provinces</option>
-                  {provinces.map((province) => (
-                    <option key={province} value={province}>
-                      {province}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div className="flex items-end">

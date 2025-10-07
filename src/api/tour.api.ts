@@ -132,7 +132,25 @@ export const handleGetTourByStar = async (
   const res = await axios.get(
     `${
       import.meta.env.VITE_API_URL
-    }/tours/star/${star}?page=${page}&size=${size}`
+    }tours/star/${star}?page=${page}&size=${size}`
+  );
+  return res.data;
+};
+
+export const handleGetProvinceByTour = async (): Promise<string[]> => {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}tours/provinces`);
+  return res.data.provinces;
+};
+
+export const handleGetTourByProvince = async (
+  province: string,
+  page: number,
+  size: number
+): Promise<TourPage> => {
+  const res = await axios.get(
+    `${
+      import.meta.env.VITE_API_URL
+    }tours/province/${province}?page=${page}&size=${size}`
   );
   return res.data;
 };

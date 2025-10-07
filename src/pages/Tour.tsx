@@ -6,13 +6,13 @@ import { useTour } from "../contexts/TourContext";
 import useQueryState from "../hooks/useQueryState";
 import OverlayReload from "../components/Loading";
 import Sticky from "react-stickynode";
-import { getProvinces } from "../api/province.api";
-import type { Province } from "../types/api/province";
 import StarSort from "../components/StarSort";
 import { useNavigate } from "react-router-dom";
 import type { TourType } from "../types/response/tour.type";
 import { Popover, Transition } from "@headlessui/react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import useOptionalQueryState from "../hooks/useOptionalQueryState";
+import { handleGetProvinceByTour } from "../api/tour.api";
 
 const Tour: React.FC = () => {
   const {
@@ -22,18 +22,30 @@ const Tour: React.FC = () => {
     searchTour,
     keyword,
     setKeyword,
+    getTourByStar,
+    getTourByProvince,
   } = useTour();
 
   const [totalPages, setTotalPages] = useState(0);
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [provinces, setProvinces] = useState<string[]>([]);
+  const [selectedProvince, setSelectedProvince] =
+    useOptionalQueryState("province");
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [page, setPage] = useQueryState("page", "1" as string);
   const [showDropdown, setShowDropdown] = useState(false);
   const [visibleResults, setVisibleResults] = useState<TourType[]>([]);
   const [hasMore, setHasMore] = useState(false);
+  const [selectedStarQuery, setSelectedStarQuery] =
+    useOptionalQueryState("star");
   const navigate = useNavigate();
+
+  const selectedStar: number | null = selectedStarQuery
+    ? Number(selectedStarQuery)
+    : null;
+  const handleStarChange = (star: number | null) => {
+    setSelectedStarQuery(star !== null ? String(star) : undefined);
+  };
 
   useEffect(() => {
     const delaySearch = setTimeout(async () => {
@@ -71,7 +83,7 @@ const Tour: React.FC = () => {
 
   useEffect(() => {
     async function fetchProvinces() {
-      const data = await getProvinces();
+      const data = await handleGetProvinceByTour();
       setProvinces(data);
     }
     fetchProvinces();
@@ -91,7 +103,16 @@ const Tour: React.FC = () => {
   const fetchTours = async () => {
     try {
       const currentPage = parseInt(page);
-      const data = await getAllTours(currentPage, 20);
+      let data;
+
+      if (selectedStar) {
+        data = await getTourByStar(selectedStar, currentPage, 20);
+      } else if (selectedProvince) {
+        data = await getTourByProvince(selectedProvince, currentPage, 20);
+      } else {
+        data = await getAllTours(currentPage, 20);
+      }
+
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Failed to fetch tourList:", error);
@@ -100,7 +121,7 @@ const Tour: React.FC = () => {
 
   useEffect(() => {
     fetchTours();
-  }, [page]);
+  }, [page, selectedStar, selectedProvince]);
 
   if (!tourList) {
     return <OverlayReload />;
@@ -212,12 +233,10 @@ const Tour: React.FC = () => {
                       }
                       MenuProps={MenuProps}
                     >
-                      <MenuItem value="">
-                        <em>-- Chọn tỉnh --</em>
-                      </MenuItem>
-                      {provinces.map((p) => (
-                        <MenuItem key={p.province_id} value={p.province_name}>
-                          {p.province_name}
+                      <MenuItem value="">Tất cả</MenuItem>
+                      {provinces.map((p, key) => (
+                        <MenuItem key={key} value={p}>
+                          {p}
                         </MenuItem>
                       ))}
                     </Select>
@@ -225,7 +244,10 @@ const Tour: React.FC = () => {
                 </div>
 
                 <div className="mt-4 ">
-                  <StarSort />
+                  <StarSort
+                    selectedStar={selectedStar}
+                    onChange={handleStarChange}
+                  />
                 </div>
               </div>
             </details>
@@ -243,12 +265,10 @@ const Tour: React.FC = () => {
                       }
                       MenuProps={MenuProps}
                     >
-                      <MenuItem value="">
-                        <em>-- Chọn tỉnh --</em>
-                      </MenuItem>
-                      {provinces.map((p) => (
-                        <MenuItem key={p.province_id} value={p.province_name}>
-                          {p.province_name}
+                      <MenuItem value="">Tất cả</MenuItem>
+                      {provinces.map((p, key) => (
+                        <MenuItem key={key} value={p}>
+                          {p}
                         </MenuItem>
                       ))}
                     </Select>
@@ -256,7 +276,10 @@ const Tour: React.FC = () => {
                 </div>
 
                 <div className="mt-4">
-                  <StarSort />
+                  <StarSort
+                    selectedStar={selectedStar}
+                    onChange={handleStarChange}
+                  />
                 </div>
               </div>
             </Sticky>

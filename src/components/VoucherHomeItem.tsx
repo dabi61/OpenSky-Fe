@@ -1,19 +1,17 @@
 import { Button } from "@mui/material";
 import { Hotel, TentTree } from "lucide-react";
 import { VoucherEnum } from "../constants/VoucherEnum";
-
-type VoucherType = {
-  description: string;
-  type: (typeof VoucherEnum)[keyof typeof VoucherEnum];
-  percent: string;
-  code: string;
-};
+import type { VoucherType } from "../types/response/voucher.type";
+import { useUser } from "../contexts/UserContext";
 
 type VoucherItemProps = {
   item: VoucherType;
+  onSuccess: () => void;
 };
 
-function VoucherHomeItem({ item }: VoucherItemProps) {
+function VoucherHomeItem({ item, onSuccess }: VoucherItemProps) {
+  const { user } = useUser();
+
   return (
     <div
       className="flex flex-col cursor-pointer p-5 md:w-102 w-81
@@ -21,7 +19,7 @@ function VoucherHomeItem({ item }: VoucherItemProps) {
     >
       <div className="flex gap-5">
         <div>
-          {item.type === VoucherEnum.HOTEL ? (
+          {item.tableType === VoucherEnum.HOTEL ? (
             <Hotel size={60} className="text-blue-500" />
           ) : (
             <TentTree size={60} className="text-green-500" />
@@ -40,19 +38,22 @@ function VoucherHomeItem({ item }: VoucherItemProps) {
         <div className="p-2 text-sm bg-gray-200 rounded-xl flex-1 text-gray-700">
           {item.code}
         </div>
-        <Button
-          variant="contained"
-          type="submit"
-          sx={{
-            backgroundColor: "#3B82F6",
-            borderRadius: "12px",
-            "&:hover": {
-              backgroundColor: "#2563EB",
-            },
-          }}
-        >
-          Lưu
-        </Button>
+        {user?.role === "Customer" && (
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{
+              backgroundColor: "#3B82F6",
+              borderRadius: "12px",
+              "&:hover": {
+                backgroundColor: "#2563EB",
+              },
+            }}
+            onClick={onSuccess}
+          >
+            Lưu
+          </Button>
+        )}
       </div>
     </div>
   );

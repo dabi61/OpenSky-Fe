@@ -3,23 +3,15 @@ import { Hotel, TentTree } from "lucide-react";
 import type { FC } from "react";
 import type { VoucherType } from "../types/response/voucher.type";
 import dayjs from "dayjs";
-import { handleSaveVouchers } from "../api/userVoucher.api";
-import { toast } from "sonner";
+import { useUser } from "../contexts/UserContext";
 
 type VoucherItemProps = {
   item: VoucherType;
+  onSuccess: () => void;
 };
 
-const handleSubmit = async (id: string) => {
-  const res = await handleSaveVouchers(id);
-  if (res.userVoucherId) {
-    toast.success(res.message);
-  } else {
-    toast.error(res.message);
-  }
-};
-
-const VoucherItem: FC<VoucherItemProps> = ({ item }) => {
+const VoucherItem: FC<VoucherItemProps> = ({ item, onSuccess }) => {
+  const { user } = useUser();
   return (
     <div
       className="flex flex-col cursor-pointer p-4 md:w-60 w-50
@@ -55,10 +47,10 @@ const VoucherItem: FC<VoucherItemProps> = ({ item }) => {
         </div>
       </div>
 
-      <div className="flex gap-3 mt-5 w-full flex-col">
+      {user?.role === "Customer" && (
         <Button
           variant="contained"
-          type="button"
+          type="submit"
           sx={{
             backgroundColor: "#3B82F6",
             borderRadius: "12px",
@@ -66,11 +58,11 @@ const VoucherItem: FC<VoucherItemProps> = ({ item }) => {
               backgroundColor: "#2563EB",
             },
           }}
-          onClick={() => handleSubmit(item.voucherID)}
+          onClick={onSuccess}
         >
           Lưu
         </Button>
-      </div>
+      )}
     </div>
   );
 };

@@ -30,6 +30,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-router-dom": "^7.8.2",
     "react-stickynode": "^5.0.2",
+    "recharts": "^3.2.1",
     "sonner": "^2.0.7",
     "tailwindcss": "^4.1.12",
     "zod": "^4.1.1"

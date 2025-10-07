@@ -190,6 +190,7 @@ const TourCreate = () => {
             variant="outlined"
             label="Địa chỉ"
             {...register("address")}
+            placeholder="Địa chỉ (VD: Cầu Giấy, Dịch Vọng, Hà Nội)"
             error={!!errors.address}
             helperText={errors.address?.message || " "}
             InputLabelProps={{

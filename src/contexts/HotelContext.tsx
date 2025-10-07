@@ -17,6 +17,8 @@ import {
   handleGetActiveHotel,
   handleGetCurrentHotel,
   handleGetHotelById,
+  handleGetHotelByProvince,
+  handleGetHotelByStar,
   handleGetHotelByStatus,
   handleSearchHotel,
   handleSearchManageHotel,
@@ -50,6 +52,16 @@ type HotelContextType = {
     size: number,
     append: boolean
   ) => Promise<HotelPage>;
+  getHotelByProvince: (
+    province: string,
+    page: number,
+    size: number
+  ) => Promise<HotelPage>;
+  getHotelByStar: (
+    star: number,
+    page: number,
+    size: number
+  ) => Promise<HotelPage>;
 };
 
 const HotelContext = createContext<HotelContextType | null>(null);
@@ -81,6 +93,26 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getHotelByProvince = async (
+    province: string,
+    page: number,
+    size: number
+  ): Promise<HotelPage> => {
+    const res = await handleGetHotelByProvince(province, page, size);
+    setHotelList(res.hotels);
+    return res;
+  };
+
+  const getHotelByStar = async (
+    star: number,
+    page: number,
+    size: number
+  ): Promise<HotelPage> => {
+    const res = await handleGetHotelByStar(star, page, size);
+    setHotelList(res.hotels);
+    return res;
   };
 
   const getMyHotel = async (): Promise<HotelTypeWithImgs> => {
@@ -173,6 +205,8 @@ export const HotelProvider = ({ children }: { children: ReactNode }) => {
         keyword,
         searchHotel,
         searchManageHotel,
+        getHotelByProvince,
+        getHotelByStar,
       }}
     >
       {children}

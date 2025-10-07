@@ -1,26 +1,85 @@
-import { InputAdornment, TextField } from "@mui/material";
 import assets from "../assets";
-import { Search } from "lucide-react";
 import { locaions } from "../constants/LocationHomeItem.const";
-import { vouchers } from "../constants/Voucher.const";
 import LocationHomeItem from "../components/LocationHomeItem";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
-import tours from "../constants/TourItem.const";
-import hotels from "../constants/HotelItem.const";
 import HomeDescriptionItem from "../components/HomeDescriptionItem";
 import { homeDescriptions } from "../constants/HomeDescription";
 import { useEffect } from "react";
 import HotelHomeItem from "../components/HotelHomeItem";
 import TourHomeItem from "../components/TourHomeItem";
 import VoucherHomeItem from "../components/VoucherHomeItem";
+import { useNavigate } from "react-router-dom";
+import { useTour } from "../contexts/TourContext";
+import { useHotel } from "../contexts/HotelContext";
+import { useVoucher } from "../contexts/VoucherContext";
+import { useUser } from "../contexts/UserContext";
+import { handleSaveVouchers } from "../api/userVoucher.api";
+import { toast } from "sonner";
 
 const Home: React.FC = () => {
   const [emblaRefLocal] = useEmblaCarousel({ axis: "x", dragFree: true });
-  const [emblaRefForeign] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefVoucher] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefTour] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefHotel] = useEmblaCarousel({ axis: "x", dragFree: true });
+  const { tourList, getAllTours } = useTour();
+  const { hotelList, getActiveHotel } = useHotel();
+  const { voucherList, getUnsavedVoucher, getAvailableVoucher } = useVoucher();
+  const { user } = useUser();
+
+  const fetchTours = async () => {
+    try {
+      const initialData = await getAllTours(1, 20);
+      const total = initialData.totalPages;
+      const randomPage = Math.floor(Math.random() * total) + 1;
+      await getAllTours(randomPage, 20);
+    } catch (error) {
+      console.error("Failed to fetch random tours:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTours();
+  }, []);
+
+  const fetchHotels = async () => {
+    try {
+      const initialData = await getActiveHotel(1, 20);
+      const total = initialData.totalPages;
+      const randomPage = Math.floor(Math.random() * total) + 1;
+      await getActiveHotel(randomPage, 20);
+    } catch (error) {
+      console.error("Failed to fetch random tours:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHotels();
+  }, []);
+
+  const fetchVouchers = async () => {
+    try {
+      if (user) {
+        const initialData = await getUnsavedVoucher(1, 20);
+        const totalPages = initialData.totalPages;
+        const randomPage = Math.floor(Math.random() * totalPages) + 1;
+        await getUnsavedVoucher(randomPage, 20);
+      } else {
+        const initialData = await getAvailableVoucher(1, 20);
+        const totalPages = initialData.totalPages;
+        const randomPage = Math.floor(Math.random() * totalPages) + 1;
+        await getAvailableVoucher(randomPage, 20);
+      }
+    } catch (error) {
+      console.error("Failed to fetch vouchers:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchVouchers();
+  }, [user]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
@@ -28,6 +87,16 @@ const Home: React.FC = () => {
     }
     window.scrollTo(0, 0);
   }, []);
+
+  const handleSubmit = async (id: string) => {
+    const res = await handleSaveVouchers(id);
+    if (res.userVoucherId) {
+      toast.success(res.message);
+      fetchVouchers();
+    } else {
+      toast.error(res.message);
+    }
+  };
 
   return (
     <div className=" bg-cover bg-center overflow-x-hidden">
@@ -47,35 +116,6 @@ const Home: React.FC = () => {
           viewport={{ once: true, amount: 0.3 }}
           className="text-white flex flex-col items-center gap-5 w-full"
         >
-          <TextField
-            variant="outlined"
-            placeholder="Nhập điểm du lịch hoặc tên khách sạn"
-            className="bg-white rounded-2xl md:w-3/5 w-4/5 flex flex-col"
-            size="medium"
-            sx={{
-              backgroundColor: "white",
-              borderRadius: "1rem",
-              paddingX: "0.5rem",
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  border: "none",
-                },
-                "&:hover fieldset": {
-                  border: "none",
-                },
-                "&.Mui-focused fieldset": {
-                  border: "none",
-                },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search className="w-5" />
-                </InputAdornment>
-              ),
-            }}
-          />
           <div className="text-white flex flex-col items-center gap-5">
             <div className="md:text-7xl text-5xl font-bold my-10">OPENSKY</div>
             <div className="md:text-3xl text-xl font-bold">
@@ -98,9 +138,12 @@ const Home: React.FC = () => {
           >
             <div className="flex justify-between w-full">
               <div className="font-bold md:text-xl">
-                Các địa điểm thu hút trong nước
+                Các địa điểm được lựa chọn
               </div>
-              <div className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500">
+              <div
+                onClick={() => navigate("/tour")}
+                className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500"
+              >
                 Xem thêm
               </div>
             </div>
@@ -128,22 +171,25 @@ const Home: React.FC = () => {
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <div className="flex justify-between w-full">
-              Các địa điểm hot ở nước ngoài
-              <div className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500">
+              <div className="font-bold md:text-xl">Ưu đãi</div>
+              <div
+                onClick={() => navigate("/discount")}
+                className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500"
+              >
                 Xem thêm
               </div>
             </div>
             <div
-              className="flex overflow-x-hidden scrollbar-hide mt-5"
-              ref={emblaRefForeign}
+              className="overflow-x-hidden scrollbar-hide mt-5"
+              ref={emblaRefVoucher}
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
-                {locaions.map((item, index) => {
+                {voucherList.map((item) => {
                   return (
-                    <LocationHomeItem
-                      key={index}
-                      img={item.img}
-                      name={item.name}
+                    <VoucherHomeItem
+                      key={item.voucherID}
+                      item={item}
+                      onSuccess={() => handleSubmit(item.voucherID)}
                     />
                   );
                 })}
@@ -156,32 +202,12 @@ const Home: React.FC = () => {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <div className="flex justify-between w-full">
-              <div className="font-bold md:text-xl">Ưu đãi</div>
-              <div className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500">
-                Xem thêm
-              </div>
-            </div>
-            <div
-              className="overflow-x-hidden scrollbar-hide mt-5"
-              ref={emblaRefVoucher}
-            >
-              <div className="flex scrollbar-hide gap-5 pb-5">
-                {vouchers.map((item, index) => {
-                  return <VoucherHomeItem key={index} item={item} />;
-                })}
-              </div>
-            </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
             <div className="flex justify-between w-full mt-5">
               <div className="font-bold md:text-xl">Tour du lịch phổ biến</div>
-              <div className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500">
+              <div
+                onClick={() => navigate("/hotel")}
+                className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500"
+              >
                 Xem thêm
               </div>
             </div>
@@ -190,7 +216,7 @@ const Home: React.FC = () => {
               ref={emblaRefTour}
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
-                {tours.map((item, index) => {
+                {tourList.map((item, index) => {
                   return <TourHomeItem item={item} key={index} />;
                 })}
               </div>
@@ -215,7 +241,7 @@ const Home: React.FC = () => {
               ref={emblaRefHotel}
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
-                {hotels.map((item, index) => {
+                {hotelList.map((item, index) => {
                   return <HotelHomeItem item={item} key={index} />;
                 })}
               </div>

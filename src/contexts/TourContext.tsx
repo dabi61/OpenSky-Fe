@@ -13,7 +13,13 @@ import {
   type TourType,
   type TourTypeWithImgs,
 } from "../types/response/tour.type";
-import { getTours, handleGetTourById, handleSearchTour } from "../api/tour.api";
+import {
+  getTours,
+  handleGetTourById,
+  handleGetTourByProvince,
+  handleGetTourByStar,
+  handleSearchTour,
+} from "../api/tour.api";
 import type { TourItineraryType } from "../types/response/tour_itinerary.type";
 import { handleGetTourItineraryByTour } from "../api/tourItinerary.api";
 
@@ -33,6 +39,16 @@ type TourContextType = {
     page: number,
     size: number,
     append: boolean
+  ) => Promise<TourPage>;
+  getTourByProvince: (
+    province: string,
+    page: number,
+    size: number
+  ) => Promise<TourPage>;
+  getTourByStar: (
+    star: number,
+    page: number,
+    size: number
   ) => Promise<TourPage>;
 };
 
@@ -86,6 +102,26 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
     return res;
   };
 
+  const getTourByProvince = async (
+    province: string,
+    page: number,
+    size: number
+  ): Promise<TourPage> => {
+    const res = await handleGetTourByProvince(province, page, size);
+    setTourList(res.tours);
+    return res;
+  };
+
+  const getTourByStar = async (
+    star: number,
+    page: number,
+    size: number
+  ): Promise<TourPage> => {
+    const res = await handleGetTourByStar(star, page, size);
+    setTourList(res.tours);
+    return res;
+  };
+
   const getAllTours = useCallback(
     async (page: number, limit: number): Promise<TourPage> => {
       try {
@@ -115,6 +151,8 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
         getTourById,
         getTourItineraryByTour,
         tourItineraryList,
+        getTourByProvince,
+        getTourByStar,
       }}
     >
       {children}

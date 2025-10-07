@@ -7,6 +7,8 @@ import useQueryState from "../hooks/useQueryState";
 import OverlayReload from "../components/Loading";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useUser } from "../contexts/UserContext";
+import { handleSaveVouchers } from "../api/userVoucher.api";
+import { toast } from "sonner";
 
 const Discount: React.FC = () => {
   const { getAvailableVoucher, getUnsavedVoucher, voucherList, loading } =
@@ -32,6 +34,15 @@ const Discount: React.FC = () => {
     fetchVouchers();
   }, [user]);
 
+  const handleSubmit = async (id: string) => {
+    const res = await handleSaveVouchers(id);
+    if (res.userVoucherId) {
+      toast.success(res.message);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
   if (loading) {
     return <OverlayReload />;
   }
@@ -55,7 +66,6 @@ const Discount: React.FC = () => {
         </div>
       </div>
 
-      {/* Hiển thị thông báo khi danh sách trống */}
       {voucherList.length === 0 && !loading && (
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -74,7 +84,6 @@ const Discount: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Hiển thị danh sách voucher khi có dữ liệu */}
       {voucherList.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -84,8 +93,12 @@ const Discount: React.FC = () => {
           className="flex justify-center mx-auto"
         >
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-5 mt-10 w-full max-w-screen-xl px-4">
-            {voucherList.map((item, index) => (
-              <VoucherItem key={index} item={item} />
+            {voucherList.map((item) => (
+              <VoucherItem
+                key={item.voucherID}
+                item={item}
+                onSuccess={() => handleSubmit(item.voucherID)}
+              />
             ))}
           </div>
         </motion.div>

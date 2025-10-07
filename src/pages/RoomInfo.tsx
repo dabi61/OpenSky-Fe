@@ -17,6 +17,8 @@ import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/vi";
 import { useBooking } from "../contexts/BookingContext";
 import type { RoomType } from "../types/response/room.type";
+import assets from "../assets";
+import { useUser } from "../contexts/UserContext";
 
 const RoomInfo: FC = () => {
   const { id } = useParams();
@@ -25,6 +27,7 @@ const RoomInfo: FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [nights, setNights] = useState<number>(1);
+  const { user } = useUser();
   const { setBill } = useBooking();
   useEffect(() => {
     const fetchRoom = async () => {
@@ -43,7 +46,7 @@ const RoomInfo: FC = () => {
     selectedRoom;
   const summarySelectedRoom: RoomType = {
     ...selectedRoom,
-    firstImage: selectedRoom.images[0].imageUrl,
+    firstImage: selectedRoom.images?.[0]?.imageUrl || assets.logo,
   };
   const totalPrice = price * nights;
 
@@ -52,7 +55,7 @@ const RoomInfo: FC = () => {
       setBill({
         id: 1,
         type: "room",
-        checkInDate: dayjs(startDate).toDate(), // convert về Date
+        checkInDate: dayjs(startDate).toDate(),
         numberOfNights: 2,
         room: summarySelectedRoom,
       });
@@ -145,128 +148,132 @@ const RoomInfo: FC = () => {
 
                 <CardContent className="p-6">
                   <Box className="mb-6 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-6">
-                      <LocalizationProvider
-                        dateAdapter={AdapterDayjs}
-                        adapterLocale="vi"
-                      >
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-                          <div className="lg:col-span-2">
-                            <div className="flex items-center gap-2 mb-3">
-                              <Typography
-                                variant="subtitle1"
-                                className="font-semibold text-gray-700"
-                              >
-                                Ngày nhận phòng
-                              </Typography>
-                            </div>
-                            <DatePicker
-                              value={startDate}
-                              onChange={setStartDate}
-                              format="DD/MM/YYYY"
-                              minDate={dayjs()}
-                              slotProps={{
-                                textField: {
-                                  fullWidth: true,
-                                  size: "medium",
-                                  placeholder: "Chọn ngày nhận phòng",
-                                  InputProps: {
-                                    startAdornment: (
-                                      <Calendar className="w-5 h-5 mr-3" />
-                                    ),
-                                    className: "bg-gray-50 border-0 rounded-xl",
+                    {user?.role === "Customer" && (
+                      <div className="p-6">
+                        <LocalizationProvider
+                          dateAdapter={AdapterDayjs}
+                          adapterLocale="vi"
+                        >
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                            <div className="lg:col-span-2">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Typography
+                                  variant="subtitle1"
+                                  className="font-semibold text-gray-700"
+                                >
+                                  Ngày nhận phòng
+                                </Typography>
+                              </div>
+                              <DatePicker
+                                value={startDate}
+                                onChange={setStartDate}
+                                format="DD/MM/YYYY"
+                                minDate={dayjs()}
+                                slotProps={{
+                                  textField: {
+                                    fullWidth: true,
+                                    size: "medium",
+                                    placeholder: "Chọn ngày nhận phòng",
+                                    InputProps: {
+                                      startAdornment: (
+                                        <Calendar className="w-5 h-5 mr-3" />
+                                      ),
+                                      className:
+                                        "bg-gray-50 border-0 rounded-xl",
+                                    },
                                   },
-                                },
-                                popper: {
-                                  className: "rounded-xl shadow-lg",
-                                },
-                              }}
-                              className="[&_.MuiOutlinedInput-root]:rounded-xl [&_.MuiOutlinedInput-notchedOutline]:border-2 [&_.MuiOutlinedInput-notchedOutline]:border-gray-200 [&_.MuiOutlinedInput-root:hover_.MuiOutlinedInput-notchedOutline]:border-blue-300"
-                            />
-                          </div>
+                                  popper: {
+                                    className: "rounded-xl shadow-lg",
+                                  },
+                                }}
+                                className="[&_.MuiOutlinedInput-root]:rounded-xl [&_.MuiOutlinedInput-notchedOutline]:border-2 [&_.MuiOutlinedInput-notchedOutline]:border-gray-200 [&_.MuiOutlinedInput-root:hover_.MuiOutlinedInput-notchedOutline]:border-blue-300"
+                              />
+                            </div>
 
-                          <div>
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <Typography
+                                  variant="subtitle1"
+                                  className="font-semibold text-gray-700"
+                                >
+                                  Số đêm
+                                </Typography>
+                              </div>
+                              <TextField
+                                fullWidth
+                                size="medium"
+                                type="number"
+                                value={nights}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value);
+                                  if (value >= 1 && value <= 30)
+                                    setNights(value);
+                                }}
+                                InputProps={{
+                                  startAdornment: (
+                                    <Moon className="w-5 h-5 mr-3" />
+                                  ),
+                                  className:
+                                    "bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-blue-300",
+                                }}
+                                inputProps={{
+                                  min: 1,
+                                  max: 30,
+                                  className: "text-center font-semibold",
+                                }}
+                                className="[&_.MuiOutlinedInput-root]:rounded-xl"
+                              />
+                            </div>
+                          </div>
+                        </LocalizationProvider>
+
+                        {startDate && nights > 1 && (
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
                             <div className="flex items-center gap-2 mb-3">
+                              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
                               <Typography
                                 variant="subtitle1"
-                                className="font-semibold text-gray-700"
+                                className="font-semibold text-gray-800"
                               >
-                                Số đêm
+                                Thông tin đặt phòng
                               </Typography>
                             </div>
-                            <TextField
-                              fullWidth
-                              size="medium"
-                              type="number"
-                              value={nights}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value);
-                                if (value >= 1 && value <= 30) setNights(value);
-                              }}
-                              InputProps={{
-                                startAdornment: (
-                                  <Moon className="w-5 h-5 mr-3" />
-                                ),
-                                className:
-                                  "bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-blue-300",
-                              }}
-                              inputProps={{
-                                min: 1,
-                                max: 30,
-                                className: "text-center font-semibold",
-                              }}
-                              className="[&_.MuiOutlinedInput-root]:rounded-xl"
-                            />
-                          </div>
-                        </div>
-                      </LocalizationProvider>
 
-                      {startDate && nights > 1 && (
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                            <Typography
-                              variant="subtitle1"
-                              className="font-semibold text-gray-800"
-                            >
-                              Thông tin đặt phòng
-                            </Typography>
-                          </div>
+                            <div className="flex gap-4 text-sm">
+                              {startDate && (
+                                <>
+                                  <div className="bg-white rounded-lg p-3 flex-1 shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Calendar className="w-4 h-4 text-blue-500" />
+                                      <span className="font-semibold text-gray-600">
+                                        Nhận phòng
+                                      </span>
+                                    </div>
+                                    <div className="text-lg font-bold text-gray-800">
+                                      {startDate.format("DD/MM/YYYY")}
+                                    </div>
+                                  </div>
 
-                          <div className="flex gap-4 text-sm">
-                            {startDate && (
-                              <>
-                                <div className="bg-white rounded-lg p-3 flex-1 shadow-sm border border-gray-100">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Calendar className="w-4 h-4 text-blue-500" />
-                                    <span className="font-semibold text-gray-600">
-                                      Nhận phòng
-                                    </span>
+                                  <div className="bg-white rounded-lg p-3 flex-1 shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Calendar className="w-4 h-4 text-green-500" />
+                                      <span className="font-semibold text-gray-600">
+                                        Trả phòng
+                                      </span>
+                                    </div>
+                                    <div className="text-lg font-bold text-gray-800">
+                                      {startDate
+                                        .add(nights, "day")
+                                        .format("DD/MM/YYYY")}
+                                    </div>
                                   </div>
-                                  <div className="text-lg font-bold text-gray-800">
-                                    {startDate.format("DD/MM/YYYY")}
-                                  </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg p-3 flex-1 shadow-sm border border-gray-100">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Calendar className="w-4 h-4 text-green-500" />
-                                    <span className="font-semibold text-gray-600">
-                                      Trả phòng
-                                    </span>
-                                  </div>
-                                  <div className="text-lg font-bold text-gray-800">
-                                    {startDate
-                                      .add(nights, "day")
-                                      .format("DD/MM/YYYY")}
-                                  </div>
-                                </div>
-                              </>
-                            )}
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </Box>
 
                   <div className="text-center mb-6">
@@ -293,19 +300,21 @@ const RoomInfo: FC = () => {
                     )}
                   </div>
 
-                  <div className="space-y-4">
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      className="bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
-                      disabled={status !== "Available" || !startDate}
-                      onClick={handleSubmitBill}
-                    >
-                      {startDate
-                        ? `Đặt phòng ${nights} đêm`
-                        : "Vui lòng chọn ngày nhận phòng"}
-                    </Button>
-                  </div>
+                  {user?.role === "Customer" && (
+                    <div className="space-y-4">
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
+                        disabled={status !== "Available" || !startDate}
+                        onClick={handleSubmitBill}
+                      >
+                        {startDate
+                          ? `Đặt phòng ${nights} đêm`
+                          : "Vui lòng chọn ngày nhận phòng"}
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </div>
             </div>

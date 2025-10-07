@@ -1,45 +1,49 @@
-import { Star } from "lucide-react";
-
-type Hotel = {
-  name: string;
-  img: string;
-  description: string;
-  stars: number;
-  price: number;
-};
+import { Star, MapPin } from "lucide-react";
+import type { HotelType } from "../types/response/hotel.type";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
-  item: Hotel;
+  item: HotelType;
 };
 
 function HotelHomeItem({ item }: Props) {
+  const navigate = useNavigate();
   return (
-    <div className="flex flex-col border-1 border-gray-300 cursor-pointer transition-shadow duration-300 hover:shadow-lg rounded-xl flex-shrink-0">
+    <div
+      onClick={() => navigate(`/hotel_info/${item.hotelID}`)}
+      className="flex flex-col border border-gray-200 cursor-pointer transition-all duration-300 hover:shadow-lg rounded-xl flex-shrink-0 bg-white overflow-hidden"
+    >
       <div className="relative">
         <img
-          src={item.img}
-          className="md:w-83 md:h-55 w-38 h-30 rounded-t-xl object-cover"
+          src={item.firstImage}
+          className="md:w-83 md:h-55 w-38 h-30 object-cover"
         />
-        <div className="absolute top-0 left-0 font-semibold text-sm rounded-tl-xl rounded-br-xl bg-blue-400 text-white px-8 py-2  ">
-          {item.name}
+        <div
+          className="absolute top-0 left-0 font-semibold text-sm rounded-tl-xl rounded-br-xl bg-blue-400 text-white px-2 py-2 
+             max-w-[170px] overflow-hidden text-ellipsis whitespace-nowrap"
+        >
+          {item.hotelName}
         </div>
       </div>
 
-      <div className="p-2">
-        <div className="flex gap-1">
-          {Array.from({ length: item.stars }).map((_, index) => (
-            <Star
-              key={index}
-              className="w-4 text-yellow-300"
-              fill="currentColor"
-            />
-          ))}
+      <div className="p-3 flex flex-col flex-1 h-100">
+        <div className="h-4">
+          {item.star > 0 && (
+            <div className="flex gap-1 mb-2">
+              {Array.from({ length: item.star }).map((_, index) => (
+                <Star
+                  key={index}
+                  className="w-4 h-4 text-yellow-400"
+                  fill="currentColor"
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="font-semibold mt-1 mb-3">{item.description}</div>
-        <div>
-          {new Intl.NumberFormat("vi-VN").format(item.price)}
-          <span className="text-blue-400"> VNĐ</span>
+        <div className="flex items-center gap-1 text-gray-600 pt-2">
+          <MapPin className="w-4 h-4 text-blue-500" />
+          <span className="text-sm font-medium">{item.province}</span>
         </div>
       </div>
     </div>

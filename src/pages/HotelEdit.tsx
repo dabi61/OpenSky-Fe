@@ -240,6 +240,7 @@ const HotelEdit: React.FC = () => {
                 <TextField
                   fullWidth
                   label="Địa chỉ"
+                  placeholder="Địa chỉ (VD: Cầu Giấy, Dịch Vọng, Hà Nội)"
                   {...register("address")}
                   error={!!errors.address}
                   helperText={errors.address?.message || " "}

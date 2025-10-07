@@ -433,7 +433,7 @@ const TourInfo: FC = () => {
               </div>
             </div>
 
-            {(user?.role === "Customer" || user?.role === "Hotel") && (
+            {user?.role === "Customer" && (
               <div className="flex justify-center mt-6">
                 <Button
                   variant="contained"
