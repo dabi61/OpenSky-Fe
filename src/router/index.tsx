@@ -79,6 +79,7 @@ const router = createBrowserRouter([
           </HotelProvider>
         ),
       },
+      { path: "contact", element: <Contact /> },
       {
         path: "tour",
         element: (
@@ -188,10 +189,7 @@ const router = createBrowserRouter([
           },
         ],
       },
-      {
-        element: <RoleGuard deniedRoles={[Roles.ADMIN]} />,
-        children: [{ path: "contact", element: <Contact /> }],
-      },
+
       {
         element: (
           <RoleGuard allowedRoles={[Roles.HOTELMANAGER, Roles.CUSTOMER]} />

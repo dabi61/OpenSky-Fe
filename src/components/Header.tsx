@@ -55,9 +55,7 @@ function Header() {
     ? baseMenuItems
     : [...baseMenuItems, ...authMenuItems];
 
-  if (user?.role === "Admin") {
-    menuItems = menuItems.filter((item) => item.to !== "/contact");
-  } else {
+  if (user?.role !== "Admin") {
     menuItems = menuItems.filter((item) => item.to !== "/manager");
   }
 
