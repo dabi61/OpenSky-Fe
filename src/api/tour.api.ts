@@ -120,7 +120,7 @@ export const handleUpdateTour = async (
 export const handleGetTourById = async (
   id: string
 ): Promise<TourTypeWithImgs> => {
-  const res = await axiosInstance.get(`tours/${id}`);
+  const res = await axiosInstance.get(`tours/detail/${id}`);
   return res.data;
 };
 
