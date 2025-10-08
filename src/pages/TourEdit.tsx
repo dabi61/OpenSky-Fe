@@ -80,8 +80,6 @@ const TourEdit: FC = () => {
   } = useSchedule();
   const [totalPages, setTotalPages] = useState(0);
 
-  console.log(tourItineraryList);
-
   useEffect(() => {
     const fetchSchedule = async () => {
       if (id) {

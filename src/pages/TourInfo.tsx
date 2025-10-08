@@ -143,7 +143,6 @@ const TourInfo: FC = () => {
 
   const tour: TourTypeWithImgs = selectedTour;
 
-  console.log(selectedSchedule);
   const handleSubmitBill = () => {
     if (selectedSchedule) {
       setBill({
@@ -306,7 +305,7 @@ const TourInfo: FC = () => {
                           <span>Đã đặt</span>
                         </div>
                         <div className="font-bold text-blue-600 text-sm">
-                          {schedule.numberPeople}
+                          {tour.maxPeople - schedule.numberPeople}
                         </div>
                       </div>
 

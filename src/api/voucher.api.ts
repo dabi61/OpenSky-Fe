@@ -130,7 +130,6 @@ export const handleUpdateVoucher = async (
       );
     if (data.description) formData.append("description", data.description);
     if (data.code) formData.append("code", data.code);
-    console.log(data);
     const res = await axiosInstance.put(`vouchers/${id}`, formData, {
       headers: {
         "Content-Type": "application/json",

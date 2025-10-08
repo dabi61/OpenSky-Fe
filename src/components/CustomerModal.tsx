@@ -141,7 +141,6 @@ const CustomerModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
         citizenId: formData?.citizenId || "",
         dob: formData?.dob || undefined,
       };
-      console.log(submitData);
 
       if (avatarFile) {
         submitData.avatar = avatarFile;

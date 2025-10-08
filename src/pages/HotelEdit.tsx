@@ -48,8 +48,6 @@ const HotelEdit: React.FC = () => {
     }
   };
 
-  console.log(selectedHotel);
-
   useEffect(() => {
     fetchHotel();
   }, []);
@@ -121,7 +119,6 @@ const HotelEdit: React.FC = () => {
 
   const onSubmit = async (data: HotelupdateValidateType) => {
     const res = await handleUpdateHotel(selectedHotel?.hotelID, data);
-    console.log(selectedHotel.hotelID);
     if (res.success) {
       toast.success(res.message);
     } else {

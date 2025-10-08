@@ -74,7 +74,6 @@ const VoucherModal: FC<ModalProps> = ({ isOpen, onClose, data, onSuccess }) => {
       delete updatedVoucher.code;
     }
 
-    console.log(updatedVoucher);
     const res = await handleUpdateVoucher(data.voucherID, updatedVoucher);
 
     if (res.success) {

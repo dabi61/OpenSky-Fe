@@ -35,7 +35,6 @@ const Booking: React.FC = () => {
     useState<UserVoucherType | null>(null);
   const [openVoucherModal, setOpenVoucherModal] = useState(false);
   const { bill, loading } = useBooking();
-  console.log(bill);
 
   useEffect(() => {
     const fetchMyVouchers = async () => {

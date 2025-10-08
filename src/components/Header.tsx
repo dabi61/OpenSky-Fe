@@ -59,7 +59,7 @@ function Header() {
     menuItems = menuItems.filter((item) => item.to !== "/manager");
   }
 
-  console.log(Cookies.get("access_token"));
+  // console.log(Cookies.get("access_token"));
 
   return (
     <div className="flex justify-between w-full px-10 items-center fixed h-20 bg-white z-100 shadow-md">

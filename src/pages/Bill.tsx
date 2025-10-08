@@ -73,8 +73,6 @@ const Bill: FC = () => {
     fetchPopulation();
   }, [selectedBill]);
 
-  console.log(populationValue);
-
   if (loading || !selectedBill) {
     return <OverlayReload />;
   }
@@ -146,7 +144,6 @@ const Bill: FC = () => {
       toast.error(res.message);
     }
   };
-
   return (
     <>
       <div className="min-h-screen bg-gray-50">
@@ -358,19 +355,12 @@ const Bill: FC = () => {
                             Yêu cầu hoàn tiền đang chờ xử lý
                           </p>
                           <p>
-                            Tỷ lệ hoàn tiền:{" "}
-                            <strong>{selectedRefund.refundPercentage}%</strong>
-                          </p>
-                          <p>
-                            Số tiền hoàn:{" "}
-                            <strong>
-                              {Intl.NumberFormat("vi-VN").format(
-                                selectedBill.totalPrice -
-                                  selectedRefund.refundAmount
-                              )}{" "}
-                              VNĐ
+                            Lý do hoàn tiền:{" "}
+                            <strong className="text-gray-700 whitespace-pre-line">
+                              {selectedRefund.description}
                             </strong>
                           </p>
+
                           <p>
                             Ngày tạo:{" "}
                             {new Date(
@@ -433,7 +423,6 @@ const Bill: FC = () => {
                           </p>
                         </div>
                       ) : (
-                        // Nếu chưa có refund => hiện nút Hủy
                         (selectedBill.status === "Pending" ||
                           selectedBill.status === "Paid") &&
                         user?.role === "Customer" && (

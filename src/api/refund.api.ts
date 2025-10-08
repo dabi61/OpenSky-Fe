@@ -10,7 +10,6 @@ import axiosInstance from "../utils/AxisosInstance";
 export const handleCreateRefund = async (
   refund: RefundCreateType
 ): Promise<RefundResponse> => {
-  console.log(refund);
   try {
     const res = await axiosInstance.post(`refunds`, refund, {
       headers: {
@@ -45,8 +44,6 @@ export const handleGetRefundByBill = async (
   const res = await axiosInstance.get(`refunds/bill/${id}`, {
     validateStatus: () => true,
   });
-
-  console.log(res.status);
 
   if (res.status === 404) {
     return { message: res.data?.message || "Không tìm thấy yêu cầu hoàn tiền" };

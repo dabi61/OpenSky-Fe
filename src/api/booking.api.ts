@@ -18,7 +18,6 @@ export const handleCreateRoomBooking = async (
       checkInDate: data.checkInDate?.toISOString(),
       checkOutDate: data.checkOutDate?.toISOString(),
     };
-    console.log(payload);
 
     const res = await axiosInstance.post(`bookings/hotel`, payload, {
       headers: {
@@ -43,7 +42,6 @@ export const handleCreateScheduleBooking = async (
       scheduleID: data.scheduleID,
       numberOfGuests: data.numberOfGuests,
     };
-    console.log(payload);
 
     const res = await axiosInstance.post(`bookings/tour`, payload, {
       headers: {
@@ -83,7 +81,6 @@ export const handleGetTourBookingById = async (
   id: string
 ): Promise<BookingTourType> => {
   const res = await axiosInstance.get(`bookings/tour/${id}`);
-  console.log(res.data);
 
   return res.data;
 };
@@ -92,6 +89,5 @@ export const handleGetHotelBookingById = async (
   id: string
 ): Promise<BookingTourType> => {
   const res = await axiosInstance.get(`bookings/hotel/${id}/detail`);
-  console.log(res.data);
   return res.data;
 };

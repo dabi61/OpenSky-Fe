@@ -56,9 +56,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const rateValue = watch("rate");
 
   const handleFormSubmit = async (data: FeedbackCreateType) => {
-    console.log(data);
     const res = await handleCreateFeedback(data);
-    console.log(res);
     if (res.reviewId) {
       toast.success(res.message);
       reset();

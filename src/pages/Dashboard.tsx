@@ -54,7 +54,6 @@ const Dashboard: React.FC = () => {
     const fetchBillStatistics = async () => {
       try {
         const res = await getBIllStatistics();
-        console.log("Bill statistics:", res);
         setBillStatistic(res);
       } catch (err) {
         console.error("Lỗi khi lấy bill statistics:", err);
@@ -71,10 +70,6 @@ const Dashboard: React.FC = () => {
           getUserStatistics("Supervisor" as Roles),
           getUserStatistics("Customer" as Roles),
         ]);
-
-        console.log("TourGuide statistics:", tourGuideRes);
-        console.log("Supervisor statistics:", supervisorRes);
-        console.log("Customer statistics:", customerRes);
 
         setUserTourGuideStatistic(tourGuideRes);
         setUserSupervisorStatistic(supervisorRes);
@@ -93,9 +88,6 @@ const Dashboard: React.FC = () => {
           getServiceStatistics("Hotel"),
           getServiceStatistics("Tour"),
         ]);
-
-        console.log("Hotel service statistics:", hotelRes);
-        console.log("Tour service statistics:", tourRes);
 
         setHotelStatistic(hotelRes);
         setTourStatistic(tourRes);

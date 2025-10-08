@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { NavLink } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 const BottomNavigation: React.FC = () => {
+  const { user } = useUser();
   const [emblaRef] = useEmblaCarousel({
     axis: "x",
     align: "start",
@@ -94,26 +96,33 @@ const BottomNavigation: React.FC = () => {
       >
         <div className="embla overflow-hidden" ref={emblaRef}>
           <div className="embla__container flex">
-            {navItems.map((item) => (
-              <div
-                className="embla__slide flex-shrink-0 min-w-[80px]"
-                key={item.id}
-              >
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `flex flex-col items-center p-3 cursor-pointer rounded-xl transition-all w-full ${
-                      isActive
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`
-                  }
+            {navItems
+              .filter((item) => {
+                if (user?.role === "Supervisor") {
+                  return item.id !== "staff" && item.id !== "sale";
+                }
+                return true;
+              })
+              .map((item) => (
+                <div
+                  className="embla__slide flex-shrink-0 min-w-[80px]"
+                  key={item.id}
                 >
-                  {item.icon}
-                  <span className="text-[11px] mt-1">{item.label}</span>
-                </NavLink>
-              </div>
-            ))}
+                  <NavLink
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `flex flex-col items-center p-3 cursor-pointer rounded-xl transition-all w-full ${
+                        isActive
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`
+                    }
+                  >
+                    {item.icon}
+                    <span className="text-[11px] mt-1">{item.label}</span>
+                  </NavLink>
+                </div>
+              ))}
           </div>
         </div>
       </div>

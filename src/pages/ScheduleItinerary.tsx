@@ -33,8 +33,6 @@ const ScheduleItinerary: FC = () => {
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
 
-  console.log(scheduleItineraryList);
-
   const fetchSchedules = async () => {
     try {
       setLoading(true);
