@@ -50,6 +50,7 @@ import { FeedbackProvider } from "../contexts/FeedbackContext";
 import { RefundProvider } from "../contexts/RefundContext";
 import RefundManage from "../pages/RefundManage";
 import RefundInfo from "../pages/RefundInfo";
+import MyFeedback from "../pages/MyFeedback";
 
 const router = createBrowserRouter([
   {
@@ -174,16 +175,29 @@ const router = createBrowserRouter([
                 element: <Profile />,
               },
               {
-                path: "user_voucher",
-                element: <UserVoucher />,
-              },
-              {
-                path: "my_bills",
-                element: (
-                  <BillProvider>
-                    <MyBill />
-                  </BillProvider>
-                ),
+                element: <RoleGuard allowedRoles={[Roles.CUSTOMER]} />,
+                children: [
+                  {
+                    path: "user_voucher",
+                    element: <UserVoucher />,
+                  },
+                  {
+                    path: "my_bills",
+                    element: (
+                      <BillProvider>
+                        <MyBill />
+                      </BillProvider>
+                    ),
+                  },
+                  {
+                    path: "my_reviews",
+                    element: (
+                      <FeedbackProvider>
+                        <MyFeedback />
+                      </FeedbackProvider>
+                    ),
+                  },
+                ],
               },
             ],
           },
@@ -191,9 +205,7 @@ const router = createBrowserRouter([
       },
 
       {
-        element: (
-          <RoleGuard allowedRoles={[Roles.HOTELMANAGER, Roles.CUSTOMER]} />
-        ),
+        element: <RoleGuard allowedRoles={[Roles.CUSTOMER]} />,
         children: [
           {
             path: "booking",

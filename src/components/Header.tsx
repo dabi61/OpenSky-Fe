@@ -6,7 +6,7 @@ import { AlignJustify } from "lucide-react";
 import { handleLogout } from "../api/auth.api";
 import { useUser } from "../contexts/UserContext";
 import OverlayReload from "./Loading";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import { Roles } from "../constants/role";
 
 const baseMenuItems = [

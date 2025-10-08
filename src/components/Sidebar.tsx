@@ -12,7 +12,7 @@ function Sidebar() {
     { icon: <User />, label: "Hồ sơ", to: "/profile" },
     { icon: <TicketPercent />, label: "Mã giảm giá", to: "/user_voucher" },
     { icon: <ReceiptText />, label: "Đơn đặt chỗ", to: "/my_bills" },
-    { icon: <Star />, label: "Đánh giá của bạn", to: "/review" },
+    { icon: <Star />, label: "Đánh giá của bạn", to: "/my_reviews" },
   ];
 
   const NavItem = ({ item }: { item: MenuItem }) => (

@@ -51,10 +51,8 @@ export const handleGetMyFeedback = async (
   page: number,
   size: number
 ): Promise<MyFeedbackPage> => {
-  const res = await axios.get(
-    `${
-      import.meta.env.VITE_API_URL
-    }feedback/my-feedbacks?page=${page}&size=${size}`
+  const res = await axiosInstance.get(
+    `feedback/my-feedbacks?page=${page}&size=${size}`
   );
   return res.data;
 };
