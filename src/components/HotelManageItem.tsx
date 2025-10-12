@@ -39,7 +39,9 @@ const HotelManageItem: FC<Props> = ({
 
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-bold text-gray-900">{hotel.hotelName}</h3>
+          <h3 className="text-xl font-bold text-gray-900 truncate w-full">
+            {hotel.hotelName}
+          </h3>
           {hotel.star !== 0 && (
             <div className="flex items-center">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -57,8 +59,8 @@ const HotelManageItem: FC<Props> = ({
         </div>
 
         <div className="flex items-center text-gray-600 mb-4">
-          <MapPin className="h-4 w-4 mr-1" />
-          <span className="text-sm">{hotel.address}</span>
+          <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+          <span className="text-sm truncate w-full">{hotel.address}</span>
         </div>
 
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
