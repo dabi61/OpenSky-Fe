@@ -34,7 +34,6 @@ function Header() {
     ...(user?.role === Roles.TOURGUIDE
       ? [{ name: "Quản lý lịch trình", to: "/my_schedules" }]
       : []),
-    { name: "Đổi mật khẩu", to: "/" },
   ];
 
   const isLoggedIn = !!user;

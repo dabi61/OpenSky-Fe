@@ -49,6 +49,13 @@ export const handleAllHotelExceptRemove = async (
   return res.data;
 };
 
+export const handleApporveHotel = async (id: string) => {
+  const res = await axiosInstance.post(
+    `${import.meta.env.VITE_API_URL}hotels/approve/${id}`
+  );
+  return res.data;
+};
+
 export const handleSearchHotel = async (
   keyword: string,
   page: number,

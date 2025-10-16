@@ -8,7 +8,7 @@ import { useRoom } from "../contexts/RoomContext";
 import useQueryState from "../hooks/useQueryState";
 import { useUser } from "../contexts/UserContext";
 import { Button } from "@mui/material";
-import { handleUpdateHotelStatus } from "../api/hotel.api";
+import { handleApporveHotel, handleUpdateHotelStatus } from "../api/hotel.api";
 import type { HotelStatus } from "../constants/HotelStatus";
 import { toast } from "sonner";
 import RoomItem from "../components/RoomItem";
@@ -92,6 +92,16 @@ const HotelInfo = () => {
     const res = await handleUpdateHotelStatus(selectedHotel?.hotelID, status);
     if (res.status) {
       toast.success(res.message);
+      navigate(-1);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const approveStatus = async () => {
+    const res = await handleApporveHotel(selectedHotel.hotelID);
+    if (res) {
+      toast.success("Duyệt khách sạn thành công!");
       navigate(-1);
     } else {
       toast.error(res.message);
@@ -299,7 +309,7 @@ const HotelInfo = () => {
                       backgroundColor: "#3B82F6",
                       "&:hover": { backgroundColor: "#2563EB" },
                     }}
-                    onClick={() => handleChangeStatus("Active")}
+                    onClick={() => approveStatus()}
                   >
                     Duyệt
                   </Button>

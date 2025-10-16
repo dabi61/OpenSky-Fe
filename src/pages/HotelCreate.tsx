@@ -52,6 +52,7 @@ const HotelCreate = () => {
   };
 
   const onSubmit = async (data: HotelCreateValidateType) => {
+    console.log(data);
     const allProvinces = await getProvinces();
     const parts = data.address.split(",").map((p) => p.trim());
     const lastPart = parts[parts.length - 1];
