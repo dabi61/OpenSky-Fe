@@ -67,7 +67,7 @@ const HotelRoomManageItem: FC<Props> = ({
       toast.success(res.message);
       onSuccess?.();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
     }
   };
 

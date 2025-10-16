@@ -108,7 +108,7 @@ const ScheduleModal: FC<ModalProps> = ({
       toast.success(res.message);
       onSuccess?.();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
     }
     onClose();
     reset();
@@ -121,7 +121,7 @@ const ScheduleModal: FC<ModalProps> = ({
       toast.success(res.message);
       onSuccess?.();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
     }
     onClose();
     reset();

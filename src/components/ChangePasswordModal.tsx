@@ -39,7 +39,7 @@ export const ChangePasswordModal: FC<ModalProps> = ({ isOpen, onClose }) => {
       onClose();
       reset();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
     }
   };
 

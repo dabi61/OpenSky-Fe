@@ -62,7 +62,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       reset();
       onClose();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
+
       reset();
       onClose();
     }

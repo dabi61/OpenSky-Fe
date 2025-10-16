@@ -81,7 +81,7 @@ const TourItineraryModal: FC<ModalProps> = ({
       onSuccess?.();
       onClose();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
     }
   };
 
@@ -93,7 +93,7 @@ const TourItineraryModal: FC<ModalProps> = ({
       onSuccess?.();
       onClose();
     } else {
-      toast.error(res.message);
+      toast.error(res.message || "Có lỗi đã xảy ra!");
     }
   };
 
