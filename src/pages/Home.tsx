@@ -1,6 +1,4 @@
 import assets from "../assets";
-import { locaions } from "../constants/LocationHomeItem.const";
-import LocationHomeItem from "../components/LocationHomeItem";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import HomeDescriptionItem from "../components/HomeDescriptionItem";
@@ -18,7 +16,6 @@ import { handleSaveVouchers } from "../api/userVoucher.api";
 import { toast } from "sonner";
 
 const Home: React.FC = () => {
-  const [emblaRefLocal] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefVoucher] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefTour] = useEmblaCarousel({ axis: "x", dragFree: true });
   const [emblaRefHotel] = useEmblaCarousel({ axis: "x", dragFree: true });
@@ -136,12 +133,10 @@ const Home: React.FC = () => {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <div className="flex justify-between w-full">
-              <div className="font-bold md:text-xl">
-                Các địa điểm được lựa chọn
-              </div>
+            <div className="flex justify-between w-full mt-5">
+              <div className="font-bold md:text-xl">Tour du lịch phổ biến</div>
               <div
-                onClick={() => navigate("/tour")}
+                onClick={() => navigate("/hotel")}
                 className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500"
               >
                 Xem thêm
@@ -149,17 +144,11 @@ const Home: React.FC = () => {
             </div>
             <div
               className="flex overflow-x-hidden scrollbar-hide mt-5 "
-              ref={emblaRefLocal}
+              ref={emblaRefTour}
             >
               <div className="flex scrollbar-hide gap-5 pb-5">
-                {locaions.map((item, index) => {
-                  return (
-                    <LocationHomeItem
-                      key={index}
-                      img={item.img}
-                      name={item.name}
-                    />
-                  );
+                {tourList.map((item, index) => {
+                  return <TourHomeItem item={item} key={index} />;
                 })}
               </div>
             </div>
@@ -203,34 +192,8 @@ const Home: React.FC = () => {
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <div className="flex justify-between w-full mt-5">
-              <div className="font-bold md:text-xl">Tour du lịch phổ biến</div>
-              <div
-                onClick={() => navigate("/hotel")}
-                className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500"
-              >
-                Xem thêm
-              </div>
-            </div>
-            <div
-              className="flex overflow-x-hidden scrollbar-hide mt-5 "
-              ref={emblaRefTour}
-            >
-              <div className="flex scrollbar-hide gap-5 pb-5">
-                {tourList.map((item, index) => {
-                  return <TourHomeItem item={item} key={index} />;
-                })}
-              </div>
-            </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <div className="flex justify-between w-full mt-5">
               <div className="font-bold md:text-xl">
-                Địa điểm khách sạn nổi tiêng
+                Địa điểm khách sạn nổi tiếng
               </div>
               <div className="text-blue-400 underline text-sm flex items-center cursor-pointer hover:font-semibold hover:text-blue-500">
                 Xem thêm
