@@ -3,6 +3,8 @@ import type { LoginType } from "../types/schemas/login.schema";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
 import type { RegisterType } from "../types/schemas/register.schema";
+import axiosInstance from "../utils/AxisosInstance";
+import type { ChangePasswordWithoutReType } from "../types/schemas/changePassword.schema";
 
 export const handleLogin = async (req: LoginType) => {
   try {
@@ -97,6 +99,26 @@ export const handleLogout = async () => {
     );
     return {
       success: false,
+    };
+  }
+};
+
+export const handleChangePassword = async (
+  data: ChangePasswordWithoutReType
+): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  try {
+    const res = await axiosInstance.post("auth/change-password", data);
+    return {
+      success: true,
+      message: res.data.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message || "Cập nhật thất bại!",
     };
   }
 };
