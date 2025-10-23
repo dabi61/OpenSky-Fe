@@ -1,7 +1,16 @@
 import type React from "react";
 import type { UserType } from "../types/response/user.type";
 import Modal from "./Modal";
-import { Button, CircularProgress, TextField } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { CalendarPlus, Camera, Mail, User } from "lucide-react";
@@ -326,6 +335,23 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
             </LocalizationProvider>
           </div>
         </div>
+
+        {!data && (
+          <FormControl fullWidth error={!!errors.role}>
+            <InputLabel>Vai trò *</InputLabel>
+            <Select
+              label="Vai trò *"
+              {...register("role")}
+              defaultValue={Roles.TOURGUIDE}
+            >
+              <MenuItem value={Roles.TOURGUIDE}>Hướng dẫn viên</MenuItem>
+              <MenuItem value={Roles.SUPERVISOR}>Giám sát</MenuItem>
+            </Select>
+            {errors.role && (
+              <FormHelperText>{errors.role.message}</FormHelperText>
+            )}
+          </FormControl>
+        )}
 
         <div className="flex gap-3 pt-4">
           <Button
