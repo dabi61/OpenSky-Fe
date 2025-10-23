@@ -240,7 +240,7 @@ const Hotel: React.FC = () => {
                   <FormControl fullWidth variant="outlined" size="small">
                     <Select
                       labelId="province-label"
-                      value={selectedProvince}
+                      value={selectedProvince || ""}
                       onChange={(e) => setSelectedProvince(e.target.value)}
                       MenuProps={MenuProps}
                     >
@@ -270,7 +270,7 @@ const Hotel: React.FC = () => {
                   <FormControl fullWidth variant="outlined" size="small">
                     <Select
                       labelId="province-label"
-                      value={selectedProvince}
+                      value={selectedProvince || ""}
                       onChange={(e) => setSelectedProvince(e.target.value)}
                       MenuProps={MenuProps}
                     >

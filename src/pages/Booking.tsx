@@ -56,7 +56,7 @@ const Booking: React.FC = () => {
       }
     };
     fetchMyVouchers();
-  }, [page]);
+  }, [page, bill]);
 
   if (loading) {
     return <OverlayReload />;
@@ -117,6 +117,8 @@ const Booking: React.FC = () => {
     return (bill.schedule?.tour.price || 0) * bill.numberOfGuest;
   };
 
+  console.log(bill);
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 ">
@@ -133,7 +135,7 @@ const Booking: React.FC = () => {
             </div>
 
             <h1 className="text-3xl font-bold text-gray-800">
-              Xác Nhận Đặt Tour
+              Xác Nhận hóa đơn
             </h1>
           </div>
         </div>
