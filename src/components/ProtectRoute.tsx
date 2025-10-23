@@ -29,8 +29,7 @@ export function AuthGuard() {
 
   if (loading) return <OverlayReload />;
 
-  if (!user) {
-    return <Navigate to={"/unauthorized"} replace />;
-  }
+  if (!user) return <Navigate to="/login" replace />;
+
   return <Outlet />;
 }
