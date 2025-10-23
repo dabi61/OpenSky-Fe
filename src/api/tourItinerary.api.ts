@@ -41,6 +41,7 @@ export const handleUpdateTourItinerary = async (
     if (data.description) formData.append("description", data.description);
     if (data.location) formData.append("location", data.location);
     if (data.dayNumber) formData.append("dayNumber", data.dayNumber.toString());
+    console.log(data);
 
     const res = await axiosInstance.put(`tour_itinerary/${id}`, formData, {
       headers: {

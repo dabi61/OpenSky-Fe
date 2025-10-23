@@ -70,10 +70,7 @@ export const ScheduleUpdateSchema = z
       .refine((date) => date instanceof Date && !isNaN(date.getTime()), {
         message: "Vui lòng nhập ngày kết thúc hợp lệ",
       }),
-    numberPeople: z
-      .int("Số người phải là số nguyên")
-      .positive("Số người phải lớn hơn 0")
-      .max(1000, "Số người không được vượt quá 1000"),
+
     status: z.enum(ScheduleStatus, {
       error: () => {
         return "Vui lòng chọn trạng thái";

@@ -99,7 +99,6 @@ export const handleUpdateSchedule = async (
       formData.append("startTime", dayjs(data.startTime).toISOString());
     if (data.endTime)
       formData.append("endTime", dayjs(data.endTime).toISOString());
-    formData.append("numberPeople", data.numberPeople.toString());
     formData.append("status", data.status);
     const res = await axiosInstance.put(`schedules/${id}`, formData, {
       headers: {

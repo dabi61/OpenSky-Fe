@@ -363,7 +363,7 @@ const Booking: React.FC = () => {
                     onClick={() => createBookingSubmit()}
                     className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors"
                   >
-                    Xác Nhận Đặt Tour
+                    Xác Nhận Đặt {bill.type === "room" ? "Phòng" : "Tour"}
                   </button>
 
                   <p className="text-xs text-gray-500 text-center">

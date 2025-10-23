@@ -99,6 +99,7 @@ export const handleUpdateTour = async (
         formData.append("files", file);
       });
     }
+    console.log(tour);
     if (tour.province) formData.append("province", tour.province);
     const res = await axiosInstance.put(`tours/${tourID}`, formData, {
       headers: {

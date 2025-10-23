@@ -306,7 +306,7 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Navigate to="dashboard" replace />,
+                element: <Navigate to="customer" replace />,
               },
               { path: "dashboard", element: <Dashboard /> },
               { path: "customer", element: <CustomerManager /> },

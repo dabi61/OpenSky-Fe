@@ -70,7 +70,7 @@ const HotelManageItem: FC<Props> = ({
         <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
           <div className="flex justify-center items-center gap-2">
             <img
-              className="w-7 rounded-full"
+              className="w-7 h-7 rounded-full"
               src={
                 hotel.user.avatarURL ||
                 `${import.meta.env.VITE_AVATAR_API}${hotel.user.fullName}`

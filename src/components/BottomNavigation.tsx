@@ -99,7 +99,11 @@ const BottomNavigation: React.FC = () => {
             {navItems
               .filter((item) => {
                 if (user?.role === "Supervisor") {
-                  return item.id !== "staff" && item.id !== "sale";
+                  return (
+                    item.id !== "staff" &&
+                    item.id !== "sale" &&
+                    item.id !== "dashboard"
+                  );
                 }
                 return true;
               })
