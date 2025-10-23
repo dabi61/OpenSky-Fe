@@ -78,7 +78,8 @@ const Bill: FC = () => {
   }
 
   if (!bill) {
-    return <Navigate to="/unauthorized" replace />;
+    toast.error("Có lỗi xảy ra vui lòng đợt hệ thống xử lý trong ít phút!");
+    return <Navigate to="/home" replace />;
   }
 
   const handleConfirmCancelled = async () => {
