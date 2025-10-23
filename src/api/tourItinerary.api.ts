@@ -41,7 +41,6 @@ export const handleUpdateTourItinerary = async (
     if (data.description) formData.append("description", data.description);
     if (data.location) formData.append("location", data.location);
     if (data.dayNumber) formData.append("dayNumber", data.dayNumber.toString());
-    console.log(data);
 
     const res = await axiosInstance.put(`tour_itinerary/${id}`, formData, {
       headers: {
@@ -84,6 +83,5 @@ export const handleGetTourItineraryByTour = async (
   const res = await axios.get(
     `${import.meta.env.VITE_API_URL}tour_itinerary/tour/${id}`
   );
-  console.log(res.data);
   return res.data;
 };

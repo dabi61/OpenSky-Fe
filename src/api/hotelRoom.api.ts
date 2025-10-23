@@ -60,7 +60,6 @@ export const handleCreateRoom = async (
       });
     }
     const res = await axiosInstance.post("rooms", formData);
-    console.log(formData);
     return res.data;
   } catch (error: any) {
     return {

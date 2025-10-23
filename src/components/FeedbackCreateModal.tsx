@@ -57,7 +57,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   const handleFormSubmit = async (data: FeedbackCreateType) => {
     const res = await handleCreateFeedback(data);
-    console.log(data);
     if (res.reviewId) {
       toast.success(res.message);
       reset();
@@ -69,8 +68,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       onClose();
     }
   };
-
-  console.log(errors);
 
   const handleClose = () => {
     reset();

@@ -117,8 +117,6 @@ const Booking: React.FC = () => {
     return (bill.schedule?.tour.price || 0) * bill.numberOfGuest;
   };
 
-  console.log(bill);
-
   return (
     <>
       <div className="min-h-screen bg-gray-50 ">
