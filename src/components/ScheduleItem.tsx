@@ -102,18 +102,10 @@ const ScheduleItem = ({ schedule }: { schedule: ScheduleType }) => {
 
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
-          <span className="font-medium">{schedule.numberPeople}</span>
+          <span className="font-medium">
+            {schedule.tour.maxPeople - schedule.numberPeople}
+          </span>
           <span className="text-gray-500">/{schedule.tour.maxPeople}</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-          <div
-            className="bg-blue-600 h-2 rounded-full"
-            style={{
-              width: `${
-                (schedule.numberPeople / schedule.tour.maxPeople) * 100
-              }%`,
-            }}
-          ></div>
         </div>
       </td>
 

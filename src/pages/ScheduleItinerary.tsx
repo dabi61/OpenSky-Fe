@@ -22,7 +22,7 @@ const ScheduleItinerary: FC = () => {
   const { getScheduleItineraryBySchedule, scheduleItineraryList } =
     useScheduleItinerary();
   const { user } = useUser();
-  const { getScheduleById } = useSchedule();
+  const { getScheduleById, selectedSchedule } = useSchedule();
   const [selectedItinerary, setSelectedItinerary] =
     useState<TourItineraryType | null>(null);
   const [tourItineraryList, setTourItineraryList] = useState<
@@ -325,6 +325,10 @@ const ScheduleItinerary: FC = () => {
                       </div>
 
                       {user?.role === "TourGuide" &&
+                        selectedSchedule?.status === "Active" &&
+                        // dayjs(selectedSchedule?.startTime).isAfter(
+                        //   dayjs().startOf("day")
+                        // ) &&
                         (() => {
                           const prevItinerary = tourItineraryList[index - 1];
                           const prevStatus = prevItinerary
