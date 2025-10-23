@@ -32,20 +32,20 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
   onClose,
   type,
-  targetId,
+  targetId: target,
 }) => {
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<FeedbackCreateType>({
     resolver: zodResolver(FeedbackSchema),
     defaultValues: {
       type,
-      targetId,
+      targetId: target,
       description: "",
       rate: 0,
     },
@@ -57,6 +57,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   const handleFormSubmit = async (data: FeedbackCreateType) => {
     const res = await handleCreateFeedback(data);
+    console.log(data);
     if (res.reviewId) {
       toast.success(res.message);
       reset();
@@ -68,6 +69,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       onClose();
     }
   };
+
+  console.log(errors);
 
   const handleClose = () => {
     reset();
@@ -85,7 +88,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           </Typography>
         </DialogTitle>
         <DialogContent>
-          <div className="flex mb-5 justify-center">
+          <div className="flex mb-5 justify-center flex-col items-center">
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Rating
                 value={rateValue}
@@ -132,7 +135,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           <Button
             type="submit"
             variant="contained"
-            disabled={!isValid || isSubmitting}
             startIcon={isSubmitting && <CircularProgress size={16} />}
           >
             {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
