@@ -261,6 +261,12 @@ const Booking: React.FC = () => {
                             ({bill.room.maxPeople} người)
                           </span>
                         </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Số đêm:</span>
+                          <span className="font-medium">
+                            {bill.numberOfNights}
+                          </span>
+                        </div>
 
                         <div className="flex justify-between">
                           <span className="text-gray-600">Giá:</span>

@@ -29,6 +29,7 @@ const RoomInfo: FC = () => {
   const [nights, setNights] = useState<number>(1);
   const { user } = useUser();
   const { setBill } = useBooking();
+
   useEffect(() => {
     const fetchRoom = async () => {
       if (id) {
@@ -51,12 +52,12 @@ const RoomInfo: FC = () => {
   const totalPrice = price * nights;
 
   const handleSubmitBill = () => {
-    if (selectedRoom) {
+    if (selectedRoom && startDate) {
       setBill({
         id: 1,
         type: "room",
         checkInDate: dayjs(startDate).toDate(),
-        numberOfNights: 2,
+        numberOfNights: nights,
         room: summarySelectedRoom,
       });
     }
@@ -227,7 +228,7 @@ const RoomInfo: FC = () => {
                           </div>
                         </LocalizationProvider>
 
-                        {startDate && nights > 1 && (
+                        {startDate && nights >= 1 && (
                           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
