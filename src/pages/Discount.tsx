@@ -16,21 +16,20 @@ const Discount: React.FC = () => {
   const { user } = useUser();
   const [page, setPage] = useQueryState("page", "1" as string);
   const [totalPages, setTotalPages] = useState(0);
-
-  useEffect(() => {
-    const fetchVouchers = async () => {
-      try {
-        if (user) {
-          const data = await getUnsavedVoucher(Number(page), 20);
-          setTotalPages(data.totalPages);
-        } else {
-          const data = await getAvailableVoucher(Number(page), 20);
-          setTotalPages(data.totalPages);
-        }
-      } catch (error) {
-        console.error("Failed to fetch tourList:", error);
+  const fetchVouchers = async () => {
+    try {
+      if (user) {
+        const data = await getUnsavedVoucher(Number(page), 20);
+        setTotalPages(data.totalPages);
+      } else {
+        const data = await getAvailableVoucher(Number(page), 20);
+        setTotalPages(data.totalPages);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch tourList:", error);
+    }
+  };
+  useEffect(() => {
     fetchVouchers();
   }, [user]);
 
@@ -38,6 +37,7 @@ const Discount: React.FC = () => {
     const res = await handleSaveVouchers(id);
     if (res.userVoucherId) {
       toast.success(res.message);
+      fetchVouchers();
     } else {
       toast.error(res.message);
     }

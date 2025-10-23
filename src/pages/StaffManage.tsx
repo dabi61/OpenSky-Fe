@@ -7,6 +7,9 @@ import StaffManageItem from "../components/StaffManageItem";
 import StaffModal from "../components/StaffModal";
 import Pagination from "../components/Pagination";
 import useQueryState from "../hooks/useQueryState";
+import { handleSoftDeleteUser } from "../api/user.api";
+import { toast } from "sonner";
+import Modal from "../components/Modal";
 
 const StaffManager: React.FC = () => {
   const { getUsersByRole, userList, keyword, setKeyword, searchUsersByRole } =
@@ -29,32 +32,47 @@ const StaffManager: React.FC = () => {
   const [openAddStaff, setOpenAddStaff] = useState(false);
   const pageSize = 20;
 
-  useEffect(() => {
-    const fetchStaffs = async () => {
-      try {
-        if (keyword) {
-          const data = await searchUsersByRole(
-            keyword,
-            [Roles.TOURGUIDE, Roles.SUPERVISOR],
-            currentPage,
-            pageSize
-          );
-          setTotalPages(data.totalPages);
-        } else {
-          const data = await getUsersByRole(
-            [Roles.TOURGUIDE, Roles.SUPERVISOR],
-            currentPage,
-            pageSize
-          );
-          setTotalPages(Math.max(data.totalPages));
-        }
-      } catch (error) {
-        console.error("Failed to fetch staffs:", error);
+  const fetchStaffs = async () => {
+    try {
+      if (keyword) {
+        const data = await searchUsersByRole(
+          keyword,
+          [Roles.TOURGUIDE, Roles.SUPERVISOR],
+          currentPage,
+          pageSize
+        );
+        setTotalPages(data.totalPages);
+      } else {
+        const data = await getUsersByRole(
+          [Roles.TOURGUIDE, Roles.SUPERVISOR],
+          currentPage,
+          pageSize
+        );
+        setTotalPages(Math.max(data.totalPages));
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch staffs:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchStaffs();
   }, [currentPage, keyword]);
+
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleDelete = async (user: UserType) => {
+    setSelectedStaff(user);
+    const res = await handleSoftDeleteUser(user.userID);
+    if (res.success) {
+      toast.success(res.message);
+      setOpenModal(false);
+      fetchStaffs();
+    } else {
+      toast.error(res.message);
+      setOpenModal(false);
+    }
+  };
 
   return (
     <>
@@ -126,6 +144,10 @@ const StaffManager: React.FC = () => {
                             setSelectedStaff(staff);
                             setOpenAddStaff(true);
                           }}
+                          onDelete={() => {
+                            setSelectedStaff(staff);
+                            setOpenModal(true);
+                          }}
                         />
                       ))}
                     </tbody>
@@ -163,6 +185,13 @@ const StaffManager: React.FC = () => {
           }, 500);
         }}
         data={selectedStaff}
+      />
+      <Modal
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        description="Bạn có muốn xóa người dùng này khỏi hệ thống?"
+        title="Thông báo"
+        onAgree={() => handleDelete(selectedStaff!)}
       />
     </>
   );

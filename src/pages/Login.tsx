@@ -118,8 +118,6 @@ const Login: React.FC = () => {
               Đăng nhập
             </Button>
             <div className="text-sm flex flex-col justify-center items-center gap-2">
-              <p>Hoặc đăng nhập với</p>
-              <img className="w-10 cursor-pointer" src={assets.google} />
               <p>
                 Bạn chưa có tài khoản ?{" "}
                 <Link className="text-blue-400" to={"/register"}>

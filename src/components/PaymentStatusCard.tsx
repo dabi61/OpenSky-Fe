@@ -1,6 +1,7 @@
 import { Button } from "@mui/material";
-import { CheckCircle, QrCode, RefreshCcw, XCircle } from "lucide-react";
+import { CheckCircle, RefreshCcw, XCircle } from "lucide-react";
 import type { BillType } from "../types/response/bill.type";
+import { useUser } from "../contexts/UserContext";
 
 export const PaymentStatusCard = ({
   onPay,
@@ -9,56 +10,28 @@ export const PaymentStatusCard = ({
   onPay: () => void;
   bill: BillType;
 }) => {
-  const generateQRCodeData = () => {
-    const billInfo = {
-      amount: bill.totalPrice,
-      currency: "VND",
-      billId: `BILL-${Date.now()}`,
-      customerName: bill.user.fullName || "Khách hàng",
-      customerEmail: bill.user.email || "",
-      description:
-        bill.billDetails.itemType === "Hotel"
-          ? `Đặt phòng ${bill.billDetails.itemName}`
-          : `Đặt tour ${bill.billDetails.itemName}`,
-    };
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-      JSON.stringify(billInfo)
-    )}`;
-  };
+  const { user } = useUser();
+
   switch (bill.status) {
     case "Pending":
-      return (
-        <div className="bg-blue-50 rounded-lg p-6 text-center shadow">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <QrCode className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-semibold text-blue-800">
-              Quét mã để thanh toán
-            </h3>
+      if (user?.role === "Customer") {
+        return (
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4"></div>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#3B82F6",
+                "&:hover": { backgroundColor: "#2563EB" },
+              }}
+              onClick={onPay}
+            >
+              Xác nhận thanh toán
+            </Button>
           </div>
-
-          <div className="flex justify-center mb-4">
-            <img
-              src={generateQRCodeData()}
-              alt="QR Code thanh toán"
-              className="w-48 h-48 border-4 border-white rounded-lg shadow-md"
-            />
-          </div>
-
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#3B82F6",
-              "&:hover": { backgroundColor: "#2563EB" },
-            }}
-            onClick={onPay}
-          >
-            Xác nhận thanh toán
-          </Button>
-          <p className="text-xs text-blue-600 mt-4">
-            Mã QR sẽ hết hạn sau 1 giờ
-          </p>
-        </div>
-      );
+        );
+      }
+      return null;
 
     case "Paid":
       return (

@@ -7,6 +7,9 @@ import CustomerManageItem from "../components/CustomerManagerItem";
 import CustomerModal from "../components/CustomerModal";
 import Pagination from "../components/Pagination";
 import useQueryState from "../hooks/useQueryState";
+import { handleSoftDeleteUser } from "../api/user.api";
+import { toast } from "sonner";
+import Modal from "../components/Modal";
 
 const CustomerManager: React.FC = () => {
   const { getUsersByRole, userList, keyword, setKeyword, searchUsersByRole } =
@@ -25,33 +28,46 @@ const CustomerManager: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [openAddCustomer, setOpenAddCustomer] = useState(false);
   const pageSize = 20;
-
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        if (keyword) {
-          const data = await searchUsersByRole(
-            keyword,
-            [Roles.CUSTOMER],
-            currentPage,
-            pageSize
-          );
-          setTotalPages(data.totalPages);
-        } else {
-          const data = await getUsersByRole(
-            [Roles.CUSTOMER],
-            currentPage,
-            pageSize
-          );
-          setTotalPages(data.totalPages);
-        }
-      } catch (error) {
-        console.error("Failed to fetch customers:", error);
+  const fetchCustomers = async () => {
+    try {
+      if (keyword) {
+        const data = await searchUsersByRole(
+          keyword,
+          [Roles.CUSTOMER],
+          currentPage,
+          pageSize
+        );
+        setTotalPages(data.totalPages);
+      } else {
+        const data = await getUsersByRole(
+          [Roles.CUSTOMER],
+          currentPage,
+          pageSize
+        );
+        setTotalPages(data.totalPages);
       }
-    };
-
+    } catch (error) {
+      console.error("Failed to fetch customers:", error);
+    }
+  };
+  useEffect(() => {
     fetchCustomers();
   }, [currentPage, keyword]);
+
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleDelete = async (user: UserType) => {
+    setSelectedCustomer(user);
+    const res = await handleSoftDeleteUser(user.userID);
+    if (res.success) {
+      toast.success(res.message);
+      setOpenModal(false);
+      fetchCustomers();
+    } else {
+      toast.error(res.message);
+      setOpenModal(false);
+    }
+  };
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -144,6 +160,10 @@ const CustomerManager: React.FC = () => {
                             setSelectedCustomer(customer);
                             setOpenAddCustomer(true);
                           }}
+                          onDelete={() => {
+                            setSelectedCustomer(customer);
+                            setOpenModal(true);
+                          }}
                         />
                       ))}
                     </tbody>
@@ -177,6 +197,13 @@ const CustomerManager: React.FC = () => {
           }, 500);
         }}
         data={selectedCustomer}
+      />
+      <Modal
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        description="Bạn có muốn xóa người dùng này khỏi hệ thống?"
+        title="Thông báo"
+        onAgree={() => handleDelete(selectedCustomer!)}
       />
     </>
   );

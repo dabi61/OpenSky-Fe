@@ -114,7 +114,7 @@ const HotelRoomManage: FC = () => {
                   className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-4 py-2 rounded-lg flex items-center"
                 >
                   <Plus className="h-5 w-5 mr-2" />
-                  Add Room
+                  Thêm phòng
                 </button>
               </div>
             )}

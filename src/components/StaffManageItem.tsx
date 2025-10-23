@@ -8,10 +8,10 @@ import { Roles } from "../constants/role";
 interface Props {
   staff: UserType;
   onEdit: () => void;
-  //   onDelete: () => void;
+  onDelete: () => void;
 }
 
-const StaffManageItem: React.FC<Props> = ({ staff, onEdit }) => {
+const StaffManageItem: React.FC<Props> = ({ staff, onEdit, onDelete }) => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case Roles.TOURGUIDE:
@@ -108,7 +108,7 @@ const StaffManageItem: React.FC<Props> = ({ staff, onEdit }) => {
           <button
             className="p-2 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Xóa"
-            // onClick={onDelete}
+            onClick={onDelete}
           >
             <Trash2 size={18} />
           </button>

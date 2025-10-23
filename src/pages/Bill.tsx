@@ -172,7 +172,8 @@ const Bill: FC = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Thay đổi từ grid 2 cột thành flex container */}
+            <div className="flex flex-col gap-8">
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -306,11 +307,6 @@ const Bill: FC = () => {
               </div>
 
               <div className="space-y-6">
-                <PaymentStatusCard
-                  bill={selectedBill}
-                  onPay={() => handlePay()}
-                />
-
                 <div className="bg-gray-50 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
                     Tổng thanh toán
@@ -457,6 +453,7 @@ const Bill: FC = () => {
                 </div>
               </div>
             </div>
+            <PaymentStatusCard bill={selectedBill} onPay={() => handlePay()} />
 
             <div className="mt-8 pt-6 border-t border-gray-200 text-center">
               <p className="text-sm text-gray-600">

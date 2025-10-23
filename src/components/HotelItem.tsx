@@ -10,7 +10,7 @@ function HotelItem({ item }: { item: HotelType }) {
       <div className="sm:w-40 md:w-48 lg:w-56 h-48 sm:h-auto">
         <img
           src={item.firstImage}
-          className="w-full h-full object-cover rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none"
+          className="w-full h-40 object-cover rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none"
           alt={item.hotelName}
         />
       </div>

@@ -22,7 +22,7 @@ const VoucherItem: FC<VoucherItemProps> = ({ item, onSuccess }) => {
         flex-shrink-0 transition-transform duration-300 hover:scale-105
       "
     >
-      <div className="flex flex-col gap-5 justify-center items-center">
+      <div className="flex flex-col gap-4 justify-center items-center">
         <div>
           {item.tableType === "Hotel" ? (
             <Hotel className="text-blue-500" size={55} />
@@ -31,20 +31,21 @@ const VoucherItem: FC<VoucherItemProps> = ({ item, onSuccess }) => {
           )}
         </div>
 
-        <div className="flex flex-col gap-2 w-full text-center md:text-left">
-          <div className="text-sm sm:text-base md:text-lg font-semibold">
+        <div className="flex flex-col gap-3 w-full text-center">
+          <div className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2 min-h-[2.5rem]">
             Giảm tới {item.percent}% cho bill{" "}
             {item.tableType === "Hotel" ? "Khách sạn" : "Tour"}
           </div>
-          <div className="text-[13px] sm:text-sm md:text-[15px] text-gray-700">
+
+          <div className="text-[13px] sm:text-sm md:text-[15px] text-gray-700 line-clamp-3 min-h-[3.5rem]">
             {item.description}
           </div>
 
-          <div className="text-[11px] sm:text-[12px] md:text-[12px] flex flex-col md:block text-gray-600 whitespace-nowrap">
-            <div>Hiệu lực: </div>
-            <div className="flex mt-1 flex-col md:flex-row">
+          <div className="text-[11px] sm:text-[12px] md:text-[12px] text-gray-600 whitespace-nowrap">
+            <div className="flex justify-center items-center gap-1">
+              <span>Hiệu lực:</span>
               <span>{dayjs(item.startDate).format("DD/MM/YYYY")}</span>
-              <span className="hidden md:block"> - </span>
+              <span>-</span>
               <span>{dayjs(item.endDate).format("DD/MM/YYYY")}</span>
             </div>
           </div>
@@ -67,7 +68,7 @@ const VoucherItem: FC<VoucherItemProps> = ({ item, onSuccess }) => {
             backgroundColor: "#3B82F6",
             borderRadius: "12px",
             width: "100%",
-            mt: 4,
+            mt: 3,
             "&:hover": {
               backgroundColor: "#2563EB",
             },

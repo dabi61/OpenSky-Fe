@@ -121,3 +121,22 @@ export const handleSearchUserByRole = async (
 
   return res.data;
 };
+
+export const handleSoftDeleteUser = async (
+  id: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const res = await axiosInstance.put(`users/${id}/status`, {
+      status: "banned",
+    });
+    return {
+      success: true,
+      message: res.data.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message || "Xóa thất bại",
+    };
+  }
+};

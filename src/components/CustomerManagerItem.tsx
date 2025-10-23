@@ -7,9 +7,14 @@ import dayjs from "dayjs";
 interface Props {
   customer: UserType;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
-const CustomerManageItem: React.FC<Props> = ({ customer, onEdit }) => {
+const CustomerManageItem: React.FC<Props> = ({
+  customer,
+  onEdit,
+  onDelete,
+}) => {
   return (
     <tr key={customer.userID} className="hover:bg-gray-50">
       <td className="py-4 px-4 sm:px-6">
@@ -74,6 +79,7 @@ const CustomerManageItem: React.FC<Props> = ({ customer, onEdit }) => {
           <button
             className="p-2 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg"
             title="Xóa"
+            onClick={onDelete}
           >
             <Trash2 size={18} />
           </button>

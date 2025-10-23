@@ -1,16 +1,7 @@
 import type React from "react";
 import type { UserType } from "../types/response/user.type";
 import Modal from "./Modal";
-import {
-  Button,
-  CircularProgress,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { Button, CircularProgress, TextField } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { CalendarPlus, Camera, Mail, User } from "lucide-react";
@@ -247,8 +238,9 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-          <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Cột trái */}
+          <div className="flex flex-col gap-4">
             <TextField
               fullWidth
               label="Họ và tên *"
@@ -259,6 +251,19 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
               helperText={errors.fullname?.message ?? " "}
             />
 
+            {!isUpdate && (
+              <TextField
+                fullWidth
+                type="email"
+                label="Email *"
+                variant="outlined"
+                autoComplete="new-email"
+                {...register("staff_email")}
+                error={!!errors.staff_email}
+                helperText={errors.staff_email?.message ?? " "}
+              />
+            )}
+
             <TextField
               fullWidth
               label="CCCD/CMND *"
@@ -266,6 +271,34 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
               {...register("citizenId")}
               error={!!errors.citizenId}
               helperText={errors.citizenId?.message ?? " "}
+            />
+          </div>
+
+          {/* Cột phải */}
+          <div className="flex flex-col gap-4">
+            {!isUpdate && (
+              <TextField
+                fullWidth
+                type="password"
+                label="Mật khẩu *"
+                autoComplete="new-password"
+                placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
+                variant="outlined"
+                {...register("staff_password")}
+                error={!!errors.staff_password}
+                helperText={errors.staff_password?.message ?? " "}
+              />
+            )}
+
+            <TextField
+              fullWidth
+              type="tel"
+              label="Số điện thoại *"
+              placeholder="Nhập số điện thoại (10-11 số)"
+              variant="outlined"
+              {...register("phoneNumber")}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber?.message ?? " "}
             />
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -291,66 +324,6 @@ const StaffModal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
                 )}
               />
             </LocalizationProvider>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {!isUpdate && (
-              <>
-                <TextField
-                  fullWidth
-                  type="email"
-                  label="Email *"
-                  variant="outlined"
-                  autoComplete="new-email"
-                  {...register("staff_email")}
-                  error={!!errors.staff_email}
-                  helperText={errors.staff_email?.message ?? " "}
-                />
-
-                <TextField
-                  fullWidth
-                  type="password"
-                  label="Mật khẩu *"
-                  autoComplete="new-password"
-                  placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
-                  variant="outlined"
-                  {...register("staff_password")}
-                  error={!!errors.staff_password}
-                  helperText={errors.staff_password?.message ?? " "}
-                />
-              </>
-            )}
-
-            <TextField
-              fullWidth
-              type="tel"
-              label="Số điện thoại *"
-              placeholder="Nhập số điện thoại (10-11 số)"
-              variant="outlined"
-              {...register("phoneNumber")}
-              error={!!errors.phoneNumber}
-              helperText={errors.phoneNumber?.message ?? " "}
-            />
-
-            <FormControl fullWidth error={!!errors.role}>
-              <InputLabel id="role-label">Vai trò *</InputLabel>
-              <Controller
-                name="role"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    labelId="role-label"
-                    label="Vai trò *"
-                    value={field.value || Roles.TOURGUIDE}
-                  >
-                    <MenuItem value={Roles.TOURGUIDE}>Hướng dẫn viên</MenuItem>
-                    <MenuItem value={Roles.SUPERVISOR}>Quản lý</MenuItem>
-                  </Select>
-                )}
-              />
-              <FormHelperText>{errors.role?.message ?? " "}</FormHelperText>
-            </FormControl>
           </div>
         </div>
 
