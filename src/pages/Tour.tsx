@@ -227,7 +227,7 @@ const Tour: React.FC = () => {
                   <FormControl fullWidth variant="outlined" size="small">
                     <Select
                       labelId="province-label"
-                      value={selectedProvince}
+                      value={selectedProvince || ""}
                       onChange={(e) =>
                         setSelectedProvince(e.target.value as string)
                       }
@@ -259,7 +259,7 @@ const Tour: React.FC = () => {
                   <FormControl fullWidth variant="outlined" size="small">
                     <Select
                       labelId="province-label"
-                      value={selectedProvince}
+                      value={selectedProvince || ""}
                       onChange={(e) =>
                         setSelectedProvince(e.target.value as string)
                       }

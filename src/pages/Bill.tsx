@@ -435,7 +435,8 @@ const Bill: FC = () => {
                     </div>
 
                     {selectedBill.status === "Paid" &&
-                      user?.role === "Customer" && (
+                      user?.role === "Customer" &&
+                      selectedBill.endTime.isBefore(dayjs()) && (
                         <div className="mt-5">
                           <Button
                             variant="contained"
