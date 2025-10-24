@@ -78,7 +78,7 @@ const Bill: FC = () => {
   }
 
   if (!bill) {
-    toast.error("Có lỗi xảy ra vui lòng đợt hệ thống xử lý trong ít phút!");
+    toast.success("Đã đặt thành công, vui lòng đợi trong ít phút!");
     return <Navigate to="/home" replace />;
   }
 
